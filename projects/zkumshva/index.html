@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Details</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            background-color: #f4f4f9; 
+            color: #333; 
+            margin: 0; 
+            padding: 40px 20px; 
+            text-align: center; 
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+        .project-img { 
+            width: 100%; 
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #ddd;
+        }
+        h1 { color: #0056b3; margin-top: 0; }
+        .description { 
+            font-size: 1.1em; 
+            line-height: 1.6; 
+            color: #444; 
+            text-align: left; 
+            margin-bottom: 30px;
+        }
+        .btn-group { 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            flex-wrap: wrap;
+        }
+        .btn { 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            transition: background-color 0.2s; 
+        }
+        .btn-github { background: #24292e; color: #fff; }
+        .btn-github:hover { background: #000; }
+        .btn-download { background: #0056b3; color: #fff; }
+        .btn-download:hover { background: #004494; }
+        .back-link { 
+            display: inline-block; 
+            margin-top: 40px; 
+            color: #666; 
+            text-decoration: none; 
+        }
+        .back-link:hover { text-decoration: underline; color: #333;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="../../images/zkumshva.jpg" alt="Zkumshva UI Screenshot" class="project-img">
+        
+        <h1>Zkumshva Archiver</h1>
+        
+        <div class="description">
+            <p>This is a graphical archiving tool built with Python. It provides a simple GUI wrapper around the powerful zpaq compression algorithm.</p>
+            <p>Features include high-ratio data compression, deduplication, and an easy-to-use interface. I built this to automate and simplify the process of backing up large file structures without needing to use the command line every time.</p>
+        </div>
+        
+        <div class="btn-group">
+            <a href="https://github.com/beberi1/Zkumshva/releases" class="btn btn-download" target="_blank">Download Release</a>
+            <a href="https://github.com/beberi1/Zkumshva" class="btn btn-github" target="_blank">View Source Code</a>
+        </div>
+
+        <a href="../../index.html" class="back-link">← Back to Showcase</a>
+    </div>
+
+</body>
+</html>

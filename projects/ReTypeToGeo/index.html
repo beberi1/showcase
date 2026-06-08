@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RetypeToGeo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Navbar -->
+    <div id="githubdiv">
+      <p id="mygit">ჩემი გითჰაბი:</p>
+      <a href="https://github.com/beberi1" target="_blank" id="aimg">
+      <img src="resources/githubLogo.png" alt="GithubLogo" id="logo">
+      </a>
+      <button id="langToggle" class="flag-btn">
+      <img src="resources/geo.png" alt="Geo" id="flagImg">
+      </button>
+    </div>
+  <!-- Main content -->
+  <main class="container">
+    <div>
+        <p id="inputTextLabel" class="textarea-label">შეიყვანეთ ტექსტი</p>
+        <textarea id="inputText" placeholder="Type or paste your text here..."></textarea>
+    </div>
+    <div>
+        <p id="outputTextLabel" class="textarea-label">ნათარგმნი ტექსტი</p>
+        <textarea id="outputText" placeholder="Converted text will appear here..." readonly></textarea>
+    </div>
+  </main>
+
+  <!-- Action button -->
+  <div class="button-container">
+    <button id="toggleBtn">ინგლისური → ქართული</button>
+    <button id="variantBtn" data-tooltip="ვარიანტი 1 - a=ა, C=ჩ | ვარიანტი 2 - ch=ჩ, kh=ხ">Variant 1</button>
+    <button id="copytext">Copy</button>
+  </div>
+
+  <script src="js.js"></script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#chasatvirti_ekrani {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    z-index: 1;
+}
+
+.chasatvirti_ekrani_box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    animation: triali;
+}
+
+.chasatvirti_ekrani_wreebi {
+    width: 50px;
+    height: 50px;
+    margin-left: 20px;
+    border: 1px black;
+    border-style: dotted;
+    border-width: 10px;
+    border-radius: 65px;
+    animation: triali 1s linear infinite;
+}
+
+@font-face {
+    font-family: 'mtavarii';
+    src: url("fontebi/3d_unicode.ttf");
+}
+
+
+
+title {
+    font-family: 'mtavarii';
+}
+
+.tavi {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background-color: antiquewhite;
+    height: 50px;
+    background-image: url("fotoebi/texture/tavi.gif");
+
+}
+
+.tavi img {
+    height: 40px;
+    width: 40px;
+    margin-left: 15px;
+    margin-top: 5px;
+    display: inline;
+    animation: triali 2s linear infinite;
+}
+
+@keyframes triali {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.satauri {
+    margin-left: 35px;
+    font-family: 'mtavarii';
+    position: absolute;
+    top: 2px;
+    left: 30px;
+}
+
+.marcxena {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: 100%;
+    max-width: 300px;
+    background-image: url("fotoebi/texture/gadzlierebis_veli.png");
+    box-shadow: inset 0 10px 10px -10px rgba(0, 0, 0, 0.5);
+}
+
+.ujra {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 97%;
+    height: 9%;
+    margin-left: 5px;
+    border: 5px black;
+    border-style:inset;
+    border-radius: 10px;
+    background-image: url("fotoebi/texture/ujra.png");
+    box-shadow: inset 0 -10px 10px -10px rgba(0, 0, 0, 15);
+}
+
+
+.ujra_foto {
+    height: 50px;
+    flex: 1;
+    width: 61px;
+    margin-right: 10px;
+    border-radius: 5px;
+    margin-left: 10px;
+    border: 2px black;
+    border-style: solid;
+}
+
+
+.knopka {
+    display: flex;
+    background-image: url("fotoebi/texture/knopka.png");
+    margin-left: 8px;
+    margin-right: 5px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-radius: 15px;
+}
+
+.teqsti {
+    flex: 2;
+}
+
+.knopka:hover { 
+    background-color: gray;
+}
+
+.gamyofi {
+    width: 300px;
+    height: 2px;
+}
+
+.gamyofi1 {
+    width: 300px;
+    height: 10px;
+}
+
+#mtavari {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(26, 61, 61);
+    background-image: url('fotoebi/texture/bg.png');
+    height: 100%;
+    width: 100%;
+    box-shadow: inset 1px 1px 15px 5px rgba(0, 0, 0, 0.5);
+}
+
+#klikis_adgili {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* background-color: rgb(93, 238, 238); */
+    border-radius: 24px;
+    background-image: url('fotoebi/texture/bg_p.png');
+    width: 250px;
+}
+
+#damateba {
+    width: 200px;
+    height: 200px;
+    text-align: center;
+    align-items: center;
+    margin-top: 15px;
+    background-image: url("fotoebi/jruanteli.jpg");
+    background-size: cover;
+    transition: transform 0.2s ease-in-out;
+    border: 0px;
+    border-style: none;
+    border-radius: 555px;
+
+}
+.a1 {
+    width: 97%;
+    height: 9%;
+}
+
+
+
+
+#u1 {
+    width: 97%;
+    height: 9%;
+    display: none;
+}
+
+#u2 {
+    width: 97%;
+    height: 9%;
+    display: none;
+}
+
+#u3 {
+    width: 97%;
+    height: 9%;
+    display: none;
+}
+
+#u4 {
+    width: 97%;
+    height: 9%;
+    display: none;
+}
+
+/* info panel  */
+ 
+
+
+.info_box {
+    display: flex;
+  }
+  
+  .info_foto {
+    width: 15px;
+    height: 15px;
+    opacity: 0.5;
+  }
+  
+  .info_foto:hover + .info_txt {
+    visibility: visible;
+  }
+  
+  .info_txt {
+    visibility: hidden;
+    color: white;
+    background-color: black;
+    border-radius: 5px;
+    position: absolute;
+    left: 50%;
+    top: 38%;
+  }
+  
+
+
+
+.mtavari_flex {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+
+
+#bonusebi {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: 100%;
+    top: 50px;
+    max-width: 300px;
+    display: none;
+    box-shadow: inset 0 10px 10px -10px rgba(0, 0, 0, 5);
+    background-image: url("fotoebi/texture/bonusebi.png");
+}
+
+.ujrau {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    margin-left: 5px;
+    border: 5px black;
+    border-style:inset;
+    border-radius: 10px;
+    background-image: url("fotoebi/texture/ujra.png");
+    box-shadow: inset 0 -10px 10px -10px rgba(0, 0, 0, 15);
+}
+
+.ujrau1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: aqua;
+    width: 97%;
+    height: 100%;
+    margin-left: 5px;
+    border: 5px black;
+    border-style:inset;
+    border-radius: 10px;
+    background-image: url("fotoebi/texture/ujra.png");
+    box-shadow: inset 0 -10px 10px -10px rgba(0, 0, 0, 15);
+}
+
+#b1 {
+    width: 97%;
+    height: 9%;
+}
+
+#b2 {
+    width: 98%;
+    height: 9%;
+    display: none;
+}
+
+#b3 {
+    width: 98%;
+    height: 9%;
+    display: none;
+}
+
+#b4 {
+    width: 98%;
+    height: 9%;
+    display: none;
+}
+
+#b5 {
+    width: 98%;
+    height: 9%;
+    display: none;
+}
+
+#b6 {
+    width: 98%;
+    height: 9%;
+    display: none;
+}
+
+.agricxva {
+    position: absolute;
+    left: 300px;
+    top: 50px;
+    width: 110px;
+}
+
+
+@keyframes vibrate {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+  }
+  
+.vibrate {
+ animation: vibrate 0.2s linear ;
+}
+
+.ramdeni_xebi {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+    width: 290px;
+    height: 60px;
+    margin-left: 5px;
+}
+
+.xebi {
+    width: 50%;
+    height: 50%;
+}
+
+.xebi_gamochena_div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    height: 30px;
+    width: 45px;
+    border-radius: 15px;
+}
+
+
+#xmis_chartva_gamortvaa {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    right: 30px;
+    top: 10px;
+    border: 1px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('fotoebi/xma_chartuli.svg');
+    border-radius: 15px;
+}
+
+.x_ebi_satauri {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 97%;
+    height: 40%;
+    flex-direction: column;
+    margin-top: 5px;
+    margin-left: 5px;
+    background-image: url('fotoebi/texture/ujra.png');
+    background-position: center;
+    background-size: 100%;
+    color: white;
+    border-radius: 15px;
+}
+
+/* agricxvebi */
+.ag_saxeli {
+    display: inline;
+}
+
+#ag_kliki {
+    display: none;
+}
+
+#ag_sicive {
+    display: none;
+}
+
+#ag_tyemali {
+    display: none;
+}
+
+#ag_ajika {
+    display: none;
+}
+
+#ag_adeqit {
+    display: none;
+}
+
+#ag_titu {
+    display: none;
+}
+
+#ag_iumorina {
+    width: 90px;
+    display: none;
+}
