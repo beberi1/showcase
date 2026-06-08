@@ -36,6 +36,12 @@ const projects = [
         url: "projects/georgian_wordlist/index.html",
         image: "images/georgian_wordlist.png"
     },
+    {
+        title: "Obsidian_Local_Server",
+        description: "Obsidian-ის vault ის ლოკალურ ქსელში გამხსნელი",
+        url: "projects/Obsidian_Local_Server/index.html",
+        image: "images/Obsidian_Local_Server.png"
+    },
 ];
 
 const grid = document.getElementById('project-grid');
