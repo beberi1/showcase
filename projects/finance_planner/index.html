@@ -25,7 +25,7 @@
         button:hover { opacity: 0.8; }
         .btn-secondary { background: #555; color: white; }
         .btn-danger { background: #f44336; color: white; }
-        .tag-badge { background: #444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
+        .tag-badge { background: #444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; transition: 0.2s; }
         .pos { color: #4caf50; font-weight: bold; } .neg { color: #f44336; font-weight: bold;}
         
         input[type="checkbox"] { transform: scale(1.6); cursor: pointer; margin: 5px; }
@@ -173,7 +173,7 @@
     
     <div class="page-footer">
         <div style="font-size: 1.2em; font-weight: bold;">Add New Entry</div>
-        <div class="large-inputs" style="display:flex; gap: 15px; flex-wrap: wrap;">
+        <div class="large-inputs" style="display:flex; gap: 15px; flex-wrap: wrap; align-items:center;">
             <select id="itemType" style="font-weight: bold; width: 140px;" onchange="updateTypePlaceholder()">
                 <option value="expense">➖ Expense</option>
                 <option value="income">➕ Income</option>
@@ -181,14 +181,16 @@
             <input type="text" id="itemName" placeholder="What is it?" style="flex-grow: 1; min-width: 200px;" oninput="checkAutoTag(this.value)" onkeydown="checkEnter(event)">
             <input type="text" class="num-input" id="itemCost" placeholder="Cost ₾" style="width:100px;" onkeydown="checkEnter(event)">
             <input type="text" class="num-input" id="itemQty" placeholder="Qty" value="1" style="width:70px;" onkeydown="checkEnter(event)">
-            <select id="itemTag" style="width: 150px;"></select>
-            <button onclick="addItem()" style="padding: 12px 30px;">Add to List (Enter)</button>
+            
+            <div id="newEntryTagsContainer" style="display:flex; gap:5px; flex-wrap:wrap; max-width:250px;"></div>
+            
+            <button onclick="addItem()" style="padding: 12px 30px; margin-left:auto;">Add to List (Enter)</button>
         </div>
         <div style="display:flex; align-items: center; gap: 20px;">
             <div class="color-grid" id="colorPicker"></div>
             <div style="display:flex; flex-direction: column; gap: 5px;">
                 <label style="font-size:0.9em; color:#aaa;">Custom Color</label>
-                <input type="color" id="customColor" onchange="selectCustomColor(this.value)" style="padding:0; width:40px; height:40px; cursor:pointer;">
+                <input type="color" id="customColor" onchange="selectCustomColor(this.value)" style="padding:0; width:40px; height:40px; cursor:pointer; border:none; background:transparent;">
             </div>
         </div>
     </div>
@@ -238,49 +240,56 @@
     let selectedColor = "#4caf50";
     let boardLayout = 'horizontal';
     let pageLayout = 'view-vertical';
-    let draggedPageItemId = null; 
     let fileHandle = null; 
     let analyticsType = 'bar';
-    let draggedDashItemId = null;
-    let draggedDashSourceMonth = null;
-    let draggedPiggyId = null;
+    let draggedDashItemId = null; let draggedDashSourceMonth = null; let draggedPageItemId = null; let draggedPiggyId = null;
+    let newEntryTags = []; // Stores active tags for the new item footer
 
     function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
 
-    // Comma to Dot Interceptor
+    // Intercept commas and convert to dots globally
     document.addEventListener('input', e => {
         if (e.target.classList.contains('num-input')) {
-            let val = e.target.value.replace(/,/g, '.');
-            val = val.replace(/[^0-9.]/g, ''); 
+            let val = e.target.value.replace(/,/g, '.').replace(/[^0-9.]/g, ''); 
             let parts = val.split('.');
             if(parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
             if (e.target.value !== val) e.target.value = val;
         }
     });
 
+    // Escape Key logic to close modals
     document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape" && activeMonth !== null) closeMonthPage();
+        if (event.key === "Escape") {
+            let aModal = document.getElementById('analyticsModal');
+            let tModal = document.getElementById('tagsModal');
+            if (aModal.style.display === 'flex') aModal.style.display = 'none';
+            else if (tModal.style.display === 'flex') tModal.style.display = 'none';
+            else if (activeMonth !== null) closeMonthPage();
+        }
     });
     
-    function checkEnter(event) {
-        if (event.key === "Enter") addItem();
-    }
+    function checkEnter(event) { if (event.key === "Enter") addItem(); }
 
     function init() {
         let saved = localStorage.getItem('financeDataV9');
-        if (saved) {
-            let parsed = JSON.parse(saved);
-            state = { ...state, ...parsed }; 
-        }
-        
+        if (saved) { state = { ...state, ...JSON.parse(saved) }; }
         if (!state.years[currentYear]) generateYear(currentYear);
         
+        // Data Migration fixes for v9 (Multi-tags & Yearly Salaries)
         for(let y in state.years) {
             if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = state.globalSalary || 2000;
             months.forEach(m => {
-                if(state.years[y][m]) state.years[y][m].items.forEach(i => { if(i.isIncome === undefined) i.isIncome = false; });
+                if(state.years[y][m]) state.years[y][m].items.forEach(i => { 
+                    if(i.isIncome === undefined) i.isIncome = false; 
+                    if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
+                    if(!i.tags) i.tags = [];
+                });
             });
         }
+        if(state.longTerm.items) state.longTerm.items.forEach(i => { 
+            if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
+            if(!i.tags) i.tags = []; 
+        });
         
         initUI();
     }
@@ -292,32 +301,19 @@
         document.getElementById('yearDisplay').innerText = currentYear;
         document.getElementById('quickNotes').value = state.notes;
         initColorPicker();
-        updateTagSelects();
+        renderNewEntryTags();
         renderBoard();
         renderExtras();
     }
 
-    function generateYear(year) {
-        state.years[year] = { yearlySalary: 2000 };
-        months.forEach(m => state.years[year][m] = { salary: null, items: [] });
-    }
-
+    function generateYear(year) { state.years[year] = { yearlySalary: 2000 }; months.forEach(m => state.years[year][m] = { salary: null, items: [] }); }
     function changeYear(dir) { currentYear += dir; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
     function changeTheme(th) { state.theme = th; document.body.setAttribute('data-theme', th); autoSave(); }
     function updateGlobalSalary(val) { state.years[currentYear].yearlySalary = parseFloat(val) || 0; renderBoard(); autoSave(); }
     function updateNotes(val) { state.notes = val; autoSave(); }
 
-    function toggleBoardLayout() {
-        boardLayout = boardLayout === 'horizontal' ? 'grid' : 'horizontal';
-        document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid';
-        renderBoard();
-    }
-
-    function togglePageLayout() {
-        pageLayout = pageLayout === 'view-vertical' ? 'view-grid' : 'view-vertical';
-        document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid';
-        renderPageItems();
-    }
+    function toggleBoardLayout() { boardLayout = boardLayout === 'horizontal' ? 'grid' : 'horizontal'; document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid'; renderBoard(); }
+    function togglePageLayout() { pageLayout = pageLayout === 'view-vertical' ? 'view-grid' : 'view-vertical'; document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid'; renderPageItems(); }
 
     function updateTypePlaceholder() {
         let t = document.getElementById('itemType').value;
@@ -336,36 +332,22 @@
             gridScrollLabel.style.display = 'inline-flex';
             if (gridScrollCb.checked) board.classList.add('scrollable-items');
             else board.classList.remove('scrollable-items');
-        } else {
-            gridScrollLabel.style.display = 'none';
-            board.classList.remove('scrollable-items');
-        }
+        } else { gridScrollLabel.style.display = 'none'; board.classList.remove('scrollable-items'); }
         
         months.forEach(month => {
             let mData = state.years[currentYear][month];
             let sal = mData.salary !== null ? mData.salary : state.years[currentYear].yearlySalary;
             
-            let incomes = mData.items.filter(i => i.isIncome);
-            let expenses = mData.items.filter(i => !i.isIncome);
-
-            let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0));
-            let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+            let incomes = mData.items.filter(i => i.isIncome); let expenses = mData.items.filter(i => !i.isIncome);
+            let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+            let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
             
-            let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0));
-            let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
-            
-            let plannedRem = fmt(sal + plannedIncome - plannedSpent);
-            let actualRem = fmt(sal + actualIncome - actualSpent);
+            let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
 
-            let col = document.createElement('div');
-            col.className = 'month-col';
-            col.ondblclick = () => openMonthPage(month);
-            col.ondragover = (e) => e.preventDefault();
-            col.ondrop = (e) => dropToMonth(e, month);
+            let col = document.createElement('div'); col.className = 'month-col';
+            col.ondblclick = () => openMonthPage(month); col.ondragover = (e) => e.preventDefault(); col.ondrop = (e) => dropToMonth(e, month);
 
-            let mathString = plannedIncome > 0 
-                ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`
-                : `Planned: ${sal} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`;
+            let mathString = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>` : `Planned: ${sal} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`;
 
             col.innerHTML = `
                 <div class="month-header">
@@ -376,10 +358,8 @@
                 <div class="items-container" id="col-${month}">
                     ${mData.items.map(item => `
                         <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
-                             draggable="true" 
-                             ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
-                             ondragover="event.preventDefault();"
-                             ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
+                             draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
+                             ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">
                                     ${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)
@@ -398,33 +378,23 @@
 
     function renderExtras() {
         let lt = state.longTerm;
-        let incomes = lt.items.filter(i => i.isIncome);
-        let expenses = lt.items.filter(i => !i.isIncome);
-        let ltPlanned = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0));
-        let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+        let incomes = lt.items.filter(i => i.isIncome); let expenses = lt.items.filter(i => !i.isIncome);
+        let ltPlanned = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
         let incText = incomes.length > 0 ? ` (+${fmt(incomes.reduce((s,i)=>s+(i.cost*i.qty),0))} Inc)` : '';
         
         document.getElementById('longTermBox').innerHTML = `
-            <div class="month-header">
-                <strong style="font-size: 1.2em;">Long Term Plans</strong>
-                <button onclick="openMonthPage('LongTerm'); event.stopPropagation();">Edit / Add</button>
-            </div>
+            <div class="month-header"><strong style="font-size: 1.2em;">Long Term Plans</strong><button onclick="openMonthPage('LongTerm'); event.stopPropagation();">Edit / Add</button></div>
             <div class="summary-top">Total Planned Costs: <strong>${ltPlanned}₾</strong> ${incText}</div>
             <div class="items-container" ondragover="event.preventDefault()" ondrop="dropToMonth(event, 'LongTerm')">
                 ${lt.items.map(item => `
                     <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
-                         draggable="true" 
-                         ondragstart="dashDragStart(event, '${item.id}', 'LongTerm'); event.stopPropagation();"
-                         ondragover="event.preventDefault()"
-                         ondrop="dashDropOnItem(event, '${item.id}', 'LongTerm');">
+                         draggable="true" ondragstart="dashDragStart(event, '${item.id}', 'LongTerm'); event.stopPropagation();"
+                         ondragover="event.preventDefault()" ondrop="dashDropOnItem(event, '${item.id}', 'LongTerm');">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">
-                                ${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)
-                            </span>
+                            <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)</span>
                             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('LongTerm', '${item.id}'); event.stopPropagation();">
                         </div>
-                    </div>
-                `).join('')}
+                    </div>`).join('')}
             </div>
             <div class="summary-bottom">Finished (Paid) Costs: <strong class="pos">${ltFinished}₾</strong></div>
         `;
@@ -433,9 +403,7 @@
         let monthlyPlanHtml = totalPlanMonthly > 0 ? `<span style="font-size:0.85em; color:#aaa; margin-left: 10px;">(Goal: ${totalPlanMonthly}₾/mo)</span>` : '';
 
         document.getElementById('piggyBox').innerHTML = `
-            <div class="month-header" style="border-bottom: 1px dashed var(--border);">
-                <strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong>
-            </div>
+            <div class="month-header" style="border-bottom: 1px dashed var(--border);"><strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong></div>
             <div style="padding:15px; display:flex; flex-direction:column; gap:10px; flex-grow:1; overflow-y:auto;">
                 ${state.piggyBanks.map(p => `
                     <div style="background:var(--card); padding:12px; border-radius:6px; border-left:6px solid ${p.color}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:grab;"
@@ -470,23 +438,22 @@
 
     // --- PIGGY BANK LOGIC ---
     function piggyDragStart(ev, id) { draggedPiggyId = id; }
-    function piggyDrop(ev, targetId) {
-        ev.preventDefault();
-        if(draggedPiggyId === targetId || !draggedPiggyId) return;
-        let arr = state.piggyBanks;
-        let dIdx = arr.findIndex(p => p.id === draggedPiggyId);
-        let tIdx = arr.findIndex(p => p.id === targetId);
-        arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]);
-        draggedPiggyId = null;
-        renderExtras();
-        autoSave();
-    }
+    function piggyDrop(ev, targetId) { ev.preventDefault(); if(draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
 
     function addPiggy() { let n = document.getElementById('newPiggyName').value; if(n){ state.piggyBanks.push({ id: Date.now().toString(), name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); renderExtras(); autoSave(); } }
     function togglePiggyEdit(id) { state.piggyBanks.find(p => p.id === id).isEditing = true; renderExtras(); }
     function savePiggy(id) { let b = state.piggyBanks.find(p => p.id === id); b.name = document.getElementById(`piggyName-${id}`).value; let pv = document.getElementById(`piggyPlan-${id}`).value; b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; b.isEditing = false; renderExtras(); autoSave(); }
     function updatePiggy(id, mult) { let amt = parseFloat(document.getElementById(`piggyVal-${id}`).value) || 0; let b = state.piggyBanks.find(p => p.id === id); if(b && amt > 0) { b.balance = fmt(b.balance + (amt * mult)); renderExtras(); autoSave(); } }
     function deletePiggy(id) { if(confirm("Delete this Piggy Bank?")) { state.piggyBanks = state.piggyBanks.filter(p => p.id !== id); renderExtras(); autoSave(); } }
+
+    // --- MULTI-TAG NEW ENTRY UI ---
+    function renderNewEntryTags() {
+        document.getElementById('newEntryTagsContainer').innerHTML = state.tags.map(t => {
+            let isSel = newEntryTags.includes(t);
+            return `<span class="tag-badge" style="cursor:pointer; opacity: ${isSel ? 1 : 0.4}" onclick="toggleNewEntryTag('${t}')">${t}</span>`;
+        }).join('');
+    }
+    function toggleNewEntryTag(t) { if(newEntryTags.includes(t)) newEntryTags = newEntryTags.filter(x => x !== t); else newEntryTags.push(t); renderNewEntryTags(); }
 
     // --- DEDICATED MONTH PAGE LOGIC ---
     function getActiveItemsArray() { return activeMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][activeMonth].items; }
@@ -507,72 +474,59 @@
         renderPageItems();
     }
 
-    function closeMonthPage() {
-        activeMonth = null;
-        document.getElementById('monthView').style.display = 'none';
-        document.getElementById('dashboardView').style.display = 'flex';
-        renderBoard();
-        renderExtras();
-    }
-
+    function closeMonthPage() { activeMonth = null; document.getElementById('monthView').style.display = 'none'; document.getElementById('dashboardView').style.display = 'flex'; renderBoard(); renderExtras(); }
     function setMonthSalary(val) { if(activeMonth !== 'LongTerm') { state.years[currentYear][activeMonth].salary = val === "" ? null : parseFloat(val); renderPageItems(); autoSave(); } }
 
     function checkAutoTag(val) {
         if(!val) return;
         let firstWord = val.trim().split(' ')[0].toLowerCase();
         let match = state.tags.find(t => t.toLowerCase() === firstWord);
-        if(match) document.getElementById('itemTag').value = match;
+        if(match && !newEntryTags.includes(match)) { newEntryTags.push(match); renderNewEntryTags(); }
     }
 
     function addItem() {
-        let nameInput = document.getElementById('itemName');
-        let costInput = document.getElementById('itemCost');
-        let qtyInput = document.getElementById('itemQty');
-        let typeInput = document.getElementById('itemType').value;
-        
+        let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value;
         if(!nameInput.value) return;
         
         let item = {
             id: Date.now().toString(), name: nameInput.value,
             cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1,
-            tag: document.getElementById('itemTag').value, color: selectedColor, done: false, isEditing: false,
-            isIncome: typeInput === 'income'
+            tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income'
         };
         
         getActiveItemsArray().push(item);
-        nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; 
-        document.getElementById('itemName').focus();
-        renderPageItems();
-        autoSave();
+        nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; document.getElementById('itemName').focus();
+        newEntryTags = []; renderNewEntryTags();
+        renderPageItems(); autoSave();
+    }
+    
+    // Quick ± Adjust function for edit mode
+    function adjustEditCost(id, mult) {
+        let costInput = document.getElementById(`editCost-${id}`);
+        let adjInput = document.getElementById(`adjustCost-${id}`);
+        let cost = parseFloat(costInput.value) || 0;
+        let adj = parseFloat(adjInput.value) || 0;
+        if (adj > 0) { costInput.value = fmt(cost + (adj * mult)); adjInput.value = ''; }
     }
 
     function renderPageItems() {
         if(!activeMonth) return;
-        let arr = getActiveItemsArray();
-        let items = [...arr];
-        let sortType = document.getElementById('pageSort').value;
+        let arr = getActiveItemsArray(); let items = [...arr]; let sortType = document.getElementById('pageSort').value;
         
         if (sortType === 'costDesc') items.sort((a,b) => (b.cost*b.qty) - (a.cost*a.qty));
         if (sortType === 'costAsc') items.sort((a,b) => (a.cost*a.qty) - (b.cost*b.qty));
-        if (sortType === 'tag') items.sort((a,b) => a.tag.localeCompare(b.tag));
+        if (sortType === 'tag') items.sort((a,b) => { let tA = a.tags[0] || ''; let tB = b.tags[0] || ''; return tA.localeCompare(tB); });
 
-        let incomes = arr.filter(i => i.isIncome);
-        let expenses = arr.filter(i => !i.isIncome);
-
-        let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0));
-        let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
-        let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0));
-        let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+        let incomes = arr.filter(i => i.isIncome); let expenses = arr.filter(i => !i.isIncome);
+        let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+        let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
 
         if (activeMonth === 'LongTerm') {
             document.getElementById('pageSummaryBar').innerHTML = `<span>Total Planned Costs: <strong>${plannedSpent}₾</strong> ${plannedIncome>0 ? `(+${plannedIncome} Inc)` : ''}</span><span>Finished (Paid): <strong class="pos">${actualSpent}₾</strong></span>`;
         } else {
             let sal = state.years[currentYear][activeMonth].salary !== null ? state.years[currentYear][activeMonth].salary : state.years[currentYear].yearlySalary;
-            let plannedRem = fmt(sal + plannedIncome - plannedSpent); 
-            let actualRem = fmt(sal + actualIncome - actualSpent);
-            
+            let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
             let str = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = ` : `Planned: ${sal} - ${plannedSpent} = `;
-            
             document.getElementById('pageSummaryBar').innerHTML = `<span>${str} <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong></span><span>Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></span>`;
         }
 
@@ -590,11 +544,32 @@
                         </select>
                         <input type="text" id="editName-${item.id}" value="${item.name}" style="flex-grow:1;" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
                     </div>
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:90px;" placeholder="Cost ₾" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
-                        <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:70px;" placeholder="Qty" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:80px;" placeholder="Cost ₾" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                        
+                        <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden;">
+                            <input type="text" class="num-input" id="adjustCost-${item.id}" placeholder="± Amt" style="width:60px; border:none; background:transparent;">
+                            <button style="border-radius:0; padding:4px 8px;" onclick="adjustEditCost('${item.id}', 1)">+</button>
+                            <button class="btn-danger" style="border-radius:0; padding:4px 8px;" onclick="adjustEditCost('${item.id}', -1)">-</button>
+                        </div>
+
+                        <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:60px;" placeholder="Qty" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                        
+                        <div style="margin-left:auto; display:flex; align-items:center; gap:5px;">
+                            <label style="font-size:0.9em; color:#aaa;">Color:</label>
+                            <input type="color" id="editColor-${item.id}" value="${item.color}" style="padding:0; width:30px; height:30px; cursor:pointer; border:none; background:transparent;">
+                        </div>
                     </div>
-                    <select id="editTag-${item.id}">${state.tags.map(t => `<option value="${t}" ${t===item.tag?'selected':''}>${t}</option>`).join('')}</select>
+                    <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="editTagsGroup-${item.id}">
+                        ${state.tags.map(t => {
+                            let isSel = item.tags.includes(t);
+                            return `
+                            <label style="cursor:pointer; margin:0;">
+                                <input type="checkbox" value="${t}" class="edit-tag-cb-${item.id}" ${isSel ? 'checked' : ''} style="display:none;" onchange="this.nextElementSibling.style.opacity = this.checked ? 1 : 0.4">
+                                <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block;">${t}</span>
+                            </label>`;
+                        }).join('')}
+                    </div>
                     <div style="display:flex; gap:10px; margin-top:5px;">
                         <button onclick="saveEditItem('${item.id}')">Save (Enter)</button>
                         <button class="btn-secondary" onclick="toggleEditItem('${item.id}')">Cancel</button>
@@ -603,8 +578,7 @@
             } else {
                 return `
                 <div class="page-item-card ${item.done ? 'done' : ''}" style="border-color: ${item.color}"
-                     ondblclick="toggleEditItem('${item.id}')"
-                     draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
+                     ondblclick="toggleEditItem('${item.id}')" draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
                      ondragover="event.preventDefault()" ondrop="pageItemDrop(event, '${item.id}')">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <strong style="font-size: 1.2em; color: ${item.isIncome ? 'var(--accent)' : 'inherit'}">${item.isIncome ? '➕' : ''} ${item.name}</strong>
@@ -613,11 +587,9 @@
                             <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteItem('${item.id}'); event.stopPropagation();">X</button>
                         </div>
                     </div>
-                    <div style="font-size: 1.1em; margin-bottom: 10px;">
-                        ${item.qty}x ${fmt(item.cost)}₾ = <b style="font-size: 1.2em;">${fmt(item.qty * item.cost)}₾</b>
-                    </div>
+                    <div style="font-size: 1.1em; margin-bottom: 10px;">${item.qty}x ${fmt(item.cost)}₾ = <b style="font-size: 1.2em;">${fmt(item.qty * item.cost)}₾</b></div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="tag-badge">${item.tag}</span>
+                        <div style="display:flex; gap:4px;">${item.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>
                         <label style="cursor:pointer;" ondblclick="event.stopPropagation();"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${activeMonth}', '${item.id}');"> Mark Done</label>
                     </div>
                 </div>`;
@@ -626,32 +598,26 @@
     }
 
     function toggleEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.isEditing = !item.isEditing; renderPageItems(); } }
-    function saveEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.name = document.getElementById(`editName-${id}`).value; item.cost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0; item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; item.tag = document.getElementById(`editTag-${id}`).value; item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; item.isEditing = false; renderPageItems(); autoSave(); } }
+    function saveEditItem(id) { 
+        let item = getActiveItemsArray().find(i => i.id === id); 
+        if(item) { 
+            item.name = document.getElementById(`editName-${id}`).value; 
+            item.cost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0; 
+            item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; 
+            item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; 
+            item.color = document.getElementById(`editColor-${id}`).value;
+            let checkboxes = document.querySelectorAll(`.edit-tag-cb-${id}:checked`);
+            item.tags = Array.from(checkboxes).map(cb => cb.value);
+            item.isEditing = false; renderPageItems(); autoSave(); 
+        } 
+    }
     function deleteItem(id) { let arr = getActiveItemsArray(); arr.splice(arr.findIndex(i => i.id === id), 1); renderPageItems(); autoSave(); }
     function toggleDone(targetMonth, id) { let arr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let item = arr.find(i => i.id === id); if (item) item.done = !item.done; if(activeMonth === targetMonth) renderPageItems(); else { renderBoard(); renderExtras(); } autoSave(); }
 
-    // --- DRAG & DROP LOGIC (Includes Main Page Reordering) ---
+    // --- DRAG & DROP LOGIC ---
     function dashDragStart(ev, id, sourceMonth) { draggedDashItemId = id; draggedDashSourceMonth = sourceMonth; ev.dataTransfer.setData("id", id); ev.dataTransfer.setData("sourceMonth", sourceMonth); }
-    function dropToMonth(ev, targetMonth) { 
-        let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); 
-        if (sourceMonth && sourceMonth !== targetMonth) { 
-            let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; 
-            let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; 
-            tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); 
-        } 
-    }
-    function dashDropOnItem(ev, targetId, targetMonth) {
-        ev.preventDefault(); ev.stopPropagation();
-        if (!draggedDashItemId) return;
-        let sArr = draggedDashSourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][draggedDashSourceMonth].items;
-        let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items;
-        let dIdx = sArr.findIndex(i => i.id === draggedDashItemId);
-        let [draggedItem] = sArr.splice(dIdx, 1);
-        let tIdx = tArr.findIndex(i => i.id === targetId);
-        tArr.splice(tIdx, 0, draggedItem);
-        draggedDashItemId = null; draggedDashSourceMonth = null;
-        renderBoard(); renderExtras(); autoSave();
-    }
+    function dropToMonth(ev, targetMonth) { let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); if (sourceMonth && sourceMonth !== targetMonth) { let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); } }
+    function dashDropOnItem(ev, targetId, targetMonth) { ev.preventDefault(); ev.stopPropagation(); if (!draggedDashItemId) return; let sArr = draggedDashSourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][draggedDashSourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let dIdx = sArr.findIndex(i => i.id === draggedDashItemId); let [draggedItem] = sArr.splice(dIdx, 1); let tIdx = tArr.findIndex(i => i.id === targetId); tArr.splice(tIdx, 0, draggedItem); draggedDashItemId = null; draggedDashSourceMonth = null; renderBoard(); renderExtras(); autoSave(); }
     
     function pageItemDragStart(ev, id) { draggedPageItemId = id; }
     function pageItemDrop(ev, targetId) { ev.preventDefault(); if (draggedPageItemId === targetId || !draggedPageItemId) return; let items = getActiveItemsArray(); let dIdx = items.findIndex(i => i.id === draggedPageItemId); let tIdx = items.findIndex(i => i.id === targetId); items.splice(tIdx, 0, items.splice(dIdx, 1)[0]); draggedPageItemId = null; document.getElementById('pageSort').value = 'none'; renderPageItems(); autoSave(); }
@@ -661,7 +627,7 @@
     function renderTags() { document.getElementById('tagList').innerHTML = state.tags.map((t, i) => `<li style="margin-bottom: 8px; display:flex; justify-content:space-between; background:var(--card); padding:8px 12px; border-radius:4px; border:1px solid var(--border);">${t} <button class="btn-danger" style="padding: 2px 6px;" onclick="removeTag(${i})">Del</button></li>`).join(''); updateTagSelects(); }
     function addTag() { let t = document.getElementById('newTag').value; if(t && !state.tags.includes(t)) { state.tags.push(t); document.getElementById('newTag').value = ''; renderTags(); autoSave(); } }
     function removeTag(idx) { state.tags.splice(idx, 1); renderTags(); autoSave(); }
-    function updateTagSelects() { document.getElementById('itemTag').innerHTML = state.tags.map(t => `<option value="${t}">${t}</option>`).join(''); }
+    function updateTagSelects() { renderNewEntryTags(); }
 
     function initColorPicker() { document.getElementById('colorPicker').innerHTML = presetColors.map(c => `<div class="color-swatch" style="background:${c}" onclick="selectColor(this, '${c}')"></div>`).join(''); selectColor(document.getElementById('colorPicker').firstElementChild, presetColors[0]); }
     function selectColor(elem, color) { document.querySelectorAll('.color-swatch').forEach(e => e.classList.remove('selected')); if(elem) elem.classList.add('selected'); selectedColor = color; document.getElementById('customColor').value = color; }
@@ -672,7 +638,6 @@
     function renderAnalytics() {
         let groupBy = document.getElementById('analyticsGroup').value;
         let totals = {}; let colors = {}; 
-        
         let grandTotal = 0; let totalIncome = 0;
         
         months.forEach(m => {
@@ -680,13 +645,26 @@
                 let cost = item.cost * item.qty;
                 if(item.isIncome) { totalIncome += cost; return; } 
                 
-                let key = groupBy === 'tag' ? item.tag : item.color;
-                let displayColor = item.color;
-                
-                if(totals[key] === undefined) totals[key] = 0;
-                totals[key] += cost;
-                colors[key] = displayColor;
                 grandTotal += cost;
+                if (groupBy === 'tag') {
+                    let numTags = item.tags.length || 1;
+                    let splitCost = cost / numTags; // Distribute cost evenly across tags if item has multiple
+                    if (item.tags.length === 0) {
+                        totals["Untagged"] = (totals["Untagged"] || 0) + splitCost;
+                        colors["Untagged"] = "#888888";
+                    } else {
+                        item.tags.forEach(t => {
+                            totals[t] = (totals[t] || 0) + splitCost;
+                            let tagIdx = state.tags.indexOf(t);
+                            colors[t] = presetColors[tagIdx % presetColors.length] || "#888888";
+                        });
+                    }
+                } else {
+                    let key = item.color;
+                    if(totals[key] === undefined) totals[key] = 0;
+                    totals[key] += cost;
+                    colors[key] = item.color;
+                }
             });
         });
         
