@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V11</title>
+    <title>Finance Planner Pro V9</title>
     <style>
         :root { 
             --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
@@ -20,12 +20,12 @@
 
         body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; }
         
-        button, input, select, textarea { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 4px; font-size: 14px; box-sizing: border-box;}
+        button, input, select, textarea { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 4px; font-size: 14px; }
         button { background: var(--accent); color: white; cursor: pointer; border: none; font-weight: bold; }
         button:hover { opacity: 0.8; }
         .btn-secondary { background: #555; color: white; }
         .btn-danger { background: #f44336; color: white; }
-        .tag-badge { background: #444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; transition: 0.2s; cursor: pointer; display: inline-block;}
+        .tag-badge { background: #444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; }
         .pos { color: #4caf50; font-weight: bold; } .neg { color: #f44336; font-weight: bold;}
         
         input[type="checkbox"] { transform: scale(1.6); cursor: pointer; margin: 5px; }
@@ -74,7 +74,7 @@
         .view-vertical { display: flex; flex-direction: column; gap: 12px; }
         .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px 15px; align-items: start; align-content: start; }
         
-        .page-item-card { background: var(--card); border-left: 6px solid; padding: 15px; border-radius: 6px; border: 1px solid var(--border); transition: 0.2s; cursor: grab; box-sizing: border-box;}
+        .page-item-card { background: var(--card); border-left: 6px solid; padding: 15px; border-radius: 6px; border: 1px solid var(--border); transition: 0.2s; cursor: grab; }
         .page-item-card.done { opacity: 0.4; }
         
         .color-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; max-width: 400px;}
@@ -82,15 +82,10 @@
         .color-swatch.selected { border-color: var(--text); transform: scale(1.1); }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
-        .modal { background: var(--panel); padding: 25px; border-radius: 8px; border: 1px solid var(--border); min-width: 400px; max-width: 700px; max-height: 90vh; overflow-y: auto;}
+        .modal { background: var(--panel); padding: 25px; border-radius: 8px; border: 1px solid var(--border); min-width: 400px; max-width: 600px; max-height: 80vh; overflow-y: auto;}
 
         .pie-chart { width: 250px; height: 250px; border-radius: 50%; border: 2px solid var(--border); margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .legend-color { width: 15px; height: 15px; display: inline-block; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
-        
-        /* Adjuster tool */
-        .adj-btn { border-radius: 0; padding: 8px 12px; border: none; font-weight: bold; flex-shrink:0; }
-        .adj-input { width: 100%; border: none; background: transparent; text-align: center; color: var(--text); font-weight: bold; min-width: 40px;}
-        .adj-container { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex: 1; min-width: 120px;}
     </style>
 </head>
 <body data-theme="dark">
@@ -124,8 +119,10 @@
         
         <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
             <span id="save-status"></span>
-            <label style="cursor:pointer;" title="Saves locally to your browser cache."><input type="checkbox" id="autosave" checked> Autosave (Cache)</label>
-            <button onclick="saveToFileNative()" style="background: #e91e63;">💾 Save to File</button>
+            <label style="cursor:pointer;" title="Saves locally to your browser cache."><input type="checkbox" id="autosave" checked> Autosave (Browser Cache)</label>
+            
+            <button onclick="saveToFileNative()" style="background: #e91e63;">💾 Save to File (Overwrite)</button>
+            
             <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
             <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import</button>
             <button class="btn-secondary" onclick="exportJSON()">📤 Export Copy</button>
@@ -176,7 +173,7 @@
     
     <div class="page-footer">
         <div style="font-size: 1.2em; font-weight: bold;">Add New Entry</div>
-        <div class="large-inputs" style="display:flex; gap: 15px; flex-wrap: wrap; align-items:center;">
+        <div class="large-inputs" style="display:flex; gap: 15px; flex-wrap: wrap;">
             <select id="itemType" style="font-weight: bold; width: 140px;" onchange="updateTypePlaceholder()">
                 <option value="expense">➖ Expense</option>
                 <option value="income">➕ Income</option>
@@ -184,16 +181,14 @@
             <input type="text" id="itemName" placeholder="What is it?" style="flex-grow: 1; min-width: 200px;" oninput="checkAutoTag(this.value)" onkeydown="checkEnter(event)">
             <input type="text" class="num-input" id="itemCost" placeholder="Cost ₾" style="width:100px;" onkeydown="checkEnter(event)">
             <input type="text" class="num-input" id="itemQty" placeholder="Qty" value="1" style="width:70px;" onkeydown="checkEnter(event)">
-            
-            <div id="newEntryTagsContainer" style="display:flex; gap:5px; flex-wrap:wrap; max-width:250px;"></div>
-            
-            <button onclick="addItem()" style="padding: 12px 30px; margin-left:auto;">Add to List (Enter)</button>
+            <select id="itemTag" style="width: 150px;"></select>
+            <button onclick="addItem()" style="padding: 12px 30px;">Add to List (Enter)</button>
         </div>
         <div style="display:flex; align-items: center; gap: 20px;">
             <div class="color-grid" id="colorPicker"></div>
             <div style="display:flex; flex-direction: column; gap: 5px;">
                 <label style="font-size:0.9em; color:#aaa;">Custom Color</label>
-                <input type="color" id="customColor" onchange="selectCustomColor(this.value)" style="padding:0; width:40px; height:40px; cursor:pointer; border:none; background:transparent;">
+                <input type="color" id="customColor" onchange="selectCustomColor(this.value)" style="padding:0; width:40px; height:40px; cursor:pointer;">
             </div>
         </div>
     </div>
@@ -216,40 +211,18 @@
 <div class="modal-overlay" id="analyticsModal">
     <div class="modal">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
-            <span id="analyticsTitle">Analytics Dashboard</span>
+            <span id="analyticsTitle">Yearly Analytics</span>
             <button class="btn-danger" onclick="document.getElementById('analyticsModal').style.display='none'">X</button>
         </div>
-        
-        <div style="display:flex; justify-content:center; align-items:center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-            <span>From:</span><select id="aYearFrom" onchange="triggerAnalytics()"></select>
-            <span>To:</span><select id="aYearTo" onchange="triggerAnalytics()"></select>
-            <button class="btn-secondary" onclick="selectAllYearsAnalytics()">All Years</button>
-            <div style="border-left: 1px solid var(--border); margin: 0 10px; height: 30px;"></div>
-            <button class="btn-secondary" onclick="analyticsType='bar'; triggerAnalytics();">Bar Chart</button>
-            <button class="btn-secondary" onclick="analyticsType='pie'; triggerAnalytics();">Pie Chart</button>
-            <button class="btn-secondary" onclick="analyticsType='pyramid'; triggerAnalytics();">Pyramid Chart</button>
-        </div>
-
-        <div style="display:flex; justify-content:center; align-items:center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-            <span>Status:</span>
-            <select id="analyticsStatus" onchange="triggerAnalytics()">
-                <option value="all">All (Planned + Done)</option>
-                <option value="done">Done (Paid Only)</option>
-                <option value="planned">Planned (Pending Only)</option>
-            </select>
-            <span style="margin-left: 10px;">Group By:</span>
-            <select id="analyticsGroup" onchange="triggerAnalytics()">
+        <div style="display:flex; justify-content:center; align-items:center; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-secondary" onclick="analyticsType='bar'; renderAnalytics();">Bar Chart</button>
+            <button class="btn-secondary" onclick="analyticsType='pie'; renderAnalytics();">Pie Chart</button>
+            <span style="margin-left: 20px;">Group By:</span>
+            <select id="analyticsGroup" onchange="renderAnalytics()">
                 <option value="tag">Tag Category</option>
                 <option value="color">Visual Color</option>
             </select>
         </div>
-        
-        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:10px;">
-            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = [...state.tags, 'Untagged']; triggerAnalytics();">✓ Select All Tags</button>
-            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = []; triggerAnalytics();">✗ Clear All Tags</button>
-        </div>
-        <div id="analyticsTagsFilter" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom: 20px; justify-content:center;"></div>
-        
         <div id="analyticsContent" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
 </div>
@@ -265,21 +238,20 @@
     let selectedColor = "#4caf50";
     let boardLayout = 'horizontal';
     let pageLayout = 'view-vertical';
+    let draggedPageItemId = null; 
     let fileHandle = null; 
     let analyticsType = 'bar';
-    let draggedDashItemId = null; let draggedDashSourceMonth = null; let draggedPageItemId = null; let draggedPiggyId = null;
-    let newEntryTags = []; 
-    
-    // Analytics State
-    let aYearStart = currentYear;
-    let aYearEnd = currentYear;
-    let aActiveTags = [];
+    let draggedDashItemId = null;
+    let draggedDashSourceMonth = null;
+    let draggedPiggyId = null;
 
     function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
 
+    // Comma to Dot Interceptor
     document.addEventListener('input', e => {
         if (e.target.classList.contains('num-input')) {
-            let val = e.target.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, ''); 
+            let val = e.target.value.replace(/,/g, '.');
+            val = val.replace(/[^0-9.]/g, ''); 
             let parts = val.split('.');
             if(parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
             if (e.target.value !== val) e.target.value = val;
@@ -287,36 +259,28 @@
     });
 
     document.addEventListener('keydown', function(event) {
-        if (event.key === "Escape") {
-            let aModal = document.getElementById('analyticsModal');
-            let tModal = document.getElementById('tagsModal');
-            if (aModal.style.display === 'flex') aModal.style.display = 'none';
-            else if (tModal.style.display === 'flex') tModal.style.display = 'none';
-            else if (activeMonth !== null) closeMonthPage();
-        }
+        if (event.key === "Escape" && activeMonth !== null) closeMonthPage();
     });
     
-    function checkEnter(event) { if (event.key === "Enter") addItem(); }
+    function checkEnter(event) {
+        if (event.key === "Enter") addItem();
+    }
 
     function init() {
-        let saved = localStorage.getItem('financeDataV10'); // Keeping v10 key for compatibility, or you can increment to v11 internally
-        if (saved) { state = { ...state, ...JSON.parse(saved) }; }
+        let saved = localStorage.getItem('financeDataV9');
+        if (saved) {
+            let parsed = JSON.parse(saved);
+            state = { ...state, ...parsed }; 
+        }
+        
         if (!state.years[currentYear]) generateYear(currentYear);
         
         for(let y in state.years) {
             if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = state.globalSalary || 2000;
             months.forEach(m => {
-                if(state.years[y][m]) state.years[y][m].items.forEach(i => { 
-                    if(i.isIncome === undefined) i.isIncome = false; 
-                    if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
-                    if(!i.tags) i.tags = [];
-                });
+                if(state.years[y][m]) state.years[y][m].items.forEach(i => { if(i.isIncome === undefined) i.isIncome = false; });
             });
         }
-        if(state.longTerm.items) state.longTerm.items.forEach(i => { 
-            if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
-            if(!i.tags) i.tags = []; 
-        });
         
         initUI();
     }
@@ -333,54 +297,97 @@
         renderExtras();
     }
 
-    function generateYear(year) { state.years[year] = { yearlySalary: 2000 }; months.forEach(m => state.years[year][m] = { salary: null, items: [] }); }
+    function generateYear(year) {
+        state.years[year] = { yearlySalary: 2000 };
+        months.forEach(m => state.years[year][m] = { salary: null, items: [] });
+    }
+
     function changeYear(dir) { currentYear += dir; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
     function changeTheme(th) { state.theme = th; document.body.setAttribute('data-theme', th); autoSave(); }
     function updateGlobalSalary(val) { state.years[currentYear].yearlySalary = parseFloat(val) || 0; renderBoard(); autoSave(); }
     function updateNotes(val) { state.notes = val; autoSave(); }
 
-    function toggleBoardLayout() { boardLayout = boardLayout === 'horizontal' ? 'grid' : 'horizontal'; document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid'; renderBoard(); }
-    function togglePageLayout() { pageLayout = pageLayout === 'view-vertical' ? 'view-grid' : 'view-vertical'; document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid'; renderPageItems(); }
-    function updateTypePlaceholder() { document.getElementById('itemCost').placeholder = document.getElementById('itemType').value === 'income' ? 'Amount ₾' : 'Cost ₾'; }
+    function toggleBoardLayout() {
+        boardLayout = boardLayout === 'horizontal' ? 'grid' : 'horizontal';
+        document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid';
+        renderBoard();
+    }
+
+    function togglePageLayout() {
+        pageLayout = pageLayout === 'view-vertical' ? 'view-grid' : 'view-vertical';
+        document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid';
+        renderPageItems();
+    }
+
+    function updateTypePlaceholder() {
+        let t = document.getElementById('itemType').value;
+        document.getElementById('itemCost').placeholder = t === 'income' ? 'Amount ₾' : 'Cost ₾';
+    }
 
     // --- DASHBOARD RENDERING ---
     function renderBoard() {
         const board = document.getElementById('board');
-        board.innerHTML = ''; board.className = 'board-' + boardLayout;
+        board.innerHTML = '';
+        board.className = 'board-' + boardLayout;
         
         let gridScrollLabel = document.getElementById('gridScrollLabel');
         let gridScrollCb = document.getElementById('gridScrollCb');
         if (boardLayout === 'grid') {
             gridScrollLabel.style.display = 'inline-flex';
-            if (gridScrollCb.checked) board.classList.add('scrollable-items'); else board.classList.remove('scrollable-items');
-        } else { gridScrollLabel.style.display = 'none'; board.classList.remove('scrollable-items'); }
+            if (gridScrollCb.checked) board.classList.add('scrollable-items');
+            else board.classList.remove('scrollable-items');
+        } else {
+            gridScrollLabel.style.display = 'none';
+            board.classList.remove('scrollable-items');
+        }
         
         months.forEach(month => {
             let mData = state.years[currentYear][month];
             let sal = mData.salary !== null ? mData.salary : state.years[currentYear].yearlySalary;
             
-            let incomes = mData.items.filter(i => i.isIncome); let expenses = mData.items.filter(i => !i.isIncome);
-            let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
-            let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+            let incomes = mData.items.filter(i => i.isIncome);
+            let expenses = mData.items.filter(i => !i.isIncome);
+
+            let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0));
+            let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
             
-            let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
-            let col = document.createElement('div'); col.className = 'month-col';
-            col.ondblclick = () => openMonthPage(month); col.ondragover = (e) => e.preventDefault(); col.ondrop = (e) => dropToMonth(e, month);
-            let mathString = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>` : `Planned: ${sal} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`;
+            let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0));
+            let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+            
+            let plannedRem = fmt(sal + plannedIncome - plannedSpent);
+            let actualRem = fmt(sal + actualIncome - actualSpent);
+
+            let col = document.createElement('div');
+            col.className = 'month-col';
+            col.ondblclick = () => openMonthPage(month);
+            col.ondragover = (e) => e.preventDefault();
+            col.ondrop = (e) => dropToMonth(e, month);
+
+            let mathString = plannedIncome > 0 
+                ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`
+                : `Planned: ${sal} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`;
 
             col.innerHTML = `
-                <div class="month-header"><strong style="font-size: 1.2em;">${month}</strong><button onclick="openMonthPage('${month}'); event.stopPropagation();">Edit / Add</button></div>
+                <div class="month-header">
+                    <strong style="font-size: 1.2em;">${month}</strong>
+                    <button onclick="openMonthPage('${month}'); event.stopPropagation();">Edit / Add</button>
+                </div>
                 <div class="summary-top">${mathString}</div>
                 <div class="items-container" id="col-${month}">
                     ${mData.items.map(item => `
                         <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
-                             draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
-                             ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
+                             draggable="true" 
+                             ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
+                             ondragover="event.preventDefault();"
+                             ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)</span>
+                                <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">
+                                    ${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)
+                                </span>
                                 <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
                             </div>
-                        </div>`).join('')}
+                        </div>
+                    `).join('')}
                 </div>
                 <div class="summary-bottom">Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></div>
             `;
@@ -390,21 +397,34 @@
     }
 
     function renderExtras() {
-        let lt = state.longTerm; let incomes = lt.items.filter(i => i.isIncome); let expenses = lt.items.filter(i => !i.isIncome);
-        let ltPlanned = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+        let lt = state.longTerm;
+        let incomes = lt.items.filter(i => i.isIncome);
+        let expenses = lt.items.filter(i => !i.isIncome);
+        let ltPlanned = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0));
+        let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
         let incText = incomes.length > 0 ? ` (+${fmt(incomes.reduce((s,i)=>s+(i.cost*i.qty),0))} Inc)` : '';
         
         document.getElementById('longTermBox').innerHTML = `
-            <div class="month-header"><strong style="font-size: 1.2em;">Long Term Plans</strong><button onclick="openMonthPage('LongTerm'); event.stopPropagation();">Edit / Add</button></div>
+            <div class="month-header">
+                <strong style="font-size: 1.2em;">Long Term Plans</strong>
+                <button onclick="openMonthPage('LongTerm'); event.stopPropagation();">Edit / Add</button>
+            </div>
             <div class="summary-top">Total Planned Costs: <strong>${ltPlanned}₾</strong> ${incText}</div>
             <div class="items-container" ondragover="event.preventDefault()" ondrop="dropToMonth(event, 'LongTerm')">
                 ${lt.items.map(item => `
-                    <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" draggable="true" ondragstart="dashDragStart(event, '${item.id}', 'LongTerm'); event.stopPropagation();" ondragover="event.preventDefault()" ondrop="dashDropOnItem(event, '${item.id}', 'LongTerm');">
+                    <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
+                         draggable="true" 
+                         ondragstart="dashDragStart(event, '${item.id}', 'LongTerm'); event.stopPropagation();"
+                         ondragover="event.preventDefault()"
+                         ondrop="dashDropOnItem(event, '${item.id}', 'LongTerm');">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)</span>
+                            <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">
+                                ${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)
+                            </span>
                             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('LongTerm', '${item.id}'); event.stopPropagation();">
                         </div>
-                    </div>`).join('')}
+                    </div>
+                `).join('')}
             </div>
             <div class="summary-bottom">Finished (Paid) Costs: <strong class="pos">${ltFinished}₾</strong></div>
         `;
@@ -413,15 +433,16 @@
         let monthlyPlanHtml = totalPlanMonthly > 0 ? `<span style="font-size:0.85em; color:#aaa; margin-left: 10px;">(Goal: ${totalPlanMonthly}₾/mo)</span>` : '';
 
         document.getElementById('piggyBox').innerHTML = `
-            <div class="month-header" style="border-bottom: 1px dashed var(--border);"><strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong></div>
+            <div class="month-header" style="border-bottom: 1px dashed var(--border);">
+                <strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong>
+            </div>
             <div style="padding:15px; display:flex; flex-direction:column; gap:10px; flex-grow:1; overflow-y:auto;">
                 ${state.piggyBanks.map(p => `
                     <div style="background:var(--card); padding:12px; border-radius:6px; border-left:6px solid ${p.color}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:grab;"
                          draggable="true" ondragstart="piggyDragStart(event, '${p.id}')" ondragover="event.preventDefault()" ondrop="piggyDrop(event, '${p.id}')">
                         ${p.isEditing ? `
-                            <input type="text" id="piggyName-${p.id}" value="${p.name}" style="flex-grow:1; min-width: 100px;">
-                            <input type="text" class="num-input" id="piggyPlan-${p.id}" value="${p.monthlyPlan || ''}" placeholder="Plan/mo ₾" style="width:80px;">
-                            <input type="color" id="piggyColor-${p.id}" value="${p.color}" style="padding:0; width:30px; height:30px; cursor:pointer; border:none; background:transparent;">
+                            <input type="text" id="piggyName-${p.id}" value="${p.name}" style="flex-grow:1; min-width: 120px;">
+                            <input type="text" class="num-input" id="piggyPlan-${p.id}" value="${p.monthlyPlan || ''}" placeholder="Plan/mo ₾" style="width:100px;">
                             <button onclick="savePiggy('${p.id}')">Save</button>
                         ` : `
                             <div style="flex-grow:1; pointer-events:none;">
@@ -449,106 +470,141 @@
 
     // --- PIGGY BANK LOGIC ---
     function piggyDragStart(ev, id) { draggedPiggyId = id; }
-    function piggyDrop(ev, targetId) { ev.preventDefault(); if(draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
+    function piggyDrop(ev, targetId) {
+        ev.preventDefault();
+        if(draggedPiggyId === targetId || !draggedPiggyId) return;
+        let arr = state.piggyBanks;
+        let dIdx = arr.findIndex(p => p.id === draggedPiggyId);
+        let tIdx = arr.findIndex(p => p.id === targetId);
+        arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]);
+        draggedPiggyId = null;
+        renderExtras();
+        autoSave();
+    }
 
     function addPiggy() { let n = document.getElementById('newPiggyName').value; if(n){ state.piggyBanks.push({ id: Date.now().toString(), name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); renderExtras(); autoSave(); } }
     function togglePiggyEdit(id) { state.piggyBanks.find(p => p.id === id).isEditing = true; renderExtras(); }
-    function savePiggy(id) { let b = state.piggyBanks.find(p => p.id === id); b.name = document.getElementById(`piggyName-${id}`).value; let pv = document.getElementById(`piggyPlan-${id}`).value; b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; b.color = document.getElementById(`piggyColor-${id}`).value; b.isEditing = false; renderExtras(); autoSave(); }
+    function savePiggy(id) { let b = state.piggyBanks.find(p => p.id === id); b.name = document.getElementById(`piggyName-${id}`).value; let pv = document.getElementById(`piggyPlan-${id}`).value; b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; b.isEditing = false; renderExtras(); autoSave(); }
     function updatePiggy(id, mult) { let amt = parseFloat(document.getElementById(`piggyVal-${id}`).value) || 0; let b = state.piggyBanks.find(p => p.id === id); if(b && amt > 0) { b.balance = fmt(b.balance + (amt * mult)); renderExtras(); autoSave(); } }
     function deletePiggy(id) { if(confirm("Delete this Piggy Bank?")) { state.piggyBanks = state.piggyBanks.filter(p => p.id !== id); renderExtras(); autoSave(); } }
 
-    // --- MULTI-TAG NEW ENTRY UI ---
-    function renderNewEntryTags() { document.getElementById('newEntryTagsContainer').innerHTML = state.tags.map(t => { let isSel = newEntryTags.includes(t); return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}" onclick="toggleNewEntryTag('${t}')">${t}</span>`; }).join(''); }
-    function toggleNewEntryTag(t) { if(newEntryTags.includes(t)) newEntryTags = newEntryTags.filter(x => x !== t); else newEntryTags.push(t); renderNewEntryTags(); }
-
     // --- DEDICATED MONTH PAGE LOGIC ---
     function getActiveItemsArray() { return activeMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][activeMonth].items; }
-    function openMonthPage(month) { activeMonth = month; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('monthView').style.display = 'flex'; if (month === 'LongTerm') { document.getElementById('pageMonthTitle').innerText = "Long Term Plans"; document.getElementById('salaryOverrideContainer').style.display = 'none'; } else { document.getElementById('pageMonthTitle').innerText = `${month} ${currentYear} Planning`; document.getElementById('salaryOverrideContainer').style.display = 'block'; document.getElementById('pageSalary').value = state.years[currentYear][month].salary || ''; } renderPageItems(); }
-    function closeMonthPage() { activeMonth = null; document.getElementById('monthView').style.display = 'none'; document.getElementById('dashboardView').style.display = 'flex'; renderBoard(); renderExtras(); }
+
+    function openMonthPage(month) {
+        activeMonth = month;
+        document.getElementById('dashboardView').style.display = 'none';
+        document.getElementById('monthView').style.display = 'flex';
+        
+        if (month === 'LongTerm') {
+            document.getElementById('pageMonthTitle').innerText = "Long Term Plans";
+            document.getElementById('salaryOverrideContainer').style.display = 'none';
+        } else {
+            document.getElementById('pageMonthTitle').innerText = `${month} ${currentYear} Planning`;
+            document.getElementById('salaryOverrideContainer').style.display = 'block';
+            document.getElementById('pageSalary').value = state.years[currentYear][month].salary || '';
+        }
+        renderPageItems();
+    }
+
+    function closeMonthPage() {
+        activeMonth = null;
+        document.getElementById('monthView').style.display = 'none';
+        document.getElementById('dashboardView').style.display = 'flex';
+        renderBoard();
+        renderExtras();
+    }
+
     function setMonthSalary(val) { if(activeMonth !== 'LongTerm') { state.years[currentYear][activeMonth].salary = val === "" ? null : parseFloat(val); renderPageItems(); autoSave(); } }
 
-    function checkAutoTag(val) { if(!val) return; let firstWord = val.trim().split(' ')[0].toLowerCase(); let match = state.tags.find(t => t.toLowerCase() === firstWord); if(match && !newEntryTags.includes(match)) { newEntryTags.push(match); renderNewEntryTags(); } }
+    function checkAutoTag(val) {
+        if(!val) return;
+        let firstWord = val.trim().split(' ')[0].toLowerCase();
+        let match = state.tags.find(t => t.toLowerCase() === firstWord);
+        if(match) document.getElementById('itemTag').value = match;
+    }
 
     function addItem() {
-        let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value;
+        let nameInput = document.getElementById('itemName');
+        let costInput = document.getElementById('itemCost');
+        let qtyInput = document.getElementById('itemQty');
+        let typeInput = document.getElementById('itemType').value;
+        
         if(!nameInput.value) return;
-        let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income' };
+        
+        let item = {
+            id: Date.now().toString(), name: nameInput.value,
+            cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1,
+            tag: document.getElementById('itemTag').value, color: selectedColor, done: false, isEditing: false,
+            isIncome: typeInput === 'income'
+        };
+        
         getActiveItemsArray().push(item);
-        nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; document.getElementById('itemName').focus(); newEntryTags = []; renderNewEntryTags(); renderPageItems(); autoSave();
-    }
-    
-    function adjustEditCost(id, mult) {
-        let costInput = document.getElementById(`editCost-${id}`);
-        let adjInput = document.getElementById(`adjustCost-${id}`);
-        let cost = parseFloat(costInput.value) || 0; let adj = parseFloat(adjInput.value) || 0;
-        if (adj > 0) { costInput.value = fmt(cost + (adj * mult)); adjInput.value = ''; }
+        nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; 
+        document.getElementById('itemName').focus();
+        renderPageItems();
+        autoSave();
     }
 
     function renderPageItems() {
         if(!activeMonth) return;
-        let arr = getActiveItemsArray(); let items = [...arr]; let sortType = document.getElementById('pageSort').value;
+        let arr = getActiveItemsArray();
+        let items = [...arr];
+        let sortType = document.getElementById('pageSort').value;
+        
         if (sortType === 'costDesc') items.sort((a,b) => (b.cost*b.qty) - (a.cost*a.qty));
         if (sortType === 'costAsc') items.sort((a,b) => (a.cost*a.qty) - (b.cost*b.qty));
-        if (sortType === 'tag') items.sort((a,b) => { let tA = a.tags[0] || ''; let tB = b.tags[0] || ''; return tA.localeCompare(tB); });
+        if (sortType === 'tag') items.sort((a,b) => a.tag.localeCompare(b.tag));
 
-        let incomes = arr.filter(i => i.isIncome); let expenses = arr.filter(i => !i.isIncome);
-        let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
-        let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+        let incomes = arr.filter(i => i.isIncome);
+        let expenses = arr.filter(i => !i.isIncome);
+
+        let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0));
+        let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+        let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0));
+        let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
 
         if (activeMonth === 'LongTerm') {
             document.getElementById('pageSummaryBar').innerHTML = `<span>Total Planned Costs: <strong>${plannedSpent}₾</strong> ${plannedIncome>0 ? `(+${plannedIncome} Inc)` : ''}</span><span>Finished (Paid): <strong class="pos">${actualSpent}₾</strong></span>`;
         } else {
             let sal = state.years[currentYear][activeMonth].salary !== null ? state.years[currentYear][activeMonth].salary : state.years[currentYear].yearlySalary;
-            let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
+            let plannedRem = fmt(sal + plannedIncome - plannedSpent); 
+            let actualRem = fmt(sal + actualIncome - actualSpent);
+            
             let str = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = ` : `Planned: ${sal} - ${plannedSpent} = `;
+            
             document.getElementById('pageSummaryBar').innerHTML = `<span>${str} <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong></span><span>Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></span>`;
         }
 
-        let container = document.getElementById('pageItemsContainer'); container.className = 'page-content ' + pageLayout;
+        let container = document.getElementById('pageItemsContainer');
+        container.className = 'page-content ' + pageLayout;
         
         container.innerHTML = items.map(item => {
             if (item.isEditing) {
                 return `
-                <div class="page-item-card" style="border-color: ${item.color}; display:flex; flex-direction:column; gap:10px; cursor:default;">
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <select id="editType-${item.id}" style="width:110px; font-weight:bold; flex-shrink:0;">
+                <div class="page-item-card" style="border-color: ${item.color}; display:flex; flex-direction:column; gap:8px; cursor:default;">
+                    <div style="display:flex; gap:10px;">
+                        <select id="editType-${item.id}" style="width:110px; font-weight:bold;">
                             <option value="expense" ${!item.isIncome ? 'selected':''}>➖ Expense</option>
                             <option value="income" ${item.isIncome ? 'selected':''}>➕ Income</option>
                         </select>
-                        <input type="text" id="editName-${item.id}" value="${item.name}" style="flex:1; min-width:150px;" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                        <input type="text" id="editName-${item.id}" value="${item.name}" style="flex-grow:1;" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
                     </div>
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:80px; flex:1;" placeholder="Cost ₾" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
-                        <div class="adj-container">
-                            <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)">-</button>
-                            <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="± Amt">
-                            <button class="adj-btn btn-secondary" style="background:var(--accent);" onclick="adjustEditCost('${item.id}', 1)">+</button>
-                        </div>
-                        <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:60px; flex-shrink:0;" placeholder="Qty" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:90px;" placeholder="Cost ₾" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                        <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:70px;" placeholder="Qty" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
                     </div>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="editTagsGroup-${item.id}">
-                        ${state.tags.map(t => {
-                            let isSel = item.tags.includes(t);
-                            return `
-                            <label style="cursor:pointer; margin:0;">
-                                <input type="checkbox" value="${t}" class="edit-tag-cb-${item.id}" ${isSel ? 'checked' : ''} style="display:none;" onchange="this.nextElementSibling.style.opacity = this.checked ? 1 : 0.4">
-                                <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block;">${t}</span>
-                            </label>`;
-                        }).join('')}
-                    </div>
-                    <div style="display:flex; gap:10px; margin-top:5px; align-items:center;">
+                    <select id="editTag-${item.id}">${state.tags.map(t => `<option value="${t}" ${t===item.tag?'selected':''}>${t}</option>`).join('')}</select>
+                    <div style="display:flex; gap:10px; margin-top:5px;">
                         <button onclick="saveEditItem('${item.id}')">Save (Enter)</button>
                         <button class="btn-secondary" onclick="toggleEditItem('${item.id}')">Cancel</button>
-                        <div style="margin-left:auto; display:flex; align-items:center; gap:5px;">
-                            <label style="font-size:0.9em; color:#aaa;">Color:</label>
-                            <input type="color" id="editColor-${item.id}" value="${item.color}" style="padding:0; width:30px; height:30px; cursor:pointer; border:none; background:transparent;">
-                        </div>
                     </div>
                 </div>`;
             } else {
                 return `
                 <div class="page-item-card ${item.done ? 'done' : ''}" style="border-color: ${item.color}"
-                     ondblclick="toggleEditItem('${item.id}')" draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
+                     ondblclick="toggleEditItem('${item.id}')"
+                     draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
                      ondragover="event.preventDefault()" ondrop="pageItemDrop(event, '${item.id}')">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <strong style="font-size: 1.2em; color: ${item.isIncome ? 'var(--accent)' : 'inherit'}">${item.isIncome ? '➕' : ''} ${item.name}</strong>
@@ -557,9 +613,11 @@
                             <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteItem('${item.id}'); event.stopPropagation();">X</button>
                         </div>
                     </div>
-                    <div style="font-size: 1.1em; margin-bottom: 10px;">${item.qty}x ${fmt(item.cost)}₾ = <b style="font-size: 1.2em;">${fmt(item.qty * item.cost)}₾</b></div>
+                    <div style="font-size: 1.1em; margin-bottom: 10px;">
+                        ${item.qty}x ${fmt(item.cost)}₾ = <b style="font-size: 1.2em;">${fmt(item.qty * item.cost)}₾</b>
+                    </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; gap:4px; flex-wrap:wrap;">${item.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>
+                        <span class="tag-badge">${item.tag}</span>
                         <label style="cursor:pointer;" ondblclick="event.stopPropagation();"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${activeMonth}', '${item.id}');"> Mark Done</label>
                     </div>
                 </div>`;
@@ -568,26 +626,33 @@
     }
 
     function toggleEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.isEditing = !item.isEditing; renderPageItems(); } }
-    function saveEditItem(id) { 
-        let item = getActiveItemsArray().find(i => i.id === id); 
-        if(item) { 
-            item.name = document.getElementById(`editName-${id}`).value; 
-            item.cost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0; 
-            item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; 
-            item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; 
-            item.color = document.getElementById(`editColor-${id}`).value;
-            let checkboxes = document.querySelectorAll(`.edit-tag-cb-${id}:checked`);
-            item.tags = Array.from(checkboxes).map(cb => cb.value);
-            item.isEditing = false; renderPageItems(); autoSave(); 
-        } 
-    }
+    function saveEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.name = document.getElementById(`editName-${id}`).value; item.cost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0; item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; item.tag = document.getElementById(`editTag-${id}`).value; item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; item.isEditing = false; renderPageItems(); autoSave(); } }
     function deleteItem(id) { let arr = getActiveItemsArray(); arr.splice(arr.findIndex(i => i.id === id), 1); renderPageItems(); autoSave(); }
     function toggleDone(targetMonth, id) { let arr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let item = arr.find(i => i.id === id); if (item) item.done = !item.done; if(activeMonth === targetMonth) renderPageItems(); else { renderBoard(); renderExtras(); } autoSave(); }
 
-    // --- DRAG & DROP LOGIC ---
+    // --- DRAG & DROP LOGIC (Includes Main Page Reordering) ---
     function dashDragStart(ev, id, sourceMonth) { draggedDashItemId = id; draggedDashSourceMonth = sourceMonth; ev.dataTransfer.setData("id", id); ev.dataTransfer.setData("sourceMonth", sourceMonth); }
-    function dropToMonth(ev, targetMonth) { let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); if (sourceMonth && sourceMonth !== targetMonth) { let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); } }
-    function dashDropOnItem(ev, targetId, targetMonth) { ev.preventDefault(); ev.stopPropagation(); if (!draggedDashItemId) return; let sArr = draggedDashSourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][draggedDashSourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let dIdx = sArr.findIndex(i => i.id === draggedDashItemId); let [draggedItem] = sArr.splice(dIdx, 1); let tIdx = tArr.findIndex(i => i.id === targetId); tArr.splice(tIdx, 0, draggedItem); draggedDashItemId = null; draggedDashSourceMonth = null; renderBoard(); renderExtras(); autoSave(); }
+    function dropToMonth(ev, targetMonth) { 
+        let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); 
+        if (sourceMonth && sourceMonth !== targetMonth) { 
+            let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; 
+            let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; 
+            tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); 
+        } 
+    }
+    function dashDropOnItem(ev, targetId, targetMonth) {
+        ev.preventDefault(); ev.stopPropagation();
+        if (!draggedDashItemId) return;
+        let sArr = draggedDashSourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][draggedDashSourceMonth].items;
+        let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items;
+        let dIdx = sArr.findIndex(i => i.id === draggedDashItemId);
+        let [draggedItem] = sArr.splice(dIdx, 1);
+        let tIdx = tArr.findIndex(i => i.id === targetId);
+        tArr.splice(tIdx, 0, draggedItem);
+        draggedDashItemId = null; draggedDashSourceMonth = null;
+        renderBoard(); renderExtras(); autoSave();
+    }
+    
     function pageItemDragStart(ev, id) { draggedPageItemId = id; }
     function pageItemDrop(ev, targetId) { ev.preventDefault(); if (draggedPageItemId === targetId || !draggedPageItemId) return; let items = getActiveItemsArray(); let dIdx = items.findIndex(i => i.id === draggedPageItemId); let tIdx = items.findIndex(i => i.id === targetId); items.splice(tIdx, 0, items.splice(dIdx, 1)[0]); draggedPageItemId = null; document.getElementById('pageSort').value = 'none'; renderPageItems(); autoSave(); }
 
@@ -596,95 +661,38 @@
     function renderTags() { document.getElementById('tagList').innerHTML = state.tags.map((t, i) => `<li style="margin-bottom: 8px; display:flex; justify-content:space-between; background:var(--card); padding:8px 12px; border-radius:4px; border:1px solid var(--border);">${t} <button class="btn-danger" style="padding: 2px 6px;" onclick="removeTag(${i})">Del</button></li>`).join(''); updateTagSelects(); }
     function addTag() { let t = document.getElementById('newTag').value; if(t && !state.tags.includes(t)) { state.tags.push(t); document.getElementById('newTag').value = ''; renderTags(); autoSave(); } }
     function removeTag(idx) { state.tags.splice(idx, 1); renderTags(); autoSave(); }
-    function updateTagSelects() { renderNewEntryTags(); }
+    function updateTagSelects() { document.getElementById('itemTag').innerHTML = state.tags.map(t => `<option value="${t}">${t}</option>`).join(''); }
 
     function initColorPicker() { document.getElementById('colorPicker').innerHTML = presetColors.map(c => `<div class="color-swatch" style="background:${c}" onclick="selectColor(this, '${c}')"></div>`).join(''); selectColor(document.getElementById('colorPicker').firstElementChild, presetColors[0]); }
     function selectColor(elem, color) { document.querySelectorAll('.color-swatch').forEach(e => e.classList.remove('selected')); if(elem) elem.classList.add('selected'); selectedColor = color; document.getElementById('customColor').value = color; }
     function selectCustomColor(color) { document.querySelectorAll('.color-swatch').forEach(e => e.classList.remove('selected')); selectedColor = color; }
 
-    function openAnalyticsModal() { 
-        document.getElementById('analyticsModal').style.display = 'flex'; 
-        aYearStart = currentYear; aYearEnd = currentYear; 
-        aActiveTags = [...state.tags, "Untagged"];
-        renderAnalyticsUI();
-    }
+    function openAnalyticsModal() { document.getElementById('analyticsModal').style.display = 'flex'; document.getElementById('analyticsTitle').innerText = `${currentYear} Analytics`; renderAnalytics(); }
     
-    function toggleAnalyticsTag(t) { if(aActiveTags.includes(t)) aActiveTags = aActiveTags.filter(x => x!==t); else aActiveTags.push(t); triggerAnalytics(); }
-    function selectAllYearsAnalytics() { 
-        let yArr = Object.keys(state.years).map(Number); 
-        aYearStart = Math.min(...yArr); aYearEnd = Math.max(...yArr); 
-        document.getElementById('aYearFrom').value = aYearStart; document.getElementById('aYearTo').value = aYearEnd;
-        triggerAnalytics(); 
-    }
-    function triggerAnalytics() {
-        aYearStart = parseInt(document.getElementById('aYearFrom').value);
-        aYearEnd = parseInt(document.getElementById('aYearTo').value);
-        renderAnalyticsUI();
-    }
-    
-    function renderAnalyticsUI() {
-        let years = Object.keys(state.years).sort();
-        let selHtml = years.map(y => `<option value="${y}">${y}</option>`).join('');
-        
-        let yFromObj = document.getElementById('aYearFrom');
-        let yToObj = document.getElementById('aYearTo');
-        if(!yFromObj.innerHTML) { yFromObj.innerHTML = selHtml; yToObj.innerHTML = selHtml; }
-        yFromObj.value = aYearStart; yToObj.value = aYearEnd;
-
-        let tagsFilterHtml = [...state.tags, "Untagged"].map(t => {
-            let isSel = aActiveTags.includes(t);
-            return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; cursor:pointer;" onclick="toggleAnalyticsTag('${t}')">${t}</span>`;
-        }).join('');
-        document.getElementById('analyticsTagsFilter').innerHTML = tagsFilterHtml;
-
+    function renderAnalytics() {
         let groupBy = document.getElementById('analyticsGroup').value;
-        let statusFilter = document.getElementById('analyticsStatus').value || 'all';
+        let totals = {}; let colors = {}; 
         
-        let totals = {}; let colors = {}; let grandTotal = 0; let totalIncome = 0;
+        let grandTotal = 0; let totalIncome = 0;
         
-        let y1 = Math.min(aYearStart, aYearEnd); let y2 = Math.max(aYearStart, aYearEnd);
-        let totalMonths = ((y2 - y1) + 1) * 12;
-
-        for (let y = y1; y <= y2; y++) {
-            if(!state.years[y]) continue;
-            months.forEach(m => {
-                state.years[y][m].items.forEach(item => {
-                    let cost = item.cost * item.qty;
-                    
-                    // Filter logic
-                    if (statusFilter === 'done' && !item.done) return;
-                    if (statusFilter === 'planned' && item.done) return;
-                    if(item.isIncome) { totalIncome += cost; return; } 
-                    
-                    if (groupBy === 'tag') {
-                        let validTags = item.tags.filter(t => aActiveTags.includes(t));
-                        if(item.tags.length === 0 && aActiveTags.includes("Untagged")) validTags = ["Untagged"];
-                        if(validTags.length === 0) return; 
-                        
-                        let splitCost = cost / (item.tags.length || 1); 
-                        validTags.forEach(t => {
-                            totals[t] = (totals[t] || 0) + splitCost;
-                            let tagIdx = state.tags.indexOf(t);
-                            colors[t] = t === "Untagged" ? "#888888" : (presetColors[tagIdx % presetColors.length] || "#888");
-                        });
-                        grandTotal += cost; 
-                    } else {
-                        let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
-                        if(!hasValidTag) return;
-                        
-                        let key = item.color;
-                        if(totals[key] === undefined) totals[key] = 0;
-                        totals[key] += cost;
-                        colors[key] = item.color;
-                        grandTotal += cost;
-                    }
-                });
+        months.forEach(m => {
+            state.years[currentYear][m].items.forEach(item => {
+                let cost = item.cost * item.qty;
+                if(item.isIncome) { totalIncome += cost; return; } 
+                
+                let key = groupBy === 'tag' ? item.tag : item.color;
+                let displayColor = item.color;
+                
+                if(totals[key] === undefined) totals[key] = 0;
+                totals[key] += cost;
+                colors[key] = displayColor;
+                grandTotal += cost;
             });
-        }
+        });
         
-        let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Filtered Spent/Planned: <strong>${fmt(grandTotal)}₾</strong> | Monthly Avg: <strong>${fmt(grandTotal/totalMonths)}₾/mo</strong></div>`;
+        let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Total Spent/Planned: <strong>${fmt(grandTotal)}₾</strong> | Income: <strong class="pos">${fmt(totalIncome)}₾</strong></div>`;
         
-        if(grandTotal === 0) { html += `<div>No expense data matches your filters.</div>`; } 
+        if(grandTotal === 0) { html += `<div>No expense data for this year yet.</div>`; } 
         else if (analyticsType === 'bar') {
             Object.keys(totals).sort((a,b)=>totals[b]-totals[a]).forEach(key => {
                 let val = totals[key];
@@ -692,7 +700,7 @@
                     let pct = Math.round((val / grandTotal) * 100);
                     let label = groupBy === 'tag' ? key : 'Color Group';
                     html += `<div style="margin-bottom:15px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span></div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%)</span></div>
                         <div style="background:var(--card); width:100%; height:10px; border-radius:5px; overflow:hidden; border:1px solid var(--border);">
                             <div style="background:${colors[key]}; width:${pct}%; height:100%;"></div>
                         </div></div>`;
@@ -712,31 +720,12 @@
             });
             legendHtml += `</div>`;
             html += `<div class="pie-chart" style="background: conic-gradient(${conic.join(', ')});"></div>` + legendHtml;
-        } else if (analyticsType === 'pyramid') {
-            let maxVal = Math.max(...Object.values(totals));
-            let pyramidHtml = `<div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:100%; margin-top:20px; padding-bottom: 20px;">`;
-            
-            Object.keys(totals).sort((a,b)=>totals[a]-totals[b]).forEach(key => {
-                let val = totals[key];
-                if(val > 0) {
-                    let pctOfTotal = (val / grandTotal) * 100;
-                    let pctOfMax = (val / maxVal) * 100;
-                    let label = groupBy === 'tag' ? key : 'Color Group';
-                    
-                    pyramidHtml += `
-                    <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                        ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${Math.round(pctOfTotal)}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span>
-                    </div>`;
-                }
-            });
-            pyramidHtml += `</div>`;
-            html += pyramidHtml;
         }
         document.getElementById('analyticsContent').innerHTML = html;
     }
 
     // --- I/O & NATIVE SAVE ---
-    function autoSave() { if (document.getElementById('autosave').checked) { localStorage.setItem('financeDataV10', JSON.stringify(state)); let d = new Date(); document.getElementById('save-status').innerText = `Autosaved at ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`; } }
+    function autoSave() { if (document.getElementById('autosave').checked) { localStorage.setItem('financeDataV9', JSON.stringify(state)); let d = new Date(); document.getElementById('save-status').innerText = `Autosaved at ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`; } }
     
     async function saveToFileNative() {
         if ('showSaveFilePicker' in window) {
@@ -755,16 +744,19 @@
     function exportJSON() { const dl = document.createElement('a'); dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2))); dl.setAttribute("download", `planner_copy_${currentYear}.json`); dl.click(); }
     
     function importJSON(event) { 
-        const file = event.target.files[0]; if (!file) return; fileHandle = null; 
+        const file = event.target.files[0]; if (!file) return; 
+        fileHandle = null; 
         const reader = new FileReader(); 
         reader.onload = function(e) { 
             try { 
-                let parsed = JSON.parse(e.target.result); state = { ...state, ...parsed };
+                let parsed = JSON.parse(e.target.result); 
+                state = { ...state, ...parsed };
                 if (!state.longTerm) state.longTerm = { items: [] }; if (!state.piggyBanks) state.piggyBanks = []; if(state.notes===undefined) state.notes=""; 
                 currentYear = parseInt(Object.keys(state.years)[0]) || new Date().getFullYear(); 
                 autoSave(); initUI(); if(activeMonth) closeMonthPage(); 
             } catch(err) { alert("Invalid JSON file"); } 
-        }; reader.readAsText(file); event.target.value = ''; 
+        }; 
+        reader.readAsText(file); event.target.value = ''; 
     }
 
     init();

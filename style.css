@@ -1,50 +1,132 @@
-/* Replace old .project-box with this */
+/* Modern CSS Variables */
+:root {
+    --bg-color: #f8f9fa;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --accent-color: #007bff;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+/* Hero Section Styling */
+.hero {
+    text-align: center;
+    padding: 80px 20px;
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    border-bottom: 1px solid #eaeaea;
+    margin-bottom: 50px;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin: 0 0 10px 0;
+    background: linear-gradient(to right, #007bff, #00c6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; /* Gradient text effect */
+}
+
+.hero p {
+    font-size: 1.2rem;
+    color: #6c757d;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Grid Layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+}
+
+/* Advanced Card Styling */
 .project-box {
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: var(--card-bg);
+    border-radius: 12px;
     text-decoration: none;
     color: inherit;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: var(--transition);
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Keeps image inside rounded corners */
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+    
+    /* Animation setup */
+    opacity: 0; 
+    transform: translateY(20px); 
+    animation: fadeUp 0.6s ease forwards;
 }
 
+/* Hover Effects */
 .project-box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow);
 }
 
-/* Add these new rules */
+.image-wrapper {
+    overflow: hidden; /* Keeps the zoom effect inside the box */
+}
+
 .project-image {
     width: 100%;
-    aspect-ratio: 16 / 9; 
+    aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.5s ease;
+}
+
+.project-box:hover .project-image {
+    transform: scale(1.05); /* Slight image zoom on hover */
 }
 
 .project-text {
-    padding: 20px;
+    padding: 25px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Reduced from 250px */
-    gap: 20px;
-    max-width: 900px; /* Reduced max width */
-    margin: 0 auto;
+.project-text h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    color: var(--text-color);
+    transition: color 0.3s ease;
 }
 
-.project-text h3 {
-    margin-top: 0;
-    color: #0056b3;
+.project-box:hover .project-text h3 {
+    color: var(--accent-color); /* Title turns blue on hover */
 }
 
 .project-text p {
     margin: 0;
-    color: #666;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    color: #adb5bd;
+    font-size: 0.9rem;
+}
+
+/* Keyframe for the cascading load animation */
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
