@@ -51,7 +51,7 @@ projects.forEach((project, index) => {
     card.href = project.url;
     card.className = 'project-box';
     
-    // Multiplies the delay by the index so cards appear one after another
+
     card.style.animationDelay = `${index * 0.1}s`;
     
     card.innerHTML = `
