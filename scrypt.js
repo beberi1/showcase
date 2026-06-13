@@ -4,19 +4,19 @@ const projects = [
         title: "Finance Planner",
         description: "Web-based financial budgeting application.",
         url: "projects/finance_planner/index.html",
-        image: "images/finance_planner.png" // Add this line
+        image: "images/finance_planner.png"
     },
     {
         title: "Jruanteli Clicker",
         description: "My clicker game project.",
         url: "projects/jruanteli_clicker/index.html",
-        image: "images/jruanteli_clicker.png" // Add this line
+        image: "images/jruanteli_clicker.png"
     },
     {
         title: "zkumshva",
         description: "Compressing program which integrates with windows.",
         url: "projects/zkumshva/index.html",
-        image: "images/zkumshva.jpg" // Add this line
+        image: "images/zkumshva.jpg"
     },
     {
         title: "YouTube Video Downloader",
@@ -25,10 +25,10 @@ const projects = [
         image: "images/youtube_video_downloader.png"
     },
     {
-        title: "RetypeToGeo",
+        title: "ReTypeToGeo",
         description: "simple .",
-        url: "projects/RetypeToGeo/index.html",
-        image: "images/RetypeToGeo.png"
+        url: "projects/ReTypeToGeo/index.html",
+        image: "images/ReTypeToGeo.png"
     },
     {
         title: "Georgian Wordlist",
