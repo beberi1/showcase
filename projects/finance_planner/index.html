@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V12</title>
+    <title>Finance Planner Pro V14</title>
     <style>
         :root { 
             --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
@@ -24,6 +24,10 @@
         [data-theme="nature"] { 
             --bg: #f0f4f0; --panel: #ffffff; --card: #f8faf8; 
             --text: #1b4332; --accent: #2d6a4f; --border: #b7e4c7; 
+        }
+        [data-theme="berry"] { 
+            --bg: #2d1b2e; --panel: #4a2849; --card: #3a1f39; 
+            --text: #fce7f3; --accent: #ec4899; --border: #831843; 
         }
 
         body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; }
@@ -66,6 +70,7 @@
         
         .dash-item { background: var(--card); border-left: 5px solid; padding: 10px; border-radius: 4px; pointer-events: auto; cursor: grab; }
         .dash-item.done { opacity: 0.4; }
+        .dash-section-title { font-size:0.8em; font-weight:bold; padding:4px 4px; letter-spacing: 1px; }
         
         #bottomSections { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
         .special-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; min-height: 300px;}
@@ -82,8 +87,10 @@
         .view-vertical { display: flex; flex-direction: column; gap: 12px; }
         .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px 15px; align-items: start; align-content: start; }
         
-        .page-item-card { background: var(--card); border-left: 6px solid; padding: 15px; border-radius: 6px; border: 1px solid var(--border); transition: 0.2s; cursor: grab; box-sizing: border-box;}
+        .page-item-card { background: var(--card); border-left: 6px solid; padding: 15px; border-radius: 6px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; box-sizing: border-box;}
+        .page-item-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         .page-item-card.done { opacity: 0.4; }
+        .page-section-title { grid-column: 1 / -1; font-size: 1.2em; font-weight: bold; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-top: 10px; color: var(--text); }
         
         .color-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; max-width: 400px;}
         .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #555; }
@@ -103,7 +110,6 @@
 </head>
 <body data-theme="dark">
 
-<!-- DASHBOARD VIEW -->
 <div id="dashboardView">
     <header>
         <div style="display:flex; align-items:center; gap: 10px; font-size: 1.2em;">
@@ -112,7 +118,7 @@
             <button onclick="changeYear(1)">▶</button>
         </div>
         <div style="border-left: 1px solid var(--border); padding-left: 15px;">
-            <label>Yearly Baseline: </label>
+            <label>Yearly Baseline (₾): </label>
             <input type="text" class="num-input" id="globalSalary" style="width: 90px;" onchange="updateGlobalSalary(this.value)">
         </div>
         
@@ -122,6 +128,7 @@
             <option value="ocean">🌊 Ocean Theme</option>
             <option value="sunset">🌇 Sunset Theme</option>
             <option value="nature">🌿 Nature Theme</option>
+            <option value="berry">🔮 Berry Theme</option>
         </select>
 
         <button id="boardLayoutBtn" class="btn-secondary" onclick="toggleBoardLayout()">Layout: Grid</button>
@@ -132,6 +139,7 @@
         
         <button class="btn-secondary" onclick="openTagsModal()">Tags</button>
         <button class="btn-secondary" onclick="openAnalyticsPage()">📊 Analytics</button>
+        <button class="btn-secondary" onclick="openSettingsModal()">⚙️ Settings</button>
         
         <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
             <span id="save-status"></span>
@@ -157,7 +165,6 @@
     </div>
 </div>
 
-<!-- DEDICATED MONTH PAGE VIEW -->
 <div id="monthView">
     <div class="page-header">
         <div style="display: flex; align-items: center; gap: 20px;">
@@ -167,7 +174,7 @@
         
         <div style="display:flex; gap: 15px; align-items: center;">
             <div id="salaryOverrideContainer">
-                <label>Month Override: </label>
+                <label>Month Override (₾): </label>
                 <input type="text" class="num-input" id="pageSalary" placeholder="Uses year baseline if empty" onchange="setMonthSalary(this.value)">
             </div>
             <div>
@@ -188,13 +195,21 @@
     
     <div class="page-footer">
         <div style="font-size: 1.2em; font-weight: bold;">Add New Entry</div>
-        <div class="large-inputs" style="display:flex; gap: 15px; flex-wrap: wrap; align-items:center;">
+        <div class="large-inputs" style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
             <select id="itemType" style="font-weight: bold; width: 140px;" onchange="updateTypePlaceholder()">
                 <option value="expense">➖ Expense</option>
                 <option value="income">➕ Income</option>
             </select>
             <input type="text" id="itemName" placeholder="What is it?" style="flex-grow: 1; min-width: 200px;" oninput="checkAutoTag(this.value)" onkeydown="checkEnter(event)">
-            <input type="text" class="num-input" id="itemCost" placeholder="Cost ₾" style="width:100px;" onkeydown="checkEnter(event)">
+            
+            <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden;">
+                <input type="text" class="num-input" id="itemCost" placeholder="Cost" style="width:80px; border:none;" onkeydown="checkEnter(event)">
+                <select id="itemCurrency" style="width:50px; border:none; background:transparent; font-weight:bold;">
+                    <option value="GEL">₾</option>
+                    <option value="USD">$</option>
+                </select>
+            </div>
+
             <input type="text" class="num-input" id="itemQty" placeholder="Qty" value="1" style="width:70px;" onkeydown="checkEnter(event)">
             
             <div id="newEntryTagsContainer" style="display:flex; gap:5px; flex-wrap:wrap; max-width:250px;"></div>
@@ -211,7 +226,6 @@
     </div>
 </div>
 
-<!-- ANALYTICS TAB VIEW -->
 <div id="analyticsView" style="display: none; flex-direction: column; flex-grow: 1; overflow: hidden;">
     <div class="page-header">
         <div style="display: flex; align-items: center; gap: 20px;">
@@ -221,7 +235,6 @@
     </div>
     <div class="page-content" style="display: flex; flex-direction: column; gap: 20px;">
         
-        <!-- Controls Row 1 -->
         <div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-wrap: wrap;">
             <span>From:</span><select id="aYearFrom" onchange="triggerAnalytics()"></select>
             <span>To:</span><select id="aYearTo" onchange="triggerAnalytics()"></select>
@@ -232,9 +245,13 @@
             <button class="btn-secondary" onclick="analyticsType='pyramid'; triggerAnalytics();">Pyramid Chart</button>
         </div>
 
-        <!-- Controls Row 2 -->
         <div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-wrap: wrap;">
-            <span>Status:</span>
+            <span>Target:</span>
+            <select id="analyticsTarget" onchange="triggerAnalytics()" style="font-weight:bold;">
+                <option value="expenses">➖ Expenses</option>
+                <option value="income">➕ Income</option>
+            </select>
+            <span style="margin-left: 10px;">Status:</span>
             <select id="analyticsStatus" onchange="triggerAnalytics()">
                 <option value="all">All (Planned + Done)</option>
                 <option value="done">Done (Paid Only)</option>
@@ -244,12 +261,12 @@
             <select id="analyticsGroup" onchange="triggerAnalytics()">
                 <option value="tag">Tag Category</option>
                 <option value="color">Visual Color</option>
+                <option value="month">Month (Trend)</option>
             </select>
         </div>
         
-        <!-- Tag Filters -->
         <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
-            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = [...state.tags, 'Untagged']; triggerAnalytics();">✓ Select All Tags</button>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = [...state.tags, 'Untagged', 'Base Salary']; triggerAnalytics();">✓ Select All Tags</button>
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = []; triggerAnalytics();">✗ Clear All Tags</button>
         </div>
         <div id="analyticsTagsFilter" style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center;"></div>
@@ -258,7 +275,6 @@
     </div>
 </div>
 
-<!-- Tags Modal -->
 <div class="modal-overlay" id="tagsModal">
     <div class="modal">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
@@ -266,10 +282,31 @@
             <button class="btn-danger" onclick="document.getElementById('tagsModal').style.display='none'">X</button>
         </div>
         <div style="display:flex; gap: 10px; margin-bottom: 15px;">
-            <input type="text" id="newTag" placeholder="New Tag Name" style="flex-grow: 1;">
+            <input type="text" id="newTag" placeholder="New Tag Name" style="flex-grow: 1;" onkeydown="if(event.key==='Enter') addTag()">
             <button onclick="addTag()">Add Tag</button>
         </div>
         <ul id="tagList" style="list-style: none; padding: 0;"></ul>
+    </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal" style="min-width: 300px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
+            <span>⚙️ App Settings</span>
+            <button class="btn-danger" onclick="document.getElementById('settingsModal').style.display='none'">X</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:20px;">
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:bold;">Exchange Rate</label>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span>1 USD ($) = </span>
+                    <input type="number" id="usdRateSetting" style="width: 80px;" step="0.01">
+                    <span>GEL (₾)</span>
+                </div>
+                <span style="font-size:0.85em; color:#aaa;">Used to calculate your total monthly budget globally.</span>
+            </div>
+            <button onclick="saveSettings()" style="padding: 12px;">Save Settings</button>
+        </div>
     </div>
 </div>
 
@@ -277,13 +314,12 @@
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const presetColors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#795548", "#9e9e9e", "#607d8b", "#ffffff"];
     
-    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "" };
+    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", settings: { usdRate: 2.7 } };
     
     let currentYear = new Date().getFullYear();
     let activeMonth = null;
     let selectedColor = "#4caf50";
     
-    // Default layouts updated to Grid
     let boardLayout = 'grid';
     let pageLayout = 'view-grid';
     
@@ -292,12 +328,13 @@
     let draggedDashItemId = null; let draggedDashSourceMonth = null; let draggedPageItemId = null; let draggedPiggyId = null;
     let newEntryTags = []; 
     
-    // Analytics State
     let aYearStart = currentYear;
     let aYearEnd = currentYear;
     let aActiveTags = [];
 
     function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
+    function toGEL(amt, curr) { return curr === 'USD' ? amt * (state.settings.usdRate || 2.7) : amt; }
+    function fmtCurr(amt, curr) { return curr === 'USD' ? '$' + fmt(amt) : fmt(amt) + '₾'; }
 
     document.addEventListener('input', e => {
         if (e.target.classList.contains('num-input')) {
@@ -311,7 +348,9 @@
     document.addEventListener('keydown', function(event) {
         if (event.key === "Escape") {
             let tModal = document.getElementById('tagsModal');
+            let sModal = document.getElementById('settingsModal');
             if (tModal.style.display === 'flex') tModal.style.display = 'none';
+            else if (sModal.style.display === 'flex') sModal.style.display = 'none';
             else if (document.getElementById('analyticsView').style.display === 'flex') closeAnalyticsPage();
             else if (activeMonth !== null) closeMonthPage();
         }
@@ -323,6 +362,7 @@
         let saved = localStorage.getItem('financeDataV10'); 
         if (saved) { state = { ...state, ...JSON.parse(saved) }; }
         if (!state.years[currentYear]) generateYear(currentYear);
+        if (!state.settings) state.settings = { usdRate: 2.7 };
         
         for(let y in state.years) {
             if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = state.globalSalary || 2000;
@@ -331,12 +371,14 @@
                     if(i.isIncome === undefined) i.isIncome = false; 
                     if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
                     if(!i.tags) i.tags = [];
+                    if(!i.currency) i.currency = 'GEL';
                 });
             });
         }
         if(state.longTerm.items) state.longTerm.items.forEach(i => { 
             if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
             if(!i.tags) i.tags = []; 
+            if(!i.currency) i.currency = 'GEL';
         });
         
         initUI();
@@ -349,7 +391,6 @@
         document.getElementById('yearDisplay').innerText = currentYear;
         document.getElementById('quickNotes').value = state.notes;
         
-        // Setup initial layouts
         document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid';
         document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid';
 
@@ -365,9 +406,20 @@
     function updateGlobalSalary(val) { state.years[currentYear].yearlySalary = parseFloat(val) || 0; renderBoard(); autoSave(); }
     function updateNotes(val) { state.notes = val; autoSave(); }
 
+    function openSettingsModal() { 
+        document.getElementById('usdRateSetting').value = state.settings.usdRate || 2.7;
+        document.getElementById('settingsModal').style.display = 'flex'; 
+    }
+    function saveSettings() {
+        state.settings.usdRate = parseFloat(document.getElementById('usdRateSetting').value) || 2.7;
+        document.getElementById('settingsModal').style.display = 'none';
+        if(activeMonth) renderPageItems();
+        renderBoard(); renderExtras(); autoSave();
+    }
+
     function toggleBoardLayout() { boardLayout = boardLayout === 'horizontal' ? 'grid' : 'horizontal'; document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid'; renderBoard(); }
     function togglePageLayout() { pageLayout = pageLayout === 'view-vertical' ? 'view-grid' : 'view-vertical'; document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid'; renderPageItems(); }
-    function updateTypePlaceholder() { document.getElementById('itemCost').placeholder = document.getElementById('itemType').value === 'income' ? 'Amount ₾' : 'Cost ₾'; }
+    function updateTypePlaceholder() { document.getElementById('itemCost').placeholder = document.getElementById('itemType').value === 'income' ? 'Amt' : 'Cost'; }
 
     // --- DASHBOARD RENDERING ---
     function renderBoard() {
@@ -386,32 +438,46 @@
             let sal = mData.salary !== null ? mData.salary : state.years[currentYear].yearlySalary;
             
             let incomes = mData.items.filter(i => i.isIncome); let expenses = mData.items.filter(i => !i.isIncome);
-            let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
-            let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+            let plannedIncome = fmt(incomes.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+            let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
+            let plannedSpent = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+            let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
             
             let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
             let col = document.createElement('div'); col.className = 'month-col';
             
-            // Single click setup for column (opening Month Page)
             col.onclick = () => openMonthPage(month); 
             col.ondragover = (e) => e.preventDefault(); col.ondrop = (e) => dropToMonth(e, month);
             let mathString = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>` : `Planned: ${sal} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`;
 
+            let incHtml = incomes.map(item => `
+                <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
+                     onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
+                     ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color: var(--accent);">➕ ${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
+                    </div>
+                </div>`).join('');
+                
+            let expHtml = expenses.map(item => `
+                <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
+                     onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
+                     ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
+                    </div>
+                </div>`).join('');
+
+            let combinedHtml = '';
+            if(incomes.length > 0) combinedHtml += `<div class="dash-section-title" style="color:var(--accent);">INCOME</div>` + incHtml;
+            if(expenses.length > 0) combinedHtml += `<div class="dash-section-title" style="color:#aaa; border-top:1px dashed var(--border); margin-top:5px;">EXPENSES</div>` + expHtml;
+
             col.innerHTML = `
                 <div class="month-header"><strong style="font-size: 1.2em;">${month}</strong><button onclick="openMonthPage('${month}'); event.stopPropagation();">Edit / Add</button></div>
                 <div class="summary-top">${mathString}</div>
-                <div class="items-container" id="col-${month}">
-                    ${mData.items.map(item => `
-                        <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
-                             onclick="event.stopPropagation();"
-                             draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
-                             ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)</span>
-                                <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
-                            </div>
-                        </div>`).join('')}
-                </div>
+                <div class="items-container" id="col-${month}">${combinedHtml}</div>
                 <div class="summary-bottom">Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></div>
             `;
             board.appendChild(col);
@@ -421,8 +487,9 @@
 
     function renderExtras() {
         let lt = state.longTerm; let incomes = lt.items.filter(i => i.isIncome); let expenses = lt.items.filter(i => !i.isIncome);
-        let ltPlanned = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
-        let incText = incomes.length > 0 ? ` (+${fmt(incomes.reduce((s,i)=>s+(i.cost*i.qty),0))} Inc)` : '';
+        let ltPlanned = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+        let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
+        let incText = incomes.length > 0 ? ` (+${fmt(incomes.reduce((s,i)=>s+toGEL(i.cost*i.qty,i.currency),0))}₾ Inc)` : '';
         
         document.getElementById('longTermBox').onclick = () => openMonthPage('LongTerm');
         document.getElementById('longTermBox').innerHTML = `
@@ -432,7 +499,7 @@
                 ${lt.items.map(item => `
                     <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', 'LongTerm'); event.stopPropagation();" ondragover="event.preventDefault()" ondrop="dashDropOnItem(event, '${item.id}', 'LongTerm');">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmt(item.cost * item.qty)}₾)</span>
+                            <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
                             <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('LongTerm', '${item.id}'); event.stopPropagation();">
                         </div>
                     </div>`).join('')}
@@ -481,7 +548,6 @@
     // --- PIGGY BANK LOGIC ---
     function piggyDragStart(ev, id) { draggedPiggyId = id; }
     function piggyDrop(ev, targetId) { ev.preventDefault(); if(draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
-
     function addPiggy() { let n = document.getElementById('newPiggyName').value; if(n){ state.piggyBanks.push({ id: Date.now().toString(), name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); renderExtras(); autoSave(); } }
     function togglePiggyEdit(id) { state.piggyBanks.find(p => p.id === id).isEditing = true; renderExtras(); }
     function savePiggy(id) { let b = state.piggyBanks.find(p => p.id === id); b.name = document.getElementById(`piggyName-${id}`).value; let pv = document.getElementById(`piggyPlan-${id}`).value; b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; b.color = document.getElementById(`piggyColor-${id}`).value; b.isEditing = false; renderExtras(); autoSave(); }
@@ -501,9 +567,9 @@
     function checkAutoTag(val) { if(!val) return; let firstWord = val.trim().split(' ')[0].toLowerCase(); let match = state.tags.find(t => t.toLowerCase() === firstWord); if(match && !newEntryTags.includes(match)) { newEntryTags.push(match); renderNewEntryTags(); } }
 
     function addItem() {
-        let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value;
+        let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value; let currInput = document.getElementById('itemCurrency').value;
         if(!nameInput.value) return;
-        let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income' };
+        let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput };
         getActiveItemsArray().push(item);
         nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; document.getElementById('itemName').focus(); newEntryTags = []; renderNewEntryTags(); renderPageItems(); autoSave();
     }
@@ -518,16 +584,18 @@
     function renderPageItems() {
         if(!activeMonth) return;
         let arr = getActiveItemsArray(); let items = [...arr]; let sortType = document.getElementById('pageSort').value;
-        if (sortType === 'costDesc') items.sort((a,b) => (b.cost*b.qty) - (a.cost*a.qty));
-        if (sortType === 'costAsc') items.sort((a,b) => (a.cost*a.qty) - (b.cost*b.qty));
+        if (sortType === 'costDesc') items.sort((a,b) => toGEL(b.cost*b.qty, b.currency) - toGEL(a.cost*a.qty, a.currency));
+        if (sortType === 'costAsc') items.sort((a,b) => toGEL(a.cost*a.qty, a.currency) - toGEL(b.cost*b.qty, b.currency));
         if (sortType === 'tag') items.sort((a,b) => { let tA = a.tags[0] || ''; let tB = b.tags[0] || ''; return tA.localeCompare(tB); });
 
-        let incomes = arr.filter(i => i.isIncome); let expenses = arr.filter(i => !i.isIncome);
-        let plannedIncome = fmt(incomes.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
-        let plannedSpent = fmt(expenses.reduce((s, i) => s + (i.cost * i.qty), 0)); let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + (i.cost * i.qty), 0));
+        let incomes = items.filter(i => i.isIncome); let expenses = items.filter(i => !i.isIncome);
+        let plannedIncome = fmt(incomes.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+        let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
+        let plannedSpent = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+        let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
 
         if (activeMonth === 'LongTerm') {
-            document.getElementById('pageSummaryBar').innerHTML = `<span>Total Planned Costs: <strong>${plannedSpent}₾</strong> ${plannedIncome>0 ? `(+${plannedIncome} Inc)` : ''}</span><span>Finished (Paid): <strong class="pos">${actualSpent}₾</strong></span>`;
+            document.getElementById('pageSummaryBar').innerHTML = `<span>Total Planned Costs: <strong>${plannedSpent}₾</strong> ${plannedIncome>0 ? `(+${plannedIncome}₾ Inc)` : ''}</span><span>Finished (Paid): <strong class="pos">${actualSpent}₾</strong></span>`;
         } else {
             let sal = state.years[currentYear][activeMonth].salary !== null ? state.years[currentYear][activeMonth].salary : state.years[currentYear].yearlySalary;
             let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
@@ -535,12 +603,10 @@
             document.getElementById('pageSummaryBar').innerHTML = `<span>${str} <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong></span><span>Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></span>`;
         }
 
-        let container = document.getElementById('pageItemsContainer'); container.className = 'page-content ' + pageLayout;
-        
-        container.innerHTML = items.map(item => {
+        const renderCard = (item) => {
             if (item.isEditing) {
                 return `
-                <div class="page-item-card" style="border-color: ${item.color}; display:flex; flex-direction:column; gap:10px; cursor:default;">
+                <div class="page-item-card" style="border-color: ${item.color}; display:flex; flex-direction:column; gap:10px; cursor:default;" onclick="event.stopPropagation();">
                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
                         <select id="editType-${item.id}" style="width:110px; font-weight:bold; flex-shrink:0;">
                             <option value="expense" ${!item.isIncome ? 'selected':''}>➖ Expense</option>
@@ -549,7 +615,13 @@
                         <input type="text" id="editName-${item.id}" value="${item.name}" style="flex:1; min-width:150px;" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
                     </div>
                     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:80px; flex:1;" placeholder="Cost ₾" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                        <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden; flex:1;">
+                            <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none;" placeholder="Cost" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                            <select id="editCurrency-${item.id}" style="width:50px; border:none; background:transparent; font-weight:bold;">
+                                <option value="GEL" ${item.currency==='GEL'?'selected':''}>₾</option>
+                                <option value="USD" ${item.currency==='USD'?'selected':''}>$</option>
+                            </select>
+                        </div>
                         <div class="adj-container">
                             <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)">-</button>
                             <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="± Amt">
@@ -577,9 +649,10 @@
                     </div>
                 </div>`;
             } else {
+                let conversionHtml = item.currency === 'USD' ? `<span style="font-size:0.85em; color:#aaa; margin-left:5px;">(~${fmt(toGEL(item.qty * item.cost, 'USD'))}₾)</span>` : '';
                 return `
                 <div class="page-item-card ${item.done ? 'done' : ''}" style="border-color: ${item.color}"
-                     ondblclick="toggleEditItem('${item.id}')" draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
+                     onclick="toggleEditItem('${item.id}')" draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
                      ondragover="event.preventDefault()" ondrop="pageItemDrop(event, '${item.id}')">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <strong style="font-size: 1.2em; color: ${item.isIncome ? 'var(--accent)' : 'inherit'}">${item.isIncome ? '➕' : ''} ${item.name}</strong>
@@ -588,14 +661,23 @@
                             <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteItem('${item.id}'); event.stopPropagation();">X</button>
                         </div>
                     </div>
-                    <div style="font-size: 1.1em; margin-bottom: 10px;">${item.qty}x ${fmt(item.cost)}₾ = <b style="font-size: 1.2em;">${fmt(item.qty * item.cost)}₾</b></div>
+                    <div style="font-size: 1.1em; margin-bottom: 10px;">${item.qty}x ${fmtCurr(item.cost, item.currency)} = <b style="font-size: 1.2em;">${fmtCurr(item.qty * item.cost, item.currency)}</b> ${conversionHtml}</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; gap:4px; flex-wrap:wrap;">${item.tags.map(t => `<span class="tag-badge">${t}</span>`).join('')}</div>
-                        <label style="cursor:pointer;" ondblclick="event.stopPropagation();"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${activeMonth}', '${item.id}');"> Mark Done</label>
+                        <div style="display:flex; gap:4px; flex-wrap:wrap;">${item.tags.map(t => `<span class="tag-badge" onclick="event.stopPropagation();">${t}</span>`).join('')}</div>
+                        <label style="cursor:pointer;" onclick="event.stopPropagation();"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${activeMonth}', '${item.id}');"> Mark Done</label>
                     </div>
                 </div>`;
             }
-        }).join('');
+        };
+
+        let container = document.getElementById('pageItemsContainer'); container.className = 'page-content ' + pageLayout;
+        let incHtml = incomes.map(renderCard).join('');
+        let expHtml = expenses.map(renderCard).join('');
+        
+        container.innerHTML = `
+            ${incomes.length > 0 ? `<div class="page-section-title" style="color:var(--accent);">➕ Income</div>${incHtml}` : ''}
+            ${expenses.length > 0 ? `<div class="page-section-title">➖ Expenses</div>${expHtml}` : ''}
+        `;
     }
 
     function toggleEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.isEditing = !item.isEditing; renderPageItems(); } }
@@ -606,6 +688,7 @@
             item.cost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0; 
             item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; 
             item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; 
+            item.currency = document.getElementById(`editCurrency-${id}`).value;
             item.color = document.getElementById(`editColor-${id}`).value;
             let checkboxes = document.querySelectorAll(`.edit-tag-cb-${id}:checked`);
             item.tags = Array.from(checkboxes).map(cb => cb.value);
@@ -638,7 +721,7 @@
         document.getElementById('dashboardView').style.display = 'none'; 
         document.getElementById('analyticsView').style.display = 'flex'; 
         aYearStart = currentYear; aYearEnd = currentYear; 
-        aActiveTags = [...state.tags, "Untagged"];
+        aActiveTags = [...state.tags, "Untagged", "Base Salary"];
         renderAnalyticsUI();
     }
     
@@ -654,6 +737,7 @@
         let yArr = Object.keys(state.years).map(Number); 
         aYearStart = Math.min(...yArr); aYearEnd = Math.max(...yArr); 
         document.getElementById('aYearFrom').value = aYearStart; document.getElementById('aYearTo').value = aYearEnd;
+        aActiveTags = [...state.tags, "Untagged", "Base Salary"];
         triggerAnalytics(); 
     }
     function triggerAnalytics() {
@@ -671,105 +755,150 @@
         if(!yFromObj.innerHTML) { yFromObj.innerHTML = selHtml; yToObj.innerHTML = selHtml; }
         yFromObj.value = aYearStart; yToObj.value = aYearEnd;
 
-        let tagsFilterHtml = [...state.tags, "Untagged"].map(t => {
+        let targetFilter = document.getElementById('analyticsTarget').value;
+        let groupBy = document.getElementById('analyticsGroup').value;
+        let statusFilter = document.getElementById('analyticsStatus').value || 'all';
+
+        let displayTags = [...state.tags, "Untagged"];
+        if (targetFilter === 'income') displayTags.push("Base Salary");
+
+        let tagsFilterHtml = displayTags.map(t => {
             let isSel = aActiveTags.includes(t);
             return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; cursor:pointer;" onclick="toggleAnalyticsTag('${t}')">${t}</span>`;
         }).join('');
         document.getElementById('analyticsTagsFilter').innerHTML = tagsFilterHtml;
-
-        let groupBy = document.getElementById('analyticsGroup').value;
-        let statusFilter = document.getElementById('analyticsStatus').value || 'all';
         
-        let totals = {}; let colors = {}; let grandTotal = 0; let totalIncome = 0;
-        
+        let totals = {}; let colors = {}; let grandTotal = 0;
         let y1 = Math.min(aYearStart, aYearEnd); let y2 = Math.max(aYearStart, aYearEnd);
         let totalMonths = ((y2 - y1) + 1) * 12;
 
         for (let y = y1; y <= y2; y++) {
             if(!state.years[y]) continue;
+            let yearlySal = state.years[y].yearlySalary || 0;
+            
             months.forEach(m => {
-                state.years[y][m].items.forEach(item => {
-                    let cost = item.cost * item.qty;
+                let mData = state.years[y][m];
+                let monthSal = mData.salary !== null ? mData.salary : yearlySal;
+
+                // Base Salary Integration for Income Target
+                if (targetFilter === 'income' && statusFilter !== 'planned' && aActiveTags.includes("Base Salary")) {
+                    if (groupBy === 'tag') {
+                        totals["Base Salary"] = (totals["Base Salary"] || 0) + monthSal;
+                        colors["Base Salary"] = "#d946ef"; // Berry/Pink indicator
+                    } else if (groupBy === 'color') {
+                        totals["#d946ef"] = (totals["#d946ef"] || 0) + monthSal;
+                        colors["#d946ef"] = "#d946ef";
+                    } else if (groupBy === 'month') {
+                        totals[m] = (totals[m] || 0) + monthSal;
+                        colors[m] = presetColors[months.indexOf(m) % presetColors.length];
+                    }
+                    grandTotal += monthSal;
+                }
+
+                mData.items.forEach(item => {
+                    let costInGEL = toGEL(item.cost * item.qty, item.currency);
                     
                     if (statusFilter === 'done' && !item.done) return;
                     if (statusFilter === 'planned' && item.done) return;
-                    if(item.isIncome) { totalIncome += cost; return; } 
+                    
+                    if (targetFilter === 'expenses' && item.isIncome) return;
+                    if (targetFilter === 'income' && !item.isIncome) return;
                     
                     if (groupBy === 'tag') {
                         let validTags = item.tags.filter(t => aActiveTags.includes(t));
                         if(item.tags.length === 0 && aActiveTags.includes("Untagged")) validTags = ["Untagged"];
                         if(validTags.length === 0) return; 
                         
-                        let splitCost = cost / (item.tags.length || 1); 
+                        let splitCost = costInGEL / (item.tags.length || 1); 
                         validTags.forEach(t => {
                             totals[t] = (totals[t] || 0) + splitCost;
                             let tagIdx = state.tags.indexOf(t);
                             colors[t] = t === "Untagged" ? "#888888" : (presetColors[tagIdx % presetColors.length] || "#888");
                         });
-                        grandTotal += cost; 
-                    } else {
+                        grandTotal += costInGEL; 
+                    } else if (groupBy === 'color') {
                         let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
                         if(!hasValidTag) return;
                         
                         let key = item.color;
                         if(totals[key] === undefined) totals[key] = 0;
-                        totals[key] += cost;
+                        totals[key] += costInGEL;
                         colors[key] = item.color;
-                        grandTotal += cost;
+                        grandTotal += costInGEL;
+                    } else if (groupBy === 'month') {
+                        let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
+                        if(!hasValidTag) return;
+                        
+                        let key = m; 
+                        if(totals[key] === undefined) totals[key] = 0;
+                        totals[key] += costInGEL;
+                        colors[key] = presetColors[months.indexOf(m) % presetColors.length];
+                        grandTotal += costInGEL;
                     }
                 });
             });
         }
         
-        let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Filtered Spent/Planned: <strong>${fmt(grandTotal)}₾</strong> | Monthly Avg: <strong>${fmt(grandTotal/totalMonths)}₾/mo</strong></div>`;
+        let labelMode = targetFilter === 'income' ? 'Income' : 'Spent/Planned';
+        let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Filtered ${labelMode}: <strong>${fmt(grandTotal)}₾</strong> | Monthly Avg: <strong>${fmt(grandTotal/totalMonths)}₾/mo</strong></div>`;
         
-        if(grandTotal === 0) { html += `<div>No expense data matches your filters.</div>`; } 
-        else if (analyticsType === 'bar') {
-            Object.keys(totals).sort((a,b)=>totals[b]-totals[a]).forEach(key => {
-                let val = totals[key];
-                if(val > 0) {
-                    let pct = Math.round((val / grandTotal) * 100);
-                    let label = groupBy === 'tag' ? key : 'Color Group';
-                    html += `<div style="margin-bottom:15px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span></div>
-                        <div style="background:var(--card); width:100%; height:10px; border-radius:5px; overflow:hidden; border:1px solid var(--border);">
-                            <div style="background:${colors[key]}; width:${pct}%; height:100%;"></div>
-                        </div></div>`;
-                }
-            });
-        } else if (analyticsType === 'pie') {
-            let conic = []; let acc = 0; let legendHtml = `<div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center; margin-top:20px;">`;
-            Object.keys(totals).sort((a,b)=>totals[b]-totals[a]).forEach(key => {
-                let val = totals[key];
-                if(val > 0) {
-                    let pct = (val / grandTotal) * 100;
-                    conic.push(`${colors[key]} ${acc}% ${acc + pct}%`);
-                    let label = groupBy === 'tag' ? key : 'Color Group';
-                    legendHtml += `<div><span class="legend-color" style="background:${colors[key]}"></span>${label} (${Math.round(pct)}%)</div>`;
-                    acc += pct;
-                }
-            });
-            legendHtml += `</div>`;
-            html += `<div class="pie-chart" style="background: conic-gradient(${conic.join(', ')});"></div>` + legendHtml;
-        } else if (analyticsType === 'pyramid') {
-            let maxVal = Math.max(...Object.values(totals));
-            let pyramidHtml = `<div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:100%; margin-top:20px; padding-bottom: 20px;">`;
-            
-            Object.keys(totals).sort((a,b)=>totals[a]-totals[b]).forEach(key => {
-                let val = totals[key];
-                if(val > 0) {
-                    let pctOfTotal = (val / grandTotal) * 100;
-                    let pctOfMax = (val / maxVal) * 100;
-                    let label = groupBy === 'tag' ? key : 'Color Group';
-                    
-                    pyramidHtml += `
-                    <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                        ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${Math.round(pctOfTotal)}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span>
-                    </div>`;
-                }
-            });
-            pyramidHtml += `</div>`;
-            html += pyramidHtml;
+        if(grandTotal === 0) { html += `<div>No data matches your filters.</div>`; } 
+        else {
+            let sortedKeys = Object.keys(totals);
+            if (groupBy === 'month') {
+                sortedKeys.sort((a,b) => months.indexOf(a) - months.indexOf(b));
+            } else {
+                sortedKeys.sort((a,b) => totals[b] - totals[a]);
+            }
+
+            if (analyticsType === 'bar') {
+                sortedKeys.forEach(key => {
+                    let val = totals[key];
+                    if(val > 0) {
+                        let pct = Math.round((val / grandTotal) * 100);
+                        let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
+                        html += `<div style="margin-bottom:15px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span></div>
+                            <div style="background:var(--card); width:100%; height:10px; border-radius:5px; overflow:hidden; border:1px solid var(--border);">
+                                <div style="background:${colors[key]}; width:${pct}%; height:100%;"></div>
+                            </div></div>`;
+                    }
+                });
+            } else if (analyticsType === 'pie') {
+                let conic = []; let acc = 0; let legendHtml = `<div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center; margin-top:20px;">`;
+                sortedKeys.forEach(key => {
+                    let val = totals[key];
+                    if(val > 0) {
+                        let pct = (val / grandTotal) * 100;
+                        conic.push(`${colors[key]} ${acc}% ${acc + pct}%`);
+                        let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
+                        legendHtml += `<div><span class="legend-color" style="background:${colors[key]}"></span>${label} (${Math.round(pct)}%)</div>`;
+                        acc += pct;
+                    }
+                });
+                legendHtml += `</div>`;
+                html += `<div class="pie-chart" style="background: conic-gradient(${conic.join(', ')});"></div>` + legendHtml;
+            } else if (analyticsType === 'pyramid') {
+                let maxVal = Math.max(...Object.values(totals));
+                let pyramidHtml = `<div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:100%; margin-top:20px; padding-bottom: 20px;">`;
+                
+                let pyramidKeys = Object.keys(totals).sort((a,b)=>totals[a]-totals[b]);
+                pyramidKeys.forEach(key => {
+                    let val = totals[key];
+                    if(val > 0) {
+                        let pctOfTotal = (val / grandTotal) * 100;
+                        let pctOfMax = (val / maxVal) * 100;
+                        let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
+                        
+                        pyramidHtml += `
+                        <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                            ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${Math.round(pctOfTotal)}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span>
+                        </div>`;
+                    }
+                });
+                pyramidHtml += `</div>`;
+                html += pyramidHtml;
+            }
         }
         document.getElementById('analyticsContent').innerHTML = html;
     }
