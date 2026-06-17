@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V14</title>
+    <title>Finance Planner Pro V15</title>
     <style>
         :root { 
             --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
@@ -55,7 +55,7 @@
         #board.board-horizontal { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 15px; align-items: flex-start; }
         #board.board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); width: 100%; align-items: flex-start; }
         
-        .month-col { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; min-width: 400px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s; }
+        .month-col { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; min-width: 400px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s; position: relative; }
         .month-col:hover { border-color: #888; }
         .month-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
         .month-header button { pointer-events: auto; }
@@ -105,16 +105,17 @@
         /* Adjuster tool */
         .adj-btn { border-radius: 0; padding: 8px 12px; border: none; font-weight: bold; flex-shrink:0; }
         .adj-input { width: 100%; border: none; background: transparent; text-align: center; color: var(--text); font-weight: bold; min-width: 40px;}
-        .adj-container { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex: 1; min-width: 120px;}
+        .adj-container { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex: 1;}
     </style>
 </head>
 <body data-theme="dark">
 
+<!-- DASHBOARD VIEW -->
 <div id="dashboardView">
     <header>
         <div style="display:flex; align-items:center; gap: 10px; font-size: 1.2em;">
             <button onclick="changeYear(-1)">◀</button>
-            <strong id="yearDisplay">2026</strong>
+            <strong id="yearDisplay"></strong>
             <button onclick="changeYear(1)">▶</button>
         </div>
         <div style="border-left: 1px solid var(--border); padding-left: 15px;">
@@ -165,6 +166,7 @@
     </div>
 </div>
 
+<!-- DEDICATED MONTH PAGE VIEW -->
 <div id="monthView">
     <div class="page-header">
         <div style="display: flex; align-items: center; gap: 20px;">
@@ -226,25 +228,40 @@
     </div>
 </div>
 
+<!-- ANALYTICS TAB VIEW -->
 <div id="analyticsView" style="display: none; flex-direction: column; flex-grow: 1; overflow: hidden;">
     <div class="page-header">
         <div style="display: flex; align-items: center; gap: 20px;">
             <button class="btn-secondary" onclick="closeAnalyticsPage()">◀ Back (Esc)</button>
             <h2 style="margin: 0;">Analytics Dashboard</h2>
         </div>
-    </div>
-    <div class="page-content" style="display: flex; flex-direction: column; gap: 20px;">
-        
-        <div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-wrap: wrap;">
-            <span>From:</span><select id="aYearFrom" onchange="triggerAnalytics()"></select>
-            <span>To:</span><select id="aYearTo" onchange="triggerAnalytics()"></select>
-            <button class="btn-secondary" onclick="selectAllYearsAnalytics()">All Years</button>
-            <div style="border-left: 1px solid var(--border); margin: 0 10px; height: 30px;"></div>
+        <div style="display:flex; gap: 10px;">
             <button class="btn-secondary" onclick="analyticsType='bar'; triggerAnalytics();">Bar Chart</button>
             <button class="btn-secondary" onclick="analyticsType='pie'; triggerAnalytics();">Pie Chart</button>
             <button class="btn-secondary" onclick="analyticsType='pyramid'; triggerAnalytics();">Pyramid Chart</button>
         </div>
+    </div>
+    <div class="page-content" style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Controls Row 1 -->
+        <div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-weight:bold;">From:</span>
+            <select id="aMonthFrom" onchange="triggerAnalytics()"></select>
+            <select id="aYearFrom" onchange="triggerAnalytics()"></select>
+            <span style="font-weight:bold; margin-left:10px;">To:</span>
+            <select id="aMonthTo" onchange="triggerAnalytics()"></select>
+            <select id="aYearTo" onchange="triggerAnalytics()"></select>
+            <button class="btn-secondary" onclick="selectAllYearsAnalytics()">All Time</button>
+            
+            <div style="border-left: 1px solid var(--border); margin: 0 10px; height: 30px;"></div>
+            
+            <label style="cursor:pointer; display:flex; align-items:center; background:var(--card); padding:6px 12px; border-radius:4px; border:1px solid var(--border); font-weight:bold;">
+                <input type="checkbox" id="aUpToCurrent" onchange="triggerAnalytics()" style="margin:0 8px 0 0; transform:scale(1.2);"> 
+                Limit to Current Month
+            </label>
+        </div>
 
+        <!-- Controls Row 2 -->
         <div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-wrap: wrap;">
             <span>Target:</span>
             <select id="analyticsTarget" onchange="triggerAnalytics()" style="font-weight:bold;">
@@ -265,6 +282,7 @@
             </select>
         </div>
         
+        <!-- Tag Filters -->
         <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = [...state.tags, 'Untagged', 'Base Salary']; triggerAnalytics();">✓ Select All Tags</button>
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = []; triggerAnalytics();">✗ Clear All Tags</button>
@@ -275,6 +293,7 @@
     </div>
 </div>
 
+<!-- Tags Modal -->
 <div class="modal-overlay" id="tagsModal">
     <div class="modal">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
@@ -289,23 +308,38 @@
     </div>
 </div>
 
+<!-- Settings Modal -->
 <div class="modal-overlay" id="settingsModal">
-    <div class="modal" style="min-width: 300px;">
+    <div class="modal" style="min-width: 350px;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
             <span>⚙️ App Settings</span>
             <button class="btn-danger" onclick="document.getElementById('settingsModal').style.display='none'">X</button>
         </div>
-        <div style="display:flex; flex-direction:column; gap:20px;">
+        <div style="display:flex; flex-direction:column; gap:25px;">
+            
             <div style="display:flex; flex-direction:column; gap:8px;">
-                <label style="font-weight:bold;">Exchange Rate</label>
-                <div style="display:flex; align-items:center; gap:10px;">
+                <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Global Exchange Rate</label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
                     <span>1 USD ($) = </span>
                     <input type="number" id="usdRateSetting" style="width: 80px;" step="0.01">
                     <span>GEL (₾)</span>
                 </div>
-                <span style="font-size:0.85em; color:#aaa;">Used to calculate your total monthly budget globally.</span>
             </div>
-            <button onclick="saveSettings()" style="padding: 12px;">Save Settings</button>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Financial Month (Salary Date)</label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
+                    <input type="checkbox" id="enableSalaryDateSetting"> 
+                    Enable Custom Salary Date
+                </label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                    <span>Salary Day (1-31): </span>
+                    <input type="number" id="salaryDateSetting" style="width: 60px;" min="1" max="31">
+                </div>
+                <span style="font-size:0.85em; color:#aaa; line-height:1.4;">If enabled, the "Current Month" will automatically stay on the previous month until this day arrives. (e.g. If set to 10, June 5th still counts as May).</span>
+            </div>
+
+            <button onclick="saveSettings()" style="padding: 12px; margin-top:10px;">Save Settings</button>
         </div>
     </div>
 </div>
@@ -314,7 +348,7 @@
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const presetColors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#795548", "#9e9e9e", "#607d8b", "#ffffff"];
     
-    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", settings: { usdRate: 2.7 } };
+    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", settings: { usdRate: 2.7, enableSalaryDate: false, salaryDate: 10 } };
     
     let currentYear = new Date().getFullYear();
     let activeMonth = null;
@@ -335,6 +369,19 @@
     function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
     function toGEL(amt, curr) { return curr === 'USD' ? amt * (state.settings.usdRate || 2.7) : amt; }
     function fmtCurr(amt, curr) { return curr === 'USD' ? '$' + fmt(amt) : fmt(amt) + '₾'; }
+
+    // Helper to get the correct current financial year/month based on settings
+    function getFinancialDate() {
+        let sysDate = new Date();
+        let sysYear = sysDate.getFullYear();
+        let sysMonthIdx = sysDate.getMonth();
+        
+        if (state.settings.enableSalaryDate && sysDate.getDate() < state.settings.salaryDate) {
+            sysMonthIdx -= 1;
+            if (sysMonthIdx < 0) { sysMonthIdx = 11; sysYear -= 1; }
+        }
+        return { year: sysYear, monthIdx: sysMonthIdx };
+    }
 
     document.addEventListener('input', e => {
         if (e.target.classList.contains('num-input')) {
@@ -361,8 +408,15 @@
     function init() {
         let saved = localStorage.getItem('financeDataV10'); 
         if (saved) { state = { ...state, ...JSON.parse(saved) }; }
+        
+        if (!state.settings) state.settings = { usdRate: 2.7, enableSalaryDate: false, salaryDate: 10 };
+        if (state.settings.enableSalaryDate === undefined) state.settings.enableSalaryDate = false;
+        if (!state.settings.salaryDate) state.settings.salaryDate = 10;
+        
+        // Auto jump to the proper financial year on load
+        currentYear = getFinancialDate().year; 
+        
         if (!state.years[currentYear]) generateYear(currentYear);
-        if (!state.settings) state.settings = { usdRate: 2.7 };
         
         for(let y in state.years) {
             if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = state.globalSalary || 2000;
@@ -401,18 +455,30 @@
     }
 
     function generateYear(year) { state.years[year] = { yearlySalary: 2000 }; months.forEach(m => state.years[year][m] = { salary: null, items: [] }); }
-    function changeYear(dir) { currentYear += dir; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
+    function changeYear(dir) { currentYear += dir; document.getElementById('yearDisplay').innerText = currentYear; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
     function changeTheme(th) { state.theme = th; document.body.setAttribute('data-theme', th); autoSave(); }
     function updateGlobalSalary(val) { state.years[currentYear].yearlySalary = parseFloat(val) || 0; renderBoard(); autoSave(); }
     function updateNotes(val) { state.notes = val; autoSave(); }
 
     function openSettingsModal() { 
         document.getElementById('usdRateSetting').value = state.settings.usdRate || 2.7;
+        document.getElementById('enableSalaryDateSetting').checked = state.settings.enableSalaryDate;
+        document.getElementById('salaryDateSetting').value = state.settings.salaryDate || 10;
         document.getElementById('settingsModal').style.display = 'flex'; 
     }
+    
     function saveSettings() {
         state.settings.usdRate = parseFloat(document.getElementById('usdRateSetting').value) || 2.7;
+        state.settings.enableSalaryDate = document.getElementById('enableSalaryDateSetting').checked;
+        state.settings.salaryDate = parseInt(document.getElementById('salaryDateSetting').value) || 10;
+        
         document.getElementById('settingsModal').style.display = 'none';
+        
+        // Settings might have changed the active real-world month tracking. Update display
+        currentYear = getFinancialDate().year;
+        document.getElementById('yearDisplay').innerText = currentYear;
+        if (!state.years[currentYear]) generateYear(currentYear);
+        
         if(activeMonth) renderPageItems();
         renderBoard(); renderExtras(); autoSave();
     }
@@ -433,6 +499,9 @@
             if (gridScrollCb.checked) board.classList.add('scrollable-items'); else board.classList.remove('scrollable-items');
         } else { gridScrollLabel.style.display = 'none'; board.classList.remove('scrollable-items'); }
         
+        // Highlighting Logic based on Settings
+        let fDate = getFinancialDate();
+
         months.forEach(month => {
             let mData = state.years[currentYear][month];
             let sal = mData.salary !== null ? mData.salary : state.years[currentYear].yearlySalary;
@@ -444,7 +513,15 @@
             let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
             
             let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
-            let col = document.createElement('div'); col.className = 'month-col';
+            
+            // Check if this is the target financial month
+            let isCurrentMonth = (currentYear === fDate.year && month === months[fDate.monthIdx]);
+
+            let col = document.createElement('div'); 
+            col.className = 'month-col';
+            if (isCurrentMonth) {
+                col.style.cssText = `border: 2px solid var(--accent); box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);`;
+            }
             
             col.onclick = () => openMonthPage(month); 
             col.ondragover = (e) => e.preventDefault(); col.ondrop = (e) => dropToMonth(e, month);
@@ -474,7 +551,10 @@
             if(incomes.length > 0) combinedHtml += `<div class="dash-section-title" style="color:var(--accent);">INCOME</div>` + incHtml;
             if(expenses.length > 0) combinedHtml += `<div class="dash-section-title" style="color:#aaa; border-top:1px dashed var(--border); margin-top:5px;">EXPENSES</div>` + expHtml;
 
+            let badgeHtml = isCurrentMonth ? `<span style="background:var(--accent); color:white; font-size:0.65em; padding:2px 8px; border-radius:12px; position:absolute; top:-12px; right:15px; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">CURRENT</span>` : '';
+
             col.innerHTML = `
+                ${badgeHtml}
                 <div class="month-header"><strong style="font-size: 1.2em;">${month}</strong><button onclick="openMonthPage('${month}'); event.stopPropagation();">Edit / Add</button></div>
                 <div class="summary-top">${mathString}</div>
                 <div class="items-container" id="col-${month}">${combinedHtml}</div>
@@ -606,45 +686,58 @@
         const renderCard = (item) => {
             if (item.isEditing) {
                 return `
-                <div class="page-item-card" style="border-color: ${item.color}; display:flex; flex-direction:column; gap:10px; cursor:default;" onclick="event.stopPropagation();">
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <select id="editType-${item.id}" style="width:110px; font-weight:bold; flex-shrink:0;">
+                <div class="page-item-card" style="border-left-color: ${item.color}; display:flex; flex-direction:column; gap:10px; cursor:default;" onclick="event.stopPropagation();">
+                    
+                    <!-- TOP ROW: Type + Save/Cancel (Right Aligned) -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 5px;">
+                        <select id="editType-${item.id}" style="font-weight:bold; width: 120px;">
                             <option value="expense" ${!item.isIncome ? 'selected':''}>➖ Expense</option>
                             <option value="income" ${item.isIncome ? 'selected':''}>➕ Income</option>
                         </select>
-                        <input type="text" id="editName-${item.id}" value="${item.name}" style="flex:1; min-width:150px;" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                        <div style="display:flex; gap: 5px; margin-left: auto;">
+                            <button onclick="saveEditItem('${item.id}')" style="padding: 4px 10px;">💾 Save</button>
+                            <button class="btn-secondary" onclick="toggleEditItem('${item.id}')" style="padding: 4px 10px;">X</button>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                        <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden; flex:1;">
-                            <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none;" placeholder="Cost" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+
+                    <!-- SECOND ROW: Name -->
+                    <input type="text" id="editName-${item.id}" value="${item.name}" style="width:100%;" placeholder="Name" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                    
+                    <!-- THIRD ROW: Cost, Currency, Qty -->
+                    <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                        <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden; flex:1; min-width: 100px;">
+                            <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none; min-width:50px; padding: 6px 10px;" placeholder="Cost" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
                             <select id="editCurrency-${item.id}" style="width:50px; border:none; background:transparent; font-weight:bold;">
                                 <option value="GEL" ${item.currency==='GEL'?'selected':''}>₾</option>
                                 <option value="USD" ${item.currency==='USD'?'selected':''}>$</option>
                             </select>
                         </div>
-                        <div class="adj-container">
-                            <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)">-</button>
-                            <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="± Amt">
-                            <button class="adj-btn btn-secondary" style="background:var(--accent);" onclick="adjustEditCost('${item.id}', 1)">+</button>
+                        <span style="font-weight:bold; color:#aaa;">x</span>
+                        <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:50px; padding: 6px 10px;" placeholder="Qty" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
+                    </div>
+
+                    <!-- FOURTH ROW: Adjuster (+ / -) -->
+                    <div class="adj-container" style="width: 100%;">
+                        <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)">-</button>
+                        <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Adjust Amount (±)">
+                        <button class="adj-btn btn-secondary" style="background:var(--accent);" onclick="adjustEditCost('${item.id}', 1)">+</button>
+                    </div>
+
+                    <!-- FIFTH ROW: Tags & Color -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; gap:5px; flex-wrap:wrap; flex:1;" id="editTagsGroup-${item.id}">
+                            ${state.tags.map(t => {
+                                let isSel = item.tags.includes(t);
+                                return `
+                                <label style="cursor:pointer; margin:0;">
+                                    <input type="checkbox" value="${t}" class="edit-tag-cb-${item.id}" ${isSel ? 'checked' : ''} style="display:none;" onchange="this.nextElementSibling.style.opacity = this.checked ? 1 : 0.4">
+                                    <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block;">${t}</span>
+                                </label>`;
+                            }).join('')}
                         </div>
-                        <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:60px; flex-shrink:0;" placeholder="Qty" onkeydown="if(event.key==='Enter') saveEditItem('${item.id}')">
-                    </div>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="editTagsGroup-${item.id}">
-                        ${state.tags.map(t => {
-                            let isSel = item.tags.includes(t);
-                            return `
-                            <label style="cursor:pointer; margin:0;">
-                                <input type="checkbox" value="${t}" class="edit-tag-cb-${item.id}" ${isSel ? 'checked' : ''} style="display:none;" onchange="this.nextElementSibling.style.opacity = this.checked ? 1 : 0.4">
-                                <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block;">${t}</span>
-                            </label>`;
-                        }).join('')}
-                    </div>
-                    <div style="display:flex; gap:10px; margin-top:5px; align-items:center;">
-                        <button onclick="saveEditItem('${item.id}')">Save (Enter)</button>
-                        <button class="btn-secondary" onclick="toggleEditItem('${item.id}')">Cancel</button>
-                        <div style="margin-left:auto; display:flex; align-items:center; gap:5px;">
+                        <div style="display:flex; align-items:center; gap:5px;">
                             <label style="font-size:0.9em; color:#aaa;">Color:</label>
-                            <input type="color" id="editColor-${item.id}" value="${item.color}" style="padding:0; width:30px; height:30px; cursor:pointer; border:none; background:transparent;">
+                            <input type="color" id="editColor-${item.id}" value="${item.color}" style="padding:0; width:25px; height:25px; cursor:pointer; border:none; background:transparent;">
                         </div>
                     </div>
                 </div>`;
@@ -657,7 +750,6 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <strong style="font-size: 1.2em; color: ${item.isIncome ? 'var(--accent)' : 'inherit'}">${item.isIncome ? '➕' : ''} ${item.name}</strong>
                         <div>
-                            <button class="btn-secondary" style="padding: 4px 8px;" onclick="toggleEditItem('${item.id}'); event.stopPropagation();">✏️</button>
                             <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteItem('${item.id}'); event.stopPropagation();">X</button>
                         </div>
                     </div>
@@ -721,8 +813,9 @@
         document.getElementById('dashboardView').style.display = 'none'; 
         document.getElementById('analyticsView').style.display = 'flex'; 
         aYearStart = currentYear; aYearEnd = currentYear; 
+        document.getElementById('aUpToCurrent').checked = false;
         aActiveTags = [...state.tags, "Untagged", "Base Salary"];
-        renderAnalyticsUI();
+        renderAnalyticsUI(true);
     }
     
     function closeAnalyticsPage() {
@@ -733,31 +826,46 @@
     }
     
     function toggleAnalyticsTag(t) { if(aActiveTags.includes(t)) aActiveTags = aActiveTags.filter(x => x!==t); else aActiveTags.push(t); triggerAnalytics(); }
+    
     function selectAllYearsAnalytics() { 
         let yArr = Object.keys(state.years).map(Number); 
-        aYearStart = Math.min(...yArr); aYearEnd = Math.max(...yArr); 
-        document.getElementById('aYearFrom').value = aYearStart; document.getElementById('aYearTo').value = aYearEnd;
+        document.getElementById('aYearFrom').value = Math.min(...yArr);
+        document.getElementById('aYearTo').value = Math.max(...yArr);
+        document.getElementById('aMonthFrom').value = "0"; // Jan
+        document.getElementById('aMonthTo').value = "11"; // Dec
         aActiveTags = [...state.tags, "Untagged", "Base Salary"];
         triggerAnalytics(); 
     }
-    function triggerAnalytics() {
-        aYearStart = parseInt(document.getElementById('aYearFrom').value);
-        aYearEnd = parseInt(document.getElementById('aYearTo').value);
-        renderAnalyticsUI();
-    }
     
-    function renderAnalyticsUI() {
+    function triggerAnalytics() { renderAnalyticsUI(false); }
+    
+    function renderAnalyticsUI(initSelects = false) {
         let years = Object.keys(state.years).sort();
-        let selHtml = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        let ySelHtml = years.map(y => `<option value="${y}">${y}</option>`).join('');
+        let mSelHtml = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
         
         let yFromObj = document.getElementById('aYearFrom');
         let yToObj = document.getElementById('aYearTo');
-        if(!yFromObj.innerHTML) { yFromObj.innerHTML = selHtml; yToObj.innerHTML = selHtml; }
-        yFromObj.value = aYearStart; yToObj.value = aYearEnd;
+        let mFromObj = document.getElementById('aMonthFrom');
+        let mToObj = document.getElementById('aMonthTo');
+        
+        if(!yFromObj.innerHTML) { yFromObj.innerHTML = ySelHtml; yToObj.innerHTML = ySelHtml; }
+        if(!mFromObj.innerHTML) { mFromObj.innerHTML = mSelHtml; mToObj.innerHTML = mSelHtml; }
+        
+        if(initSelects) {
+            yFromObj.value = aYearStart; yToObj.value = aYearEnd;
+            mFromObj.value = "0"; mToObj.value = "11";
+        }
+
+        aYearStart = parseInt(yFromObj.value);
+        aYearEnd = parseInt(yToObj.value);
+        let aMonthStartIdx = parseInt(mFromObj.value);
+        let aMonthEndIdx = parseInt(mToObj.value);
 
         let targetFilter = document.getElementById('analyticsTarget').value;
         let groupBy = document.getElementById('analyticsGroup').value;
         let statusFilter = document.getElementById('analyticsStatus').value || 'all';
+        let limitToCurrent = document.getElementById('aUpToCurrent').checked;
 
         let displayTags = [...state.tags, "Untagged"];
         if (targetFilter === 'income') displayTags.push("Base Salary");
@@ -768,23 +876,36 @@
         }).join('');
         document.getElementById('analyticsTagsFilter').innerHTML = tagsFilterHtml;
         
-        let totals = {}; let colors = {}; let grandTotal = 0;
-        let y1 = Math.min(aYearStart, aYearEnd); let y2 = Math.max(aYearStart, aYearEnd);
-        let totalMonths = ((y2 - y1) + 1) * 12;
+        let totals = {}; let colors = {}; let grandTotal = 0; let totalMonthsCount = 0;
+        
+        let fDate = getFinancialDate();
+        let currentMonthVal = fDate.year * 100 + fDate.monthIdx;
+        let startVal = aYearStart * 100 + aMonthStartIdx;
+        let endVal = aYearEnd * 100 + aMonthEndIdx;
 
-        for (let y = y1; y <= y2; y++) {
+        for (let y = Math.min(aYearStart, aYearEnd); y <= Math.max(aYearStart, aYearEnd); y++) {
             if(!state.years[y]) continue;
             let yearlySal = state.years[y].yearlySalary || 0;
             
-            months.forEach(m => {
+            months.forEach((m, mIdx) => {
+                let loopVal = y * 100 + mIdx;
+                
+                // Skip if outside selected range
+                if (loopVal < startVal || loopVal > endVal) return;
+                
+                // Skip if limit to current month is checked, and we are past current month
+                if (limitToCurrent && loopVal > currentMonthVal) return;
+                
+                totalMonthsCount++;
+
                 let mData = state.years[y][m];
                 let monthSal = mData.salary !== null ? mData.salary : yearlySal;
 
-                // Base Salary Integration for Income Target
+                // Base Salary Integration
                 if (targetFilter === 'income' && statusFilter !== 'planned' && aActiveTags.includes("Base Salary")) {
                     if (groupBy === 'tag') {
                         totals["Base Salary"] = (totals["Base Salary"] || 0) + monthSal;
-                        colors["Base Salary"] = "#d946ef"; // Berry/Pink indicator
+                        colors["Base Salary"] = "#d946ef"; // Berry indicator
                     } else if (groupBy === 'color') {
                         totals["#d946ef"] = (totals["#d946ef"] || 0) + monthSal;
                         colors["#d946ef"] = "#d946ef";
@@ -839,8 +960,9 @@
             });
         }
         
+        let actualMonths = totalMonthsCount || 1; // prevent divide by zero
         let labelMode = targetFilter === 'income' ? 'Income' : 'Spent/Planned';
-        let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Filtered ${labelMode}: <strong>${fmt(grandTotal)}₾</strong> | Monthly Avg: <strong>${fmt(grandTotal/totalMonths)}₾/mo</strong></div>`;
+        let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Filtered ${labelMode}: <strong>${fmt(grandTotal)}₾</strong> | Monthly Avg (${totalMonthsCount} mos): <strong>${fmt(grandTotal/actualMonths)}₾/mo</strong></div>`;
         
         if(grandTotal === 0) { html += `<div>No data matches your filters.</div>`; } 
         else {
@@ -858,7 +980,7 @@
                         let pct = Math.round((val / grandTotal) * 100);
                         let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
                         html += `<div style="margin-bottom:15px;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span></div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span></div>
                             <div style="background:var(--card); width:100%; height:10px; border-radius:5px; overflow:hidden; border:1px solid var(--border);">
                                 <div style="background:${colors[key]}; width:${pct}%; height:100%;"></div>
                             </div></div>`;
@@ -892,7 +1014,7 @@
                         
                         pyramidHtml += `
                         <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                            ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${Math.round(pctOfTotal)}%) | Avg: ${fmt(val/totalMonths)}₾/mo</span>
+                            ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${Math.round(pctOfTotal)}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span>
                         </div>`;
                     }
                 });
@@ -929,7 +1051,8 @@
             try { 
                 let parsed = JSON.parse(e.target.result); state = { ...state, ...parsed };
                 if (!state.longTerm) state.longTerm = { items: [] }; if (!state.piggyBanks) state.piggyBanks = []; if(state.notes===undefined) state.notes=""; 
-                currentYear = parseInt(Object.keys(state.years)[0]) || new Date().getFullYear(); 
+                currentYear = getFinancialDate().year;
+                document.getElementById('yearDisplay').innerText = currentYear;
                 autoSave(); initUI(); if(activeMonth) closeMonthPage(); 
             } catch(err) { alert("Invalid JSON file"); } 
         }; reader.readAsText(file); event.target.value = ''; 
