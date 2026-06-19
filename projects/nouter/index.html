@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouter</title>
+    <style>
+        :root {
+            --bg: #282a36; --text: #f8f8f2; --nav: #21222c; --border: #44475a; --accent: #bd93f9; --shadow: rgba(0,0,0,0.3);
+        }
+        [data-theme="dracula"] { --bg: #282a36; --text: #f8f8f2; --nav: #21222c; --border: #44475a; --accent: #bd93f9; --shadow: rgba(0,0,0,0.3); }
+        [data-theme="light"] { --bg: #ffffff; --text: #333333; --nav: #f8f9fa; --border: #e2e8f0; --accent: #3b82f6; --shadow: rgba(0,0,0,0.05); }
+        [data-theme="dark"] { --bg: #1e1e1e; --text: #d4d4d4; --nav: #252526; --border: #3e3e42; --accent: #007acc; --shadow: rgba(0,0,0,0.5); }
+        [data-theme="sepia"] { --bg: #fdf6e3; --text: #657b83; --nav: #eee8d5; --border: #ccc1b0; --accent: #b58900; --shadow: rgba(0,0,0,0.1); }
+        [data-theme="matrix"] { --bg: #000000; --text: #00ff00; --nav: #0a0a0a; --border: #004400; --accent: #00ff00; --shadow: rgba(0,255,0,0.1); }
+        [data-theme="gruvbox"] { --bg: #282828; --text: #ebdbb2; --nav: #3c3836; --border: #504945; --accent: #d3869b; --shadow: rgba(0,0,0,0.4); }
+        [data-theme="nord"] { --bg: #2e3440; --text: #d8dee9; --nav: #3b4252; --border: #4c566a; --accent: #88c0d0; --shadow: rgba(0,0,0,0.3); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        body { display: flex; flex-direction: column; height: 100vh; background: var(--bg); color: var(--text); overflow: hidden; }
+        
+        nav { display: flex; gap: 8px; padding: 10px 15px; background: var(--nav); border-bottom: 1px solid var(--border); align-items: center; z-index: 10; }
+        button, select, label.btn { padding: 5px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); cursor: pointer; border-radius: 4px; font-size: 13px; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        button:hover, label.btn:hover { border-color: var(--accent); color: var(--accent); }
+        
+        #workspace { display: flex; flex: 1; width: 100%; height: 100%; overflow: hidden; }
+        
+        .split-container { display: flex; flex: 1; overflow: hidden; width: 100%; height: 100%; }
+        .split-row { flex-direction: row; }
+        .split-col { flex-direction: column; }
+        
+        .pane { display: flex; flex-direction: column; background: var(--bg); border: 1px solid var(--border); overflow: hidden; min-width: 100px; min-height: 100px; }
+        .pane-header { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--nav); border-bottom: 1px solid var(--border); font-size: 13px; }
+        
+        .pane-title { outline: none; font-weight: bold; border-bottom: 1px dashed transparent; min-width: 50px; }
+        .pane-title:focus { border-bottom-color: var(--accent); }
+        
+        .status { font-size: 11px; opacity: 0.6; margin-left: 8px; flex: 1; }
+        .controls { display: flex; gap: 4px; align-items: center; }
+        .controls button { padding: 3px 6px; font-size: 12px; }
+        .controls input[type="checkbox"] { cursor: pointer; accent-color: var(--accent); }
+        
+        .pane-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+        textarea, .preview { width: 100%; height: 100%; padding: 15px; border: none; background: transparent; color: inherit; font-size: 14px; line-height: 1.5; outline: none; resize: none; overflow-y: auto; }
+        
+        .preview { display: none; cursor: text; }
+        .show-md textarea { display: none; }
+        .show-md .preview { display: block; }
+        
+        .preview h1, .preview h2, .preview h3 { margin: 0.3em 0 0.1em 0; line-height: 1.2; }
+        hr.md-hr { border: 0; height: 1px; background: var(--border); margin: 15px 0; }
+        .locked textarea, .locked .preview { opacity: 0.7; cursor: not-allowed !important; }
+        
+        .resizer { z-index: 5; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
+        .resizer:hover, .resizer.active { background: var(--accent); }
+        .resizer-v { width: 8px; cursor: col-resize; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        .resizer-h { height: 8px; cursor: row-resize; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body data-theme="dracula">
+
+    <nav>
+        <button onclick="exportData()">💾 ექსპორტი</button>
+        <label class="btn">📂 იმპორტი <input type="file" accept=".json" onchange="importData(event)"></label>
+        <button onclick="clearCache()" style="color: #ff5555; border-color: #ff5555;">🗑️ გასუფთავება</button>
+        <div style="flex:1"></div>
+        <select id="themeSelect" onchange="changeTheme()">
+            <option value="dracula" selected>Dracula</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+            <option value="sepia">Sepia</option>
+            <option value="matrix">Matrix</option>
+            <option value="gruvbox">Gruvbox</option>
+            <option value="nord">Nord</option>
+        </select>
+    </nav>
+
+    <div id="workspace"></div>
+
+    <script>
+        const workspace = document.getElementById('workspace');
+        let saveTimeout;
+
+        function parseMarkdown(text) {
+            return text.replace(/</g, '&lt;') 
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/(<\/h[1-3]>)\n/g, '$1')
+                .replace(/^---$/gim, '<hr class="md-hr">')
+                .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
+                .replace(/\*(.*?)\*/gim, '<i>$1</i>')
+                .replace(/`(.*?)`/gim, '<code style="background:var(--bg);padding:2px 4px;border-radius:3px;border:1px solid var(--border)">$1</code>')
+                .replace(/\n/gim, '<br>');
+        }
+
+        function triggerSave(paneElement) {
+            if(paneElement) {
+                const status = paneElement.querySelector('.status');
+                if(status) {
+                    status.textContent = "ინახება...";
+                    clearTimeout(saveTimeout);
+                    saveTimeout = setTimeout(() => { saveState(); status.textContent = "✔"; setTimeout(()=>status.textContent="", 2000); }, 500);
+                }
+            } else saveState();
+        }
+
+        function serializeNode(el) {
+            if (el.classList.contains('pane')) {
+                return {
+                    type: 'pane',
+                    title: el.querySelector('.pane-title').innerText,
+                    content: el.querySelector('textarea').value,
+                    locked: el.classList.contains('locked'),
+                    md: el.querySelector('.md-toggle').checked,
+                    flex: el.style.flex || '1'
+                };
+            } else if (el.classList.contains('split-container')) {
+                return {
+                    type: 'split',
+                    dir: el.classList.contains('split-row') ? 'row' : 'col',
+                    flex: el.style.flex || '1',
+                    children: Array.from(el.children).filter(c => !c.classList.contains('resizer')).map(serializeNode)
+                };
+            }
+        }
+
+        function saveState() {
+            if(!workspace.firstElementChild) return;
+            localStorage.setItem('i3notes_v3', JSON.stringify(serializeNode(workspace.firstElementChild)));
+        }
+
+        function createPaneDOM(data = {}) {
+            const pane = document.createElement('div');
+            pane.className = 'pane';
+            pane.style.flex = data.flex || '1';
+            const isLocked = data.locked || false;
+            const isMd = data.md || false;
+            if(isLocked) pane.classList.add('locked');
+            if(isMd) pane.classList.add('show-md');
+            
+            pane.innerHTML = `
+                <div class="pane-header">
+                    <span class="pane-title" contenteditable="${!isLocked}">${data.title || "ჩანაწერი"}</span>
+                    <span class="status"></span>
+                    <div class="controls">
+                        <label title="Markdown"><input type="checkbox" class="md-toggle" ${isMd ? 'checked' : ''}> MD</label>
+                        <button class="lock-btn" title="ჩაკეტვა">${isLocked ? '🔒' : '🔓'}</button>
+                        <button class="split-v-btn" title="ვერტიკალური გაყოფა">◫</button>
+                        <button class="split-h-btn" title="ჰორიზონტალური გაყოფა">⊟</button>
+                        <button class="close-btn" title="დახურვა" style="color:#ff5555">✕</button>
+                    </div>
+                </div>
+                <div class="pane-body">
+                    <textarea spellcheck="false" placeholder="წერეთ აქ (Esc = MD Preview, Ctrl+B = Bold)..." ${isLocked ? 'readonly' : ''}>${data.content || ""}</textarea>
+                    <div class="preview">${parseMarkdown(data.content || "")}</div>
+                </div>
+            `;
+
+            const title = pane.querySelector('.pane-title');
+            const textarea = pane.querySelector('textarea');
+            const preview = pane.querySelector('.preview');
+            const mdToggle = pane.querySelector('.md-toggle');
+            const lockBtn = pane.querySelector('.lock-btn');
+
+            textarea.addEventListener('input', () => triggerSave(pane));
+            title.addEventListener('input', () => triggerSave(pane));
+
+            preview.addEventListener('click', () => {
+                if (pane.classList.contains('locked')) return;
+                pane.classList.remove('show-md');
+                textarea.focus();
+            });
+
+            textarea.addEventListener('blur', () => {
+                if (mdToggle.checked) {
+                    preview.innerHTML = parseMarkdown(textarea.value);
+                    pane.classList.add('show-md');
+                }
+            });
+
+            mdToggle.addEventListener('change', () => {
+                if (mdToggle.checked) {
+                    preview.innerHTML = parseMarkdown(textarea.value);
+                    pane.classList.add('show-md');
+                } else {
+                    pane.classList.remove('show-md');
+                }
+                triggerSave(pane);
+            });
+
+            lockBtn.addEventListener('click', () => {
+                const locked = pane.classList.toggle('locked');
+                lockBtn.textContent = locked ? '🔒' : '🔓';
+                textarea.readOnly = locked;
+                title.contentEditable = !locked;
+                triggerSave(pane);
+            });
+
+            pane.querySelector('.split-v-btn').addEventListener('click', () => splitPane(pane, 'row'));
+            pane.querySelector('.split-h-btn').addEventListener('click', () => splitPane(pane, 'col'));
+            pane.querySelector('.close-btn').addEventListener('click', () => closePane(pane));
+
+            textarea.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    this.blur();
+                }
+                if (e.ctrlKey && e.key === 'b') {
+                    e.preventDefault();
+                    if(this.readOnly) return;
+                    const start = this.selectionStart, end = this.selectionEnd;
+                    const text = this.value, selected = text.substring(start, end);
+                    this.value = text.substring(0, start) + '**' + selected + '**' + text.substring(end);
+                    this.selectionStart = this.selectionEnd = start + selected.length + 4;
+                    triggerSave(pane);
+                }
+            });
+
+            return pane;
+        }
+
+        function deserializeData(data) {
+            if (!data) return createPaneDOM();
+            if (data.type === 'pane') return createPaneDOM(data);
+            if (data.type === 'split') {
+                const container = document.createElement('div');
+                container.className = `split-container split-${data.dir}`;
+                container.style.flex = data.flex || '1';
+                data.children.forEach((childData, index) => {
+                    container.appendChild(deserializeData(childData));
+                    if (index < data.children.length - 1) {
+                        const resizer = document.createElement('div');
+                        resizer.className = `resizer resizer-${data.dir === 'row' ? 'v' : 'h'}`;
+                        container.appendChild(resizer);
+                    }
+                });
+                return container;
+            }
+        }
+
+        function splitPane(pane, direction) {
+            const parent = pane.parentElement;
+            const wrapper = document.createElement('div');
+            wrapper.className = `split-container split-${direction}`;
+            wrapper.style.flex = pane.style.flex || '1';
+            
+            pane.style.flex = '1';
+            const newPane = createPaneDOM();
+            newPane.style.flex = '1';
+            
+            const resizer = document.createElement('div');
+            resizer.className = `resizer resizer-${direction === 'row' ? 'v' : 'h'}`;
+            
+            if (parent.id === 'workspace') {
+                parent.appendChild(wrapper);
+                wrapper.appendChild(pane);
+            } else {
+                parent.insertBefore(wrapper, pane);
+                wrapper.appendChild(pane);
+            }
+            
+            wrapper.appendChild(resizer);
+            wrapper.appendChild(newPane);
+            saveState();
+        }
+
+        function closePane(pane) {
+            if(pane.classList.contains('locked')) { alert("ფანჯარა ჩაკეტილია!"); return; }
+            const parent = pane.parentElement;
+            
+            if (parent.id === 'workspace') {
+                pane.replaceWith(createPaneDOM());
+            } else if (parent.classList.contains('split-container')) {
+                const sibling = Array.from(parent.children).find(c => c !== pane && !c.classList.contains('resizer'));
+                sibling.style.flex = parent.style.flex || '1';
+                
+                if (parent.parentElement.id === 'workspace') {
+                    workspace.innerHTML = '';
+                    workspace.appendChild(sibling);
+                } else {
+                    parent.replaceWith(sibling);
+                }
+            }
+            saveState();
+        }
+
+        let activeResizer = null;
+        document.addEventListener('mousedown', e => {
+            if(e.target.classList.contains('resizer')) {
+                activeResizer = e.target;
+                activeResizer.classList.add('active');
+                document.body.style.cursor = activeResizer.classList.contains('resizer-v') ? 'col-resize' : 'row-resize';
+            }
+        });
+
+        document.addEventListener('mousemove', e => {
+            if(!activeResizer) return;
+            e.preventDefault();
+            const prev = activeResizer.previousElementSibling;
+            const next = activeResizer.nextElementSibling;
+            const container = activeResizer.parentElement;
+            const isRow = container.classList.contains('split-row');
+            const rect = container.getBoundingClientRect();
+            
+            if(isRow) {
+                let total = rect.width - activeResizer.offsetWidth;
+                let prevSize = e.clientX - rect.left - (activeResizer.offsetWidth/2);
+                let flexA = Math.max(5, (prevSize / total) * 100);
+                let flexB = Math.max(5, 100 - flexA);
+                prev.style.flex = flexA;
+                next.style.flex = flexB;
+            } else {
+                let total = rect.height - activeResizer.offsetHeight;
+                let prevSize = e.clientY - rect.top - (activeResizer.offsetHeight/2);
+                let flexA = Math.max(5, (prevSize / total) * 100);
+                let flexB = Math.max(5, 100 - flexA);
+                prev.style.flex = flexA;
+                next.style.flex = flexB;
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if(activeResizer) {
+                activeResizer.classList.remove('active');
+                document.body.style.cursor = 'default';
+                activeResizer = null;
+                saveState();
+            }
+        });
+
+        function loadState() {
+            const savedTheme = localStorage.getItem('i3theme') || 'dracula';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeSelect').value = savedTheme;
+
+            try {
+                const saved = JSON.parse(localStorage.getItem('i3notes_v3'));
+                if(saved) workspace.appendChild(deserializeData(saved));
+                else workspace.appendChild(createPaneDOM());
+            } catch(e) {
+                workspace.appendChild(createPaneDOM());
+            }
+        }
+
+        function clearCache() {
+            if(confirm('წავშალოთ? (Are you sure?)')) {
+                localStorage.removeItem('i3notes_v3');
+                location.reload();
+            }
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('i3theme', theme);
+        }
+
+        function exportData() {
+            saveState();
+            const data = localStorage.getItem('i3notes_v3');
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = `noti-${date}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    JSON.parse(e.target.result);
+                    localStorage.setItem('i3notes_v3', e.target.result);
+                    location.reload();
+                } catch(err) { alert("შეცდომა! Invalid file."); }
+            };
+            reader.readAsText(file);
+        }
+
+        window.onload = loadState;
+    </script>
+</body>
+</html>

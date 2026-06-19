@@ -1,99 +1,123 @@
-/* Modern CSS Variables */
+/* Dark Mode by Default */
 :root {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --accent-color: #3b82f6;
+    --border-color: #333;
+    --shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    --input-bg: #2a2a2a;
+}
+
+/* Light Mode Overrides */
+body.light-mode {
     --bg-color: #f8f9fa;
     --text-color: #212529;
     --card-bg: #ffffff;
-    --accent-color: #007bff;
+    --border-color: #eaeaea;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --input-bg: #ffffff;
 }
 
 body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Segoe UI', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
     margin: 0;
-    padding: 0;
-    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* Hero Section Styling */
+/* Top Navigation (Search & Theme Toggle) */
+.top-nav {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 20px 40px;
+    gap: 15px;
+}
+
+#search-input {
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+    width: 250px;
+    transition: 0.3s;
+}
+
+#search-input:focus {
+    border-color: var(--accent-color);
+}
+
+#theme-toggle {
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+#theme-toggle:hover {
+    background: var(--border-color);
+}
+
+/* Hero Section */
 .hero {
     text-align: center;
-    padding: 80px 20px;
-    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    border-bottom: 1px solid #eaeaea;
+    padding: 40px 20px 80px;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 50px;
 }
 
 .hero h1 {
     font-size: 3rem;
     margin: 0 0 10px 0;
-    background: linear-gradient(to right, #007bff, #00c6ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; /* Gradient text effect */
-}
-
-.hero p {
-    font-size: 1.2rem;
-    color: #6c757d;
-    max-width: 600px;
-    margin: 0 auto;
+    color: var(--text-color);
 }
 
 /* Grid Layout */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px 60px;
 }
 
-/* Advanced Card Styling */
+/* Project Cards */
 .project-box {
     background: var(--card-bg);
     border-radius: 12px;
-    text-decoration: none;
-    color: inherit;
-    transition: var(--transition);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.04);
-    
-    /* Animation setup */
-    opacity: 0; 
-    transform: translateY(20px); 
+    transition: transform 0.3s, box-shadow 0.3s;
     animation: fadeUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
 }
 
-/* Hover Effects */
 .project-box:hover {
-    transform: translateY(-8px);
+    transform: translateY(-5px);
     box-shadow: var(--shadow);
-}
-
-.image-wrapper {
-    overflow: hidden; /* Keeps the zoom effect inside the box */
 }
 
 .project-image {
     width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    transition: transform 0.5s ease;
-}
-
-.project-box:hover .project-image {
-    transform: scale(1.05); /* Slight image zoom on hover */
+    border-bottom: 1px solid var(--border-color);
 }
 
 .project-text {
-    padding: 25px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
@@ -101,32 +125,61 @@ body {
 
 .project-text h3 {
     margin: 0 0 10px 0;
-    font-size: 1.4rem;
     color: var(--text-color);
-    transition: color 0.3s ease;
-}
-
-.project-box:hover .project-text h3 {
-    color: var(--accent-color); /* Title turns blue on hover */
 }
 
 .project-text p {
-    margin: 0;
-    color: #6c757d;
-    font-size: 0.95rem;
+    color: gray;
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+/* Buttons inside Cards */
+.card-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.btn-view {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.btn-view:hover { background-color: #2563eb; }
+
+.btn-github {
+    background-color: #333;
+    color: #fff;
+}
+
+.btn-github:hover { background-color: #000; }
+
+body.light-mode .btn-github {
+    background-color: #e5e5e5;
+    color: #000;
+}
+
+body.light-mode .btn-github:hover {
+    background-color: #d4d4d4;
 }
 
 footer {
     text-align: center;
     padding: 30px;
-    color: #adb5bd;
-    font-size: 0.9rem;
+    color: gray;
 }
 
-/* Keyframe for the cascading load animation */
 @keyframes fadeUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    to { opacity: 1; transform: translateY(0); }
 }

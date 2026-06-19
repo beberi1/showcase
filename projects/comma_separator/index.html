@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comma Separator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 36px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        label {
+            font-weight: 600;
+            font-size: 22px;
+            margin-top: 20px;
+            display: block;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            margin-top: 10px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: monospace;
+            font-size: 22px;
+            resize: vertical;
+            background-color: #fafafa;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        #output {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        button {
+            margin-top: 25px;
+            width: 100%;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        button:active {
+            background-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Word to Comma Separator</h2>
+        
+        <label for="input">Paste your list here:</label>
+        <textarea id="input" placeholder="Enter words, one per line..."></textarea>
+        
+        <label for="output">Comma-separated result:</label>
+        <textarea id="output" readonly placeholder="Result will appear here instantly..."></textarea>
+        
+        <button id="copyBtn" onclick="copyText()">Copy Text</button>
+    </div>
+
+    <script>
+        const inputField = document.getElementById('input');
+        const outputField = document.getElementById('output');
+        const copyBtn = document.getElementById('copyBtn');
+
+        inputField.addEventListener('input', () => {
+            const formatted = inputField.value
+                .split('\n')
+                .map(word => word.trim())
+                .filter(word => word.length > 0)
+                .join(', ');
+            
+            outputField.value = formatted;
+            copyBtn.textContent = 'Copy Text'; 
+            copyBtn.style.backgroundColor = '#28a745';
+        });
+
+        function copyText() {
+            if (!outputField.value) return;
+            
+            navigator.clipboard.writeText(outputField.value).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.style.backgroundColor = '#17a2b8'; 
+                
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Text';
+                    copyBtn.style.backgroundColor = '#28a745';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+
+</body>
+</html>
