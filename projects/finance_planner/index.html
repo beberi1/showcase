@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V16</title>
+    <title>Finance Planner Pro V17</title>
     <style>
         :root { 
             --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
@@ -33,7 +33,7 @@
         body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; }
         
         button, input, select, textarea { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 4px; font-size: 14px; box-sizing: border-box;}
-        button { background: var(--accent); color: white; cursor: pointer; border: none; font-weight: bold; }
+        button { background: var(--accent); color: white; cursor: pointer; border: none; font-weight: bold; transition: 0.2s;}
         button:hover { opacity: 0.8; }
         .btn-secondary { background: #555; color: white; }
         .btn-danger { background: #f44336; color: white; }
@@ -102,10 +102,18 @@
         .pie-chart { width: 250px; height: 250px; border-radius: 50%; border: 2px solid var(--border); margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .legend-color { width: 15px; height: 15px; display: inline-block; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
         
-        /* Adjuster tool */
         .adj-btn { border-radius: 0; padding: 8px 12px; border: none; font-weight: bold; flex-shrink:0; }
         .adj-input { width: 100%; border: none; background: transparent; text-align: center; color: var(--text); font-weight: bold; min-width: 40px;}
         .adj-container { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex: 1;}
+
+        /* Merge UI specific */
+        .merge-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px;}
+        .merge-card.new { border-left: 5px solid #2196f3; }
+        .merge-card.mod { border-left: 5px solid #ff9800; }
+        .merge-card.del { border-left: 5px solid #f44336; }
+        .merge-badge { font-size: 0.8em; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; margin-right: 10px;}
+        .btn-merge-choice { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; text-align: center; font-weight: bold; opacity: 0.4; background: var(--bg); color: var(--text); }
+        .btn-merge-choice.active { opacity: 1; border-color: var(--accent); background: var(--panel); box-shadow: inset 0 0 0 2px var(--accent); }
     </style>
 </head>
 <body data-theme="dark">
@@ -146,7 +154,7 @@
             <label style="cursor:pointer;" title="Saves automatically."><input type="checkbox" id="autosave" checked> Autosave</label>
             <button onclick="manualSave()" style="background: #e91e63;">💾 Save</button>
             <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
-            <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import</button>
+            <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import (Sync)</button>
             <button class="btn-secondary" onclick="exportJSON()">📤 Export Copy</button>
         </div>
     </header>
@@ -239,7 +247,6 @@
         </div>
     </div>
     <div class="page-content" style="display: flex; flex-direction: column; gap: 20px;">
-        
         <div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-wrap: wrap;">
             <span style="font-weight:bold;">From:</span>
             <select id="aMonthFrom" onchange="triggerAnalytics()"></select>
@@ -248,15 +255,12 @@
             <select id="aMonthTo" onchange="triggerAnalytics()"></select>
             <select id="aYearTo" onchange="triggerAnalytics()"></select>
             <button class="btn-secondary" onclick="selectAllYearsAnalytics()">All Time</button>
-            
             <div style="border-left: 1px solid var(--border); margin: 0 10px; height: 30px;"></div>
-            
             <label style="cursor:pointer; display:flex; align-items:center; background:var(--card); padding:6px 12px; border-radius:4px; border:1px solid var(--border); font-weight:bold;">
                 <input type="checkbox" id="aUpToCurrent" onchange="triggerAnalytics()" style="margin:0 8px 0 0; transform:scale(1.2);"> 
                 Limit to Current Month
             </label>
         </div>
-
         <div style="display:flex; justify-content:center; align-items:center; gap: 10px; flex-wrap: wrap;">
             <span>Target:</span>
             <select id="analyticsTarget" onchange="triggerAnalytics()" style="font-weight:bold;">
@@ -282,13 +286,11 @@
                 <option value="alpha">Name (A-Z)</option>
             </select>
         </div>
-        
         <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = [...state.tags, 'Untagged', 'Base Salary']; triggerAnalytics();">✓ Select All</button>
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = []; triggerAnalytics();">✗ Clear All</button>
         </div>
         <div id="analyticsTagsFilter" style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-bottom: 5px;"></div>
-        
         <div id="analyticsContent" style="display:flex; flex-direction:column; gap:10px; background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border);"></div>
     </div>
 </div>
@@ -314,7 +316,6 @@
             <button class="btn-danger" onclick="document.getElementById('settingsModal').style.display='none'">X</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:25px;">
-            
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Global Exchange Rate</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
@@ -323,7 +324,6 @@
                     <span>GEL (₾)</span>
                 </div>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Financial Month (Salary Date)</label>
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
@@ -336,7 +336,6 @@
                 </div>
                 <span style="font-size:0.85em; color:#aaa; line-height:1.4;">If enabled, the "Current Month" will automatically stay on the previous month until this day arrives.</span>
             </div>
-
             <button onclick="saveSettings()" style="padding: 12px; margin-top:10px;">Save Settings</button>
 
             <div style="display:flex; flex-direction:column; gap:8px; border-top: 1px dashed #f44336; margin-top: 5px; padding-top: 15px;">
@@ -344,7 +343,26 @@
                 <button class="btn-danger" onclick="clearAllData()" style="padding: 10px; margin-top: 5px;">🗑️ Clear All Local Data (Reset)</button>
                 <span style="font-size:0.85em; color:#aaa; line-height:1.4;">This will permanently delete all your entries from this browser's cache. Please export a copy first if needed.</span>
             </div>
+        </div>
+    </div>
+</div>
 
+<div class="modal-overlay" id="mergeModal" style="z-index: 300;">
+    <div class="modal" style="min-width: 600px; max-width: 800px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.3em; font-weight:bold;">
+            <span>🔄 Review Incoming Sync Data</span>
+            <button class="btn-danger" onclick="document.getElementById('mergeModal').style.display='none'">Cancel Sync</button>
+        </div>
+        <p style="color:#aaa; font-size:0.9em; margin-top:0;">The imported file contains data that differs from your current local cache. Please review the changes below.</p>
+        
+        <div id="mergeContent" style="display:flex; flex-direction:column; gap:15px; overflow-y:auto; padding-right:10px; flex-grow:1; margin-bottom: 15px;"></div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border); padding-top: 15px; flex-shrink: 0;">
+            <div style="display:flex; gap: 10px;">
+                <button class="btn-secondary" onclick="setAllMergeChoices('local')">Keep All Local</button>
+                <button class="btn-secondary" onclick="setAllMergeChoices('import')">Accept All Imports</button>
+            </div>
+            <button onclick="applyMerge()" style="padding: 12px 25px; font-size: 1.1em; background:var(--accent);">Confirm & Apply Merge</button>
         </div>
     </div>
 </div>
@@ -369,6 +387,9 @@
     let aYearStart = currentYear;
     let aYearEnd = currentYear;
     let aActiveTags = [];
+    
+    let mergeConflicts = [];
+    let mergeImportedData = null;
 
     function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
     function toGEL(amt, curr) { return curr === 'USD' ? amt * (state.settings.usdRate || 2.7) : amt; }
@@ -397,11 +418,9 @@
 
     document.addEventListener('keydown', function(event) {
         if (event.key === "Escape") {
-            let tModal = document.getElementById('tagsModal');
-            let sModal = document.getElementById('settingsModal');
-            if (tModal.style.display === 'flex') tModal.style.display = 'none';
-            else if (sModal.style.display === 'flex') sModal.style.display = 'none';
-            else if (document.getElementById('analyticsView').style.display === 'flex') closeAnalyticsPage();
+            let modals = ['tagsModal', 'settingsModal', 'mergeModal'];
+            modals.forEach(m => { if(document.getElementById(m).style.display === 'flex') document.getElementById(m).style.display = 'none'; });
+            if (document.getElementById('analyticsView').style.display === 'flex') closeAnalyticsPage();
             else if (activeMonth !== null) closeMonthPage();
         }
     });
@@ -416,11 +435,9 @@
         if (state.settings.enableSalaryDate === undefined) state.settings.enableSalaryDate = false;
         if (!state.settings.salaryDate) state.settings.salaryDate = 10;
         
-        // Globally sort tags on load
         if(state.tags) state.tags.sort((a,b) => a.localeCompare(b));
         
         currentYear = getFinancialDate().year; 
-        
         if (!state.years[currentYear]) generateYear(currentYear);
         
         for(let y in state.years) {
@@ -459,7 +476,12 @@
         renderExtras();
     }
 
-    function generateYear(year) { state.years[year] = { yearlySalary: 2000 }; months.forEach(m => state.years[year][m] = { salary: null, items: [] }); }
+    function generateYear(year, targetState = state) { 
+        if(!targetState.years[year]) {
+            targetState.years[year] = { yearlySalary: 2000 }; 
+            months.forEach(m => targetState.years[year][m] = { salary: null, items: [] });
+        }
+    }
     function changeYear(dir) { currentYear += dir; document.getElementById('yearDisplay').innerText = currentYear; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
     function changeTheme(th) { state.theme = th; document.body.setAttribute('data-theme', th); autoSave(); }
     function updateGlobalSalary(val) { state.years[currentYear].yearlySalary = parseFloat(val) || 0; renderBoard(); autoSave(); }
@@ -627,7 +649,6 @@
         `;
     }
 
-    // --- PIGGY BANK LOGIC ---
     function piggyDragStart(ev, id) { draggedPiggyId = id; }
     function piggyDrop(ev, targetId) { ev.preventDefault(); if(draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
     function addPiggy() { let n = document.getElementById('newPiggyName').value; if(n){ state.piggyBanks.push({ id: Date.now().toString(), name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); renderExtras(); autoSave(); } }
@@ -636,11 +657,9 @@
     function updatePiggy(id, mult) { let amt = parseFloat(document.getElementById(`piggyVal-${id}`).value) || 0; let b = state.piggyBanks.find(p => p.id === id); if(b && amt > 0) { b.balance = fmt(b.balance + (amt * mult)); renderExtras(); autoSave(); } }
     function deletePiggy(id) { if(confirm("Delete this Piggy Bank?")) { state.piggyBanks = state.piggyBanks.filter(p => p.id !== id); renderExtras(); autoSave(); } }
 
-    // --- MULTI-TAG NEW ENTRY UI ---
     function renderNewEntryTags() { document.getElementById('newEntryTagsContainer').innerHTML = state.tags.map(t => { let isSel = newEntryTags.includes(t); return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}" onclick="toggleNewEntryTag('${t}')">${t}</span>`; }).join(''); }
     function toggleNewEntryTag(t) { if(newEntryTags.includes(t)) newEntryTags = newEntryTags.filter(x => x !== t); else newEntryTags.push(t); renderNewEntryTags(); }
 
-    // --- DEDICATED MONTH PAGE LOGIC ---
     function getActiveItemsArray() { return activeMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][activeMonth].items; }
     function openMonthPage(month) { activeMonth = month; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('monthView').style.display = 'flex'; if (month === 'LongTerm') { document.getElementById('pageMonthTitle').innerText = "Long Term Plans"; document.getElementById('salaryOverrideContainer').style.display = 'none'; } else { document.getElementById('pageMonthTitle').innerText = `${month} ${currentYear} Planning`; document.getElementById('salaryOverrideContainer').style.display = 'block'; document.getElementById('pageSalary').value = state.years[currentYear][month].salary || ''; } renderPageItems(); }
     function closeMonthPage() { activeMonth = null; document.getElementById('monthView').style.display = 'none'; document.getElementById('dashboardView').style.display = 'flex'; renderBoard(); renderExtras(); }
@@ -698,7 +717,6 @@
                 <div class="page-item-card" style="border-left-color: ${item.color}; display:flex; flex-direction:column; gap:12px; cursor:default;" 
                      onclick="event.stopPropagation();"
                      onkeydown="if(event.key==='Enter') { saveEditItem('${item.id}'); event.preventDefault(); }">
-                    
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 5px;">
                         <select id="editType-${item.id}" style="font-weight:bold; width: 120px;">
                             <option value="expense" ${!item.isIncome ? 'selected':''}>➖ Expense</option>
@@ -709,9 +727,7 @@
                             <button class="btn-secondary" onclick="toggleEditItem('${item.id}')" style="padding: 10px 18px; font-size: 1.1em; border-radius: 6px;">X</button>
                         </div>
                     </div>
-
                     <input type="text" id="editName-${item.id}" value="${item.name}" style="width:100%; font-size: 1.1em; padding: 10px;" placeholder="Name">
-                    
                     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                         <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden; flex:1; min-width: 120px;">
                             <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none; min-width:50px; padding: 10px;" placeholder="Cost">
@@ -723,13 +739,11 @@
                         <span style="font-weight:bold; color:#aaa; font-size: 1.2em;">x</span>
                         <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:60px; padding: 10px;" placeholder="Qty">
                     </div>
-
                     <div class="adj-container" style="width: 100%;">
                         <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)" style="padding: 10px 15px;">-</button>
                         <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Adjust Amount (±)" style="padding: 10px;">
                         <button class="adj-btn btn-secondary" style="background:var(--accent); padding: 10px 15px;" onclick="adjustEditCost('${item.id}', 1)">+</button>
                     </div>
-
                     <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="editTagsGroup-${item.id}">
                         ${state.tags.map(t => {
                             let isSel = item.tags.includes(t);
@@ -740,7 +754,6 @@
                             </label>`;
                         }).join('')}
                     </div>
-                    
                     <div style="display:flex; align-items:center; gap:10px; margin-top:5px; border-top: 1px dashed var(--border); padding-top: 10px;">
                         <div style="display:flex; flex-wrap:wrap; gap: 6px; flex:1;">
                             ${quickColorsHtml}
@@ -802,28 +815,15 @@
     function deleteItem(id) { let arr = getActiveItemsArray(); arr.splice(arr.findIndex(i => i.id === id), 1); renderPageItems(); autoSave(); }
     function toggleDone(targetMonth, id) { let arr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let item = arr.find(i => i.id === id); if (item) item.done = !item.done; if(activeMonth === targetMonth) renderPageItems(); else { renderBoard(); renderExtras(); } autoSave(); }
 
-    // --- DRAG & DROP LOGIC ---
     function dashDragStart(ev, id, sourceMonth) { draggedDashItemId = id; draggedDashSourceMonth = sourceMonth; ev.dataTransfer.setData("id", id); ev.dataTransfer.setData("sourceMonth", sourceMonth); }
     function dropToMonth(ev, targetMonth) { let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); if (sourceMonth && sourceMonth !== targetMonth) { let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); } }
     function dashDropOnItem(ev, targetId, targetMonth) { ev.preventDefault(); ev.stopPropagation(); if (!draggedDashItemId) return; let sArr = draggedDashSourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][draggedDashSourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let dIdx = sArr.findIndex(i => i.id === draggedDashItemId); let [draggedItem] = sArr.splice(dIdx, 1); let tIdx = tArr.findIndex(i => i.id === targetId); tArr.splice(tIdx, 0, draggedItem); draggedDashItemId = null; draggedDashSourceMonth = null; renderBoard(); renderExtras(); autoSave(); }
     function pageItemDragStart(ev, id) { draggedPageItemId = id; }
     function pageItemDrop(ev, targetId) { ev.preventDefault(); if (draggedPageItemId === targetId || !draggedPageItemId) return; let items = getActiveItemsArray(); let dIdx = items.findIndex(i => i.id === draggedPageItemId); let tIdx = items.findIndex(i => i.id === targetId); items.splice(tIdx, 0, items.splice(dIdx, 1)[0]); draggedPageItemId = null; document.getElementById('pageSort').value = 'none'; renderPageItems(); autoSave(); }
 
-    // --- TAGS & COLORS ---
     function openTagsModal() { document.getElementById('tagsModal').style.display = 'flex'; renderTags(); }
     function renderTags() { document.getElementById('tagList').innerHTML = state.tags.map((t, i) => `<li style="margin-bottom: 8px; display:flex; justify-content:space-between; background:var(--card); padding:8px 12px; border-radius:4px; border:1px solid var(--border);">${t} <button class="btn-danger" style="padding: 2px 6px;" onclick="removeTag(${i})">Del</button></li>`).join(''); updateTagSelects(); }
-    
-    function addTag() { 
-        let t = document.getElementById('newTag').value.trim(); 
-        if(t && !state.tags.includes(t)) { 
-            state.tags.push(t); 
-            state.tags.sort((a,b) => a.localeCompare(b)); 
-            document.getElementById('newTag').value = ''; 
-            renderTags(); 
-            autoSave(); 
-        } 
-    }
-    
+    function addTag() { let t = document.getElementById('newTag').value.trim(); if(t && !state.tags.includes(t)) { state.tags.push(t); state.tags.sort((a,b) => a.localeCompare(b)); document.getElementById('newTag').value = ''; renderTags(); autoSave(); } }
     function removeTag(idx) { state.tags.splice(idx, 1); renderTags(); autoSave(); }
     function updateTagSelects() { renderNewEntryTags(); }
 
@@ -831,7 +831,6 @@
     function selectColor(elem, color) { document.querySelectorAll('#colorPicker .color-swatch').forEach(e => e.classList.remove('selected')); if(elem) elem.classList.add('selected'); selectedColor = color; document.getElementById('customColor').value = color; }
     function selectCustomColor(color) { document.querySelectorAll('#colorPicker .color-swatch').forEach(e => e.classList.remove('selected')); selectedColor = color; }
 
-    // --- ANALYTICS TAB PAGE LOGIC ---
     function openAnalyticsPage() { 
         document.getElementById('dashboardView').style.display = 'none'; 
         document.getElementById('analyticsView').style.display = 'flex'; 
@@ -907,7 +906,6 @@
             
             months.forEach((m, mIdx) => {
                 let loopVal = y * 100 + mIdx;
-                
                 if (loopVal < startVal || loopVal > endVal) return;
                 if (limitToCurrent && loopVal > currentMonthVal) return;
                 
@@ -932,10 +930,8 @@
 
                 mData.items.forEach(item => {
                     let costInGEL = toGEL(item.cost * item.qty, item.currency);
-                    
                     if (statusFilter === 'done' && !item.done) return;
                     if (statusFilter === 'planned' && item.done) return;
-                    
                     if (targetFilter === 'expenses' && item.isIncome) return;
                     if (targetFilter === 'income' && !item.isIncome) return;
                     
@@ -954,7 +950,6 @@
                     } else if (groupBy === 'color') {
                         let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
                         if(!hasValidTag) return;
-                        
                         let key = item.color;
                         if(totals[key] === undefined) totals[key] = 0;
                         totals[key] += costInGEL;
@@ -963,7 +958,6 @@
                     } else if (groupBy === 'month') {
                         let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
                         if(!hasValidTag) return;
-                        
                         let key = m; 
                         if(totals[key] === undefined) totals[key] = 0;
                         totals[key] += costInGEL;
@@ -974,7 +968,6 @@
             });
         }
         
-        // Sorting the TAG FILTERS to match the Chart Sort logic
         displayTags.sort((a, b) => {
             if (groupBy === 'tag') {
                 if (sortMode === 'valDesc') return (totals[b] || 0) - (totals[a] || 0);
@@ -996,14 +989,10 @@
         if(grandTotal === 0) { html += `<div>No data matches your filters.</div>`; } 
         else {
             let sortedKeys = Object.keys(totals);
-            
-            if (groupBy === 'month' && sortMode === 'valDesc') {
-                sortedKeys.sort((a,b) => totals[b] - totals[a]);
-            } else if (groupBy === 'month' && sortMode === 'valAsc') {
-                sortedKeys.sort((a,b) => totals[a] - totals[b]);
-            } else if (groupBy === 'month') {
-                sortedKeys.sort((a,b) => months.indexOf(a) - months.indexOf(b));
-            } else {
+            if (groupBy === 'month' && sortMode === 'valDesc') { sortedKeys.sort((a,b) => totals[b] - totals[a]); } 
+            else if (groupBy === 'month' && sortMode === 'valAsc') { sortedKeys.sort((a,b) => totals[a] - totals[b]); } 
+            else if (groupBy === 'month') { sortedKeys.sort((a,b) => months.indexOf(a) - months.indexOf(b)); } 
+            else {
                 if (sortMode === 'valDesc') sortedKeys.sort((a,b) => totals[b] - totals[a]);
                 if (sortMode === 'valAsc') sortedKeys.sort((a,b) => totals[a] - totals[b]);
                 if (sortMode === 'alpha') sortedKeys.sort((a,b) => a.localeCompare(b));
@@ -1039,14 +1028,12 @@
             } else if (analyticsType === 'pyramid') {
                 let maxVal = Math.max(...Object.values(totals));
                 let pyramidHtml = `<div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:100%; margin-top:20px; padding-bottom: 20px;">`;
-                
                 sortedKeys.forEach(key => {
                     let val = totals[key];
                     if(val > 0) {
                         let pctOfTotal = (val / grandTotal) * 100;
                         let pctOfMax = (val / maxVal) * 100;
                         let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
-                        
                         pyramidHtml += `
                         <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
                             ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${Math.round(pctOfTotal)}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span>
@@ -1060,7 +1047,6 @@
         document.getElementById('analyticsContent').innerHTML = html;
     }
 
-    // --- I/O & NATIVE SAVE ---
     function autoSave() { 
         if (document.getElementById('autosave').checked) { 
             localStorage.setItem('financeDataV10', JSON.stringify(state)); 
@@ -1090,18 +1076,202 @@
 
     function exportJSON() { const dl = document.createElement('a'); dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2))); dl.setAttribute("download", `planner_copy_${currentYear}.json`); dl.click(); }
     
+    // --- IMPORT & MERGE DIFF ENGINE ---
+    
+    function itemsEqual(a, b) {
+        return a.name === b.name && a.cost === b.cost && a.qty === b.qty && a.isIncome === b.isIncome && a.currency === b.currency && a.done === b.done && a.color === b.color && JSON.stringify(a.tags) === JSON.stringify(b.tags);
+    }
+
+    function getFlatItems(st) {
+        let map = {};
+        if (st.years) {
+            for(let y in st.years) {
+                months.forEach(m => {
+                    if (st.years[y][m] && st.years[y][m].items) {
+                        st.years[y][m].items.forEach(i => map[i.id] = { item: i, locStr: `${m} ${y}`, y: y, m: m });
+                    }
+                });
+            }
+        }
+        if (st.longTerm && st.longTerm.items) {
+            st.longTerm.items.forEach(i => map[i.id] = { item: i, locStr: `Long Term`, y: null, m: 'LongTerm' });
+        }
+        return map;
+    }
+
     function importJSON(event) { 
         const file = event.target.files[0]; if (!file) return; 
         const reader = new FileReader(); 
         reader.onload = function(e) { 
             try { 
-                let parsed = JSON.parse(e.target.result); state = { ...state, ...parsed };
-                if (!state.longTerm) state.longTerm = { items: [] }; if (!state.piggyBanks) state.piggyBanks = []; if(state.notes===undefined) state.notes=""; 
-                currentYear = getFinancialDate().year;
-                document.getElementById('yearDisplay').innerText = currentYear;
-                autoSave(); initUI(); if(activeMonth) closeMonthPage(); 
+                let parsed = JSON.parse(e.target.result); 
+                startMergeProcess(parsed);
             } catch(err) { alert("Invalid JSON file"); } 
         }; reader.readAsText(file); event.target.value = ''; 
+    }
+
+    function startMergeProcess(importedData) {
+        mergeConflicts = [];
+        mergeImportedData = importedData;
+        
+        let localMap = getFlatItems(state);
+        let impMap = getFlatItems(importedData);
+        
+        // 1. Items Comparison
+        Object.keys(impMap).forEach(id => {
+            let imp = impMap[id];
+            let loc = localMap[id];
+            if (!loc) {
+                mergeConflicts.push({ id, type: 'item_new', imp, choice: 'import', title: `New Entry in ${imp.locStr}` });
+            } else if (!itemsEqual(loc.item, imp.item)) {
+                mergeConflicts.push({ id, type: 'item_mod', loc, imp, choice: 'import', title: `Modified Entry in ${imp.locStr}` });
+            }
+        });
+
+        Object.keys(localMap).forEach(id => {
+            if (!impMap[id]) {
+                let loc = localMap[id];
+                // Item exists local but not in import. Safe default: Keep Local.
+                mergeConflicts.push({ id, type: 'item_del', loc, choice: 'local', title: `Missing in Import (from ${loc.locStr})` });
+            }
+        });
+
+        // 2. Piggy Banks Comparison
+        let localPig = {}; state.piggyBanks.forEach(p => localPig[p.id] = p);
+        let impPig = {}; (importedData.piggyBanks || []).forEach(p => impPig[p.id] = p);
+        
+        Object.keys(impPig).forEach(id => {
+            let imp = impPig[id];
+            let loc = localPig[id];
+            if(!loc) { mergeConflicts.push({ id, type: 'pig_new', imp, choice: 'import', title: `New Piggy Bank` }); }
+            else if (loc.name !== imp.name || loc.balance !== imp.balance || loc.monthlyPlan !== imp.monthlyPlan) {
+                mergeConflicts.push({ id, type: 'pig_mod', loc, imp, choice: 'import', title: `Modified Piggy Bank` });
+            }
+        });
+        Object.keys(localPig).forEach(id => {
+            if(!impPig[id]) mergeConflicts.push({ id, type: 'pig_del', loc: localPig[id], choice: 'local', title: `Piggy Bank Missing in Import` });
+        });
+
+        if (mergeConflicts.length === 0) {
+            // Auto merge invisible things like tags and settings if no major item conflicts exist
+            finalizeMerge();
+            alert("Sync Complete! Everything is up to date. No conflicts found.");
+            return;
+        }
+
+        renderMergeModal();
+        document.getElementById('mergeModal').style.display = 'flex';
+    }
+
+    function setMergeChoice(id, choice) {
+        let conf = mergeConflicts.find(c => c.id === id);
+        if(conf) conf.choice = choice;
+        renderMergeModal();
+    }
+
+    function setAllMergeChoices(choice) {
+        mergeConflicts.forEach(c => c.choice = choice);
+        renderMergeModal();
+    }
+
+    function renderMergeModal() {
+        let html = '';
+        mergeConflicts.forEach(conf => {
+            let badgeClass = conf.type.includes('new') ? 'new' : (conf.type.includes('mod') ? 'mod' : 'del');
+            let badgeText = conf.type.includes('new') ? 'NEW (IN IMPORT)' : (conf.type.includes('mod') ? 'MODIFIED' : 'NOT IN IMPORT');
+            
+            let details = '';
+            if(conf.type === 'item_new') {
+                details = `<div style="color:#aaa;">➕ ${conf.imp.item.name} | ${conf.imp.item.cost}₾ | Done: ${conf.imp.item.done ? 'Yes':'No'}</div>`;
+            } else if (conf.type === 'item_mod') {
+                details = `
+                    <div style="color:#aaa; text-decoration: line-through;">Local: ${conf.loc.item.name} | ${conf.loc.item.cost}₾ | Done: ${conf.loc.item.done ? 'Yes':'No'}</div>
+                    <div style="color:var(--text);">Import: ${conf.imp.item.name} | ${conf.imp.item.cost}₾ | Done: ${conf.imp.item.done ? 'Yes':'No'}</div>
+                `;
+            } else if (conf.type === 'item_del') {
+                details = `<div style="color:#aaa;">Existing Local: ${conf.loc.item.name} | ${conf.loc.item.cost}₾ | Done: ${conf.loc.item.done ? 'Yes':'No'}</div>`;
+            } else if (conf.type === 'pig_new') {
+                details = `<div style="color:#aaa;">➕ Vault: ${conf.imp.name} | Bal: ${conf.imp.balance}₾</div>`;
+            } else if (conf.type === 'pig_mod') {
+                details = `
+                    <div style="color:#aaa; text-decoration: line-through;">Local Vault: ${conf.loc.name} | Bal: ${conf.loc.balance}₾</div>
+                    <div style="color:var(--text);">Import Vault: ${conf.imp.name} | Bal: ${conf.imp.balance}₾</div>
+                `;
+            } else if (conf.type === 'pig_del') {
+                details = `<div style="color:#aaa;">Existing Local Vault: ${conf.loc.name} | Bal: ${conf.loc.balance}₾</div>`;
+            }
+
+            html += `
+            <div class="merge-card ${badgeClass}">
+                <div style="font-weight:bold;"><span class="merge-badge" style="background: ${badgeClass==='new'?'#2196f3':(badgeClass==='mod'?'#ff9800':'#f44336')}">${badgeText}</span>${conf.title}</div>
+                ${details}
+                <div style="display:flex; gap: 10px; margin-top: 5px;">
+                    <div class="btn-merge-choice ${conf.choice === 'local' ? 'active' : ''}" onclick="setMergeChoice('${conf.id}', 'local')">Keep Local Version</div>
+                    <div class="btn-merge-choice ${conf.choice === 'import' ? 'active' : ''}" onclick="setMergeChoice('${conf.id}', 'import')">${badgeClass==='del' ? 'Accept Deletion' : 'Use Imported Version'}</div>
+                </div>
+            </div>`;
+        });
+        document.getElementById('mergeContent').innerHTML = html;
+    }
+
+    function applyMerge() {
+        finalizeMerge();
+        document.getElementById('mergeModal').style.display = 'none';
+        
+        currentYear = getFinancialDate().year;
+        document.getElementById('yearDisplay').innerText = currentYear;
+        autoSave();
+        initUI();
+        if(activeMonth) { closeMonthPage(); openMonthPage(activeMonth); }
+        
+        let el = document.getElementById('save-status');
+        el.innerText = `Merge Completed & Saved!`;
+        el.style.color = "var(--accent)";
+        setTimeout(() => { el.innerText = ""; el.style.color = "#aaa"; }, 3000);
+    }
+
+    function finalizeMerge() {
+        let newState = JSON.parse(JSON.stringify(state)); // Deep clone
+        let imp = mergeImportedData;
+
+        // Auto-merge non-destructive metadata
+        if (imp.tags) { imp.tags.forEach(t => { if(!newState.tags.includes(t)) newState.tags.push(t); }); }
+        if (imp.notes && newState.notes !== imp.notes) { newState.notes = newState.notes ? newState.notes + "\n\n--- IMPORTED NOTE ---\n" + imp.notes : imp.notes; }
+        
+        mergeConflicts.forEach(conf => {
+            if (conf.choice === 'import') {
+                if (conf.type === 'item_new') {
+                    if(conf.imp.m === 'LongTerm') {
+                        if(!newState.longTerm) newState.longTerm = { items: [] };
+                        newState.longTerm.items.push(conf.imp.item);
+                    } else {
+                        if(!newState.years[conf.imp.y]) generateYear(conf.imp.y, newState);
+                        newState.years[conf.imp.y][conf.imp.m].items.push(conf.imp.item);
+                    }
+                } else if (conf.type === 'item_mod') {
+                    let arr = conf.imp.m === 'LongTerm' ? newState.longTerm.items : newState.years[conf.imp.y][conf.imp.m].items;
+                    let idx = arr.findIndex(i => i.id === conf.id);
+                    if(idx !== -1) arr[idx] = conf.imp.item;
+                } else if (conf.type === 'item_del') {
+                    let arr = conf.loc.m === 'LongTerm' ? newState.longTerm.items : newState.years[conf.loc.y][conf.loc.m].items;
+                    let idx = arr.findIndex(i => i.id === conf.id);
+                    if(idx !== -1) arr.splice(idx, 1);
+                } else if (conf.type === 'pig_new') {
+                    if(!newState.piggyBanks) newState.piggyBanks = [];
+                    newState.piggyBanks.push(conf.imp);
+                } else if (conf.type === 'pig_mod') {
+                    let idx = newState.piggyBanks.findIndex(p => p.id === conf.id);
+                    if(idx !== -1) newState.piggyBanks[idx] = conf.imp;
+                } else if (conf.type === 'pig_del') {
+                    let idx = newState.piggyBanks.findIndex(p => p.id === conf.id);
+                    if(idx !== -1) newState.piggyBanks.splice(idx, 1);
+                }
+            }
+        });
+
+        // Clean up sorting
+        newState.tags.sort((a,b) => a.localeCompare(b));
+        state = newState;
     }
 
     init();
