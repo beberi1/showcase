@@ -5,49 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comma Separator</title>
     <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --heading-color: #2c3e50;
+            --container-bg: #ffffff;
+            --container-shadow: rgba(0,0,0,0.1);
+            --input-bg: #fafafa;
+            --input-border: #ccc;
+            --input-text: #333;
+            --output-bg: #e9ecef;
+            --output-text: #495057;
+            --btn-theme-bg: #ddd;
+            --btn-theme-text: #333;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --heading-color: #ffffff;
+            --container-bg: #1e1e1e;
+            --container-shadow: rgba(0,0,0,0.5);
+            --input-bg: #2d2d2d;
+            --input-border: #444;
+            --input-text: #f8f9fa;
+            --output-bg: #252525;
+            --output-text: #ced4da;
+            --btn-theme-bg: #333;
+            --btn-theme-text: #f8f9fa;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
             padding: 40px 20px;
             margin: 0;
+            transition: background-color 0.3s, color 0.3s;
         }
         .container {
-            background: white;
+            background: var(--container-bg);
             padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px var(--container-shadow);
             width: 100%;
             max-width: 900px;
+            transition: background-color 0.3s;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
         h2 {
-            margin-top: 0;
+            margin: 0;
             font-size: 36px;
-            color: #2c3e50;
-            text-align: center;
+            color: var(--heading-color);
+        }
+        .theme-toggle {
+            padding: 10px 15px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--btn-theme-bg);
+            color: var(--btn-theme-text);
+            transition: 0.3s;
         }
         label {
             font-weight: 600;
             font-size: 22px;
             margin-top: 20px;
             display: block;
-            color: #555;
         }
         textarea {
             width: 100%;
             min-height: 250px;
             margin-top: 10px;
             padding: 20px;
-            border: 1px solid #ccc;
+            border: 1px solid var(--input-border);
             border-radius: 8px;
             box-sizing: border-box;
             font-family: monospace;
             font-size: 22px;
             resize: vertical;
-            background-color: #fafafa;
-            transition: border-color 0.3s;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
         }
         textarea:focus {
             outline: none;
@@ -55,10 +102,10 @@
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
         }
         #output {
-            background-color: #e9ecef;
-            color: #495057;
+            background-color: var(--output-bg);
+            color: var(--output-text);
         }
-        button {
+        .copy-btn {
             margin-top: 25px;
             width: 100%;
             padding: 20px;
@@ -71,18 +118,17 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #218838;
-        }
-        button:active {
-            background-color: #1e7e34;
-        }
+        .copy-btn:hover { background-color: #218838; }
+        .copy-btn:active { background-color: #1e7e34; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Word to Comma Separator</h2>
+        <div class="header">
+            <h2>Word to Comma Separator</h2>
+            <button id="themeToggle" class="theme-toggle">☀️ Light Mode</button>
+        </div>
         
         <label for="input">Paste your list here:</label>
         <textarea id="input" placeholder="Enter words, one per line..."></textarea>
@@ -90,10 +136,28 @@
         <label for="output">Comma-separated result:</label>
         <textarea id="output" readonly placeholder="Result will appear here instantly..."></textarea>
         
-        <button id="copyBtn" onclick="copyText()">Copy Text</button>
+        <button id="copyBtn" class="copy-btn" onclick="copyText()">Copy Text</button>
     </div>
 
     <script>
+        // Theme Logic
+        const themeToggle = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeToggle.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+
+        setTheme(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        // Conversion & Copy Logic
         const inputField = document.getElementById('input');
         const outputField = document.getElementById('output');
         const copyBtn = document.getElementById('copyBtn');
