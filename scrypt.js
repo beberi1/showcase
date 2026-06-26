@@ -49,7 +49,7 @@ const projects = [
         github: "https://github.com/beberi1/Obsidian_Local_Server"
     },
     {
-        title: "nouter",
+        title: "Nouter",
         description: "მარტივი ნოუთების გასაკეთებელი საიტი",
         url: "projects/nouter/index.html",
         image: "images/nouter.png",
@@ -57,11 +57,18 @@ const projects = [
     },
     {
         title: "Comma Separator",
-        description: "მარტივი საიტი რომელიც სიტყვებს მძიმით გამოყოფს",
+        description: "მარტივი საიტი, რომელიც სიტყვებს მძიმით გამოყოფს",
         url: "projects/comma_separator/index.html",
         image: "images/comma_separator.png",
         github: "https://github.com/beberi1/comma_separator"
-    }
+    },
+    {
+        title: "HTML Video Editor",
+        description: "საიტი FFMPEG-ის კოდის გასაკეთებლად ვიდეოს ედითინგისთვის",
+        url: "projects/html_video_editor/index.html",
+        image: "images/html_video_editor.png",
+        github: "https://github.com/beberi1/html_video_editor"
+    },
 ];
 
 const grid = document.getElementById('project-grid');

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFmpeg Video Cutter V2</title>
+    <style>
+        :root { 
+            --bg: #1e1e2e; --surface: #313244; --surface2: #45475a; 
+            --text: #cdd6f4; --accent: #89b4fa; --danger: #f38ba8; 
+            --success: #a6e3a1; --warning: #f9e2af; --track: #11111b; 
+        }
+        [data-theme="midnight"] {
+            --bg: #0f172a; --surface: #1e293b; --surface2: #334155; 
+            --text: #f8fafc; --accent: #38bdf8; --danger: #f43f5e; 
+            --success: #34d399; --warning: #fbbf24; --track: #020617;
+        }
+        [data-theme="matrix"] {
+            --bg: #000000; --surface: #0a190f; --surface2: #14331e; 
+            --text: #00ff41; --accent: #00ff41; --danger: #ff003c; 
+            --success: #00ff41; --warning: #eab308; --track: #000000;
+        }
+        [data-theme="light"] {
+            --bg: #eff1f5; --surface: #ccd0da; --surface2: #bcc0cc; 
+            --text: #4c4f69; --accent: #1e66f5; --danger: #d20f39; 
+            --success: #40a02b; --warning: #df8e1d; --track: #9ca0b0;
+        }
+
+        body { font-family: monospace; background: var(--bg); color: var(--text); padding: 20px; margin: 0; transition: background 0.3s, color 0.3s; }
+        .container { max-width: 1050px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        .theme-bar { text-align: right; font-size: 11px; opacity: 0.3; transition: opacity 0.2s; margin-bottom: -10px; }
+        .theme-bar:hover { opacity: 1; }
+        .theme-bar select { background: transparent; border: none; color: inherit; cursor: pointer; outline: none; font-family: monospace; }
+
+        #drop-zone { border: 2px dashed var(--accent); padding: 20px; text-align: center; cursor: pointer; background: var(--surface); border-radius: 8px; font-size: 16px; }
+        #drop-zone:hover { background: var(--surface2); }
+        
+        .video-container { display: flex; justify-content: center; background: #000; border: 1px solid var(--surface); border-radius: 8px; overflow: hidden; padding: 10px; }
+        #video-wrapper { position: relative; display: inline-block; line-height: 0; }
+        video { display: block; max-width: 100%; max-height: 50vh; }
+        
+        #crop-box { position: absolute; top: 0; left: 0; border: 2px solid var(--danger); background: rgba(243, 139, 168, 0.2); cursor: move; box-sizing: border-box; display: none; }
+        #resize-handle { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; background: var(--danger); border: 2px solid #fff; cursor: se-resize; }
+        
+        .timeline-wrapper { background: var(--surface); padding: 20px 15px; border-radius: 8px; position: relative; }
+        .timeline-track { position: relative; width: 100%; height: 10px; background: var(--track); border-radius: 5px; cursor: pointer; }
+        .timeline-selection { position: absolute; height: 100%; background: var(--accent); opacity: 0.3; pointer-events: none; }
+        .timeline-progress { position: absolute; height: 100%; width: 2px; background: #fff; pointer-events: none; box-shadow: 0 0 5px #fff; z-index: 1; }
+        .timeline-handle { position: absolute; top: -10px; width: 10px; height: 30px; background: var(--accent); border-radius: 4px; cursor: ew-resize; transform: translateX(-50%); z-index: 2; }
+        .timeline-handle:hover { background: #fff; }
+        
+        .panel { display: flex; gap: 10px; flex-wrap: wrap; background: var(--surface); padding: 15px; border-radius: 8px; align-items: center; }
+        .panel-break { width: 100%; height: 0; margin: 0; border: none; }
+        
+        input[type="number"], input[type="text"] { background: var(--bg); color: var(--text); border: 1px solid var(--surface2); padding: 8px; border-radius: 6px; font-size: 14px; width: 80px; outline: none; }
+        input[type="text"] { width: 150px; }
+        input:focus { border-color: var(--accent); }
+        
+        button { background: var(--surface2); color: var(--text); border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        button:hover { background: var(--accent); color: var(--bg); }
+        
+        .btn-success { background: var(--success); color: #000; }
+        .btn-success:hover { background: #87c582; color: #000; }
+        
+        .play-btn { padding: 16px 20px; font-size: 16px; background: var(--accent); color: #000; }
+        .play-btn:hover { background: #74a1eb; }
+
+        label { display: flex; align-items: center; gap: 5px; font-size: 14px; cursor: pointer; }
+        input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; }
+        
+        .time-display { font-size: 16px; color: var(--accent); font-weight: bold; min-width: 80px; }
+        .video-info { color: var(--warning); font-size: 14px; margin-left: auto; font-weight: bold; }
+
+        .cmd-container { display: flex; gap: 10px; }
+        .cmd-box { flex-grow: 1; background: var(--track); padding: 15px; border-radius: 8px; font-size: 14px; word-break: break-all; border: 1px solid var(--surface); color: var(--success); font-family: monospace; }
+        .group-label { font-weight: bold; color: var(--accent); margin-right: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="theme-bar">
+        Theme: 
+        <select onchange="document.documentElement.setAttribute('data-theme', this.value)">
+            <option value="default">Dark</option>
+            <option value="midnight">Midnight</option>
+            <option value="matrix">Matrix</option>
+            <option value="light">Light</option>
+        </select>
+    </div>
+
+    <div id="drop-zone">Drop Video Here or Click to Select</div>
+    <input type="file" id="file-input" accept="video/*" style="display: none;">
+
+    <div class="video-container">
+        <div id="video-wrapper">
+            <video id="video"></video>
+            <div id="crop-box">
+                <div id="resize-handle"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="timeline-wrapper">
+        <div class="timeline-track" id="track">
+            <div class="timeline-selection" id="selection"></div>
+            <div class="timeline-progress" id="progress-marker"></div>
+            <div class="timeline-handle" id="handle-start"></div>
+            <div class="timeline-handle" id="handle-end" style="left: 100%;"></div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="time-display" id="current-time">0.00s</div>
+        
+        <button onclick="stepFrame(-10)">-10 Fr</button>
+        <button onclick="stepFrame(-1)">-1 Fr</button>
+        <button class="play-btn" onclick="togglePlay()" title="Spacebar">▶ / ⏸</button>
+        <button onclick="stepFrame(1)">+1 Fr</button>
+        <button onclick="stepFrame(10)">+10 Fr</button>
+        
+        <label style="margin-left: 10px;">Start: <input type="number" id="start-time" value="0" min="0" step="0.1"></label>
+        <label>End: <input type="number" id="end-time" value="0" min="0" step="0.1"></label>
+        
+        <div class="video-info" id="video-info">Original: --- x --- | Duration: 0.00s</div>
+    </div>
+
+    <div class="panel">
+        <label><input type="checkbox" id="toggle-crop" onchange="toggleCrop()"> Crop</label>
+        <label><input type="checkbox" id="flip-h" onchange="updateCmd()"> Flip H</label>
+        <label><input type="checkbox" id="flip-v" onchange="updateCmd()"> Flip V</label>
+        <label><input type="checkbox" id="toggle-audio" checked onchange="updateCmd()"> Audio</label>
+        <label>Output: <input type="text" id="out-name" value="output" oninput="updateCmd()">.mp4</label>
+
+        <div class="panel-break"></div>
+
+        <label class="group-label">Custom:</label>
+        <label>W: <input type="number" id="custom-w" value="1920" onchange="applyCustomSize()"></label>
+        <label>H: <input type="number" id="custom-h" value="1080" onchange="applyCustomSize()"></label>
+        
+        <div class="panel-break"></div>
+
+        <span class="group-label">Horizontal:</span>
+        <button class="res-btn" data-w="256" data-h="144" onclick="setResolution(256, 144)">144p</button>
+        <button class="res-btn" data-w="426" data-h="240" onclick="setResolution(426, 240)">240p</button>
+        <button class="res-btn" data-w="640" data-h="360" onclick="setResolution(640, 360)">360p</button>
+        <button class="res-btn" data-w="854" data-h="480" onclick="setResolution(854, 480)">480p</button>
+        <button class="res-btn" data-w="1280" data-h="720" onclick="setResolution(1280, 720)">720p</button>
+        <button class="res-btn" data-w="1920" data-h="1080" onclick="setResolution(1920, 1080)">1080p</button>
+        <button class="res-btn" data-w="2560" data-h="1440" onclick="setResolution(2560, 1440)">2K</button>
+        <button class="res-btn" data-w="3840" data-h="2160" onclick="setResolution(3840, 2160)">4K</button>
+        
+        <div class="panel-break" style="margin: 5px 0;"></div>
+
+        <span class="group-label" style="margin-left: 17px;">Vertical:</span>
+        <button class="res-btn" data-w="144" data-h="256" onclick="setResolution(144, 256)">144p</button>
+        <button class="res-btn" data-w="240" data-h="426" onclick="setResolution(240, 426)">240p</button>
+        <button class="res-btn" data-w="360" data-h="640" onclick="setResolution(360, 640)">360p</button>
+        <button class="res-btn" data-w="480" data-h="854" onclick="setResolution(480, 854)">480p</button>
+        <button class="res-btn" data-w="720" data-h="1280" onclick="setResolution(720, 1280)">720p</button>
+        <button class="res-btn" data-w="1080" data-h="1920" onclick="setResolution(1080, 1920)">1080p</button>
+        <button class="res-btn" data-w="1440" data-h="2560" onclick="setResolution(1440, 2560)">2K</button>
+        <button class="res-btn" data-w="2160" data-h="3840" onclick="setResolution(2160, 3840)">4K</button>
+    </div>
+
+    <div class="cmd-container">
+        <div class="cmd-box" id="ffmpeg-cmd">Load a video to generate command...</div>
+        <button class="btn-success" onclick="copyCmd()" id="copy-btn">Copy</button>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('drop-zone');
+    const video = document.getElementById('video');
+    const videoWrapper = document.getElementById('video-wrapper');
+    const cropBox = document.getElementById('crop-box');
+    const handle = document.getElementById('resize-handle');
+    const cmdBox = document.getElementById('ffmpeg-cmd');
+    const timeDisplay = document.getElementById('current-time');
+    const infoDisplay = document.getElementById('video-info');
+    
+    const track = document.getElementById('track');
+    const sel = document.getElementById('selection');
+    const progMarker = document.getElementById('progress-marker');
+    const hStart = document.getElementById('handle-start');
+    const hEnd = document.getElementById('handle-end');
+    const iStart = document.getElementById('start-time');
+    const iEnd = document.getElementById('end-time');
+    
+    const inputW = document.getElementById('custom-w');
+    const inputH = document.getElementById('custom-h');
+    const outName = document.getElementById('out-name');
+    const flipH = document.getElementById('flip-h');
+    const flipV = document.getElementById('flip-v');
+
+    let fileName = 'input.mp4';
+    let duration = 0;
+    
+    let activeHandle = null;
+    let isDraggingCrop = false, isResizingCrop = false;
+    let startX, startY, startW, startH, startLeft, startTop;
+
+    dropZone.onclick = () => fileInput.click();
+    dropZone.ondragover = (e) => e.preventDefault();
+    dropZone.ondrop = (e) => { e.preventDefault(); loadVideo(e.dataTransfer.files[0]); };
+    fileInput.onchange = (e) => loadVideo(e.target.files[0]);
+
+    function loadVideo(file) {
+        if (!file) return;
+        fileName = file.name;
+        video.src = URL.createObjectURL(file);
+        video.onloadedmetadata = () => {
+            duration = video.duration;
+            iEnd.value = duration.toFixed(2);
+            iStart.value = 0;
+            inputW.value = video.videoWidth;
+            inputH.value = video.videoHeight;
+            
+            infoDisplay.innerText = `Original: ${video.videoWidth}x${video.videoHeight} | Duration: ${duration.toFixed(2)}s`;
+            
+            updateTimelineVisuals();
+            document.getElementById('toggle-crop').checked = false;
+            toggleCrop();
+        };
+    }
+
+    function togglePlay() {
+        if (video.paused) video.play();
+        else video.pause();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        // Ignore key presses if the user is typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+
+        if (e.code === 'Space') {
+            e.preventDefault();
+            togglePlay();
+        } else if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            stepFrame(e.ctrlKey ? -1 : -10);
+        } else if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            stepFrame(e.ctrlKey ? 1 : 10);
+        }
+    });
+
+    video.ontimeupdate = () => {
+        timeDisplay.innerText = video.currentTime.toFixed(2) + 's';
+        if (duration > 0) {
+            progMarker.style.left = ((video.currentTime / duration) * 100) + '%';
+        }
+    };
+
+    function stepFrame(frames) {
+        video.pause();
+        video.currentTime += frames * (1 / 30);
+    }
+
+    function updateTimelineVisuals() {
+        if (!duration) return;
+        let sTime = parseFloat(iStart.value);
+        let eTime = parseFloat(iEnd.value);
+        let sPerc = (sTime / duration) * 100;
+        let ePerc = (eTime / duration) * 100;
+        
+        hStart.style.left = sPerc + '%';
+        hEnd.style.left = ePerc + '%';
+        sel.style.left = sPerc + '%';
+        sel.style.width = (ePerc - sPerc) + '%';
+        updateCmd();
+    }
+
+    iStart.onchange = () => { if(parseFloat(iStart.value) >= parseFloat(iEnd.value)) iStart.value = (parseFloat(iEnd.value) - 0.1).toFixed(2); video.currentTime = iStart.value; updateTimelineVisuals(); };
+    iEnd.onchange = () => { if(parseFloat(iEnd.value) <= parseFloat(iStart.value)) iEnd.value = (parseFloat(iStart.value) + 0.1).toFixed(2); video.currentTime = iEnd.value; updateTimelineVisuals(); };
+
+    hStart.onmousedown = () => activeHandle = hStart;
+    hEnd.onmousedown = () => activeHandle = hEnd;
+
+    function toggleCrop() {
+        cropBox.style.display = document.getElementById('toggle-crop').checked ? 'block' : 'none';
+        if(document.getElementById('toggle-crop').checked) {
+            applyCustomSize();
+        }
+        updateCmd();
+    }
+
+    function setResolution(w, h) {
+        if (!video.src) return;
+        document.getElementById('toggle-crop').checked = true;
+        cropBox.style.display = 'block';
+        
+        const scale = Math.min(1, video.videoWidth / w, video.videoHeight / h);
+        inputW.value = Math.round(w * scale);
+        inputH.value = Math.round(h * scale);
+        
+        applyCustomSize();
+    }
+
+    function applyCustomSize() {
+        if (!video.src || !document.getElementById('toggle-crop').checked) return;
+        let w = parseInt(inputW.value);
+        let h = parseInt(inputH.value);
+        
+        if (w > video.videoWidth) { w = video.videoWidth; inputW.value = w; }
+        if (h > video.videoHeight) { h = video.videoHeight; inputH.value = h; }
+        if (w < 1) { w = 1; inputW.value = w; }
+        if (h < 1) { h = 1; inputH.value = h; }
+        
+        const scaleX = videoWrapper.clientWidth / video.videoWidth;
+        const scaleY = videoWrapper.clientHeight / video.videoHeight;
+        
+        let newW = w * scaleX;
+        let newH = h * scaleY;
+        
+        cropBox.style.width = newW + 'px';
+        cropBox.style.height = newH + 'px';
+        
+        cropBox.style.left = ((videoWrapper.clientWidth - newW) / 2) + 'px';
+        cropBox.style.top = ((videoWrapper.clientHeight - newH) / 2) + 'px';
+        updateCmd();
+    }
+
+    function syncInputsFromCrop() {
+        const scaleX = video.videoWidth / videoWrapper.clientWidth;
+        const scaleY = video.videoHeight / videoWrapper.clientHeight;
+        inputW.value = Math.round(cropBox.offsetWidth * scaleX);
+        inputH.value = Math.round(cropBox.offsetHeight * scaleY);
+    }
+
+    cropBox.onmousedown = (e) => {
+        if (!document.getElementById('toggle-crop').checked) return;
+        if (e.target === handle) { isResizingCrop = true; } else { isDraggingCrop = true; }
+        startX = e.clientX; startY = e.clientY;
+        startW = cropBox.offsetWidth; startH = cropBox.offsetHeight;
+        startLeft = cropBox.offsetLeft; startTop = cropBox.offsetTop;
+        e.preventDefault();
+    };
+
+    window.onmousemove = (e) => {
+        if (activeHandle && duration > 0) {
+            let rect = track.getBoundingClientRect();
+            let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+            let time = (x / rect.width) * duration;
+            
+            if (activeHandle === hStart) {
+                if (time >= parseFloat(iEnd.value)) time = parseFloat(iEnd.value) - 0.1;
+                iStart.value = time.toFixed(2);
+                video.currentTime = time;
+            } else {
+                if (time <= parseFloat(iStart.value)) time = parseFloat(iStart.value) + 0.1;
+                iEnd.value = time.toFixed(2);
+                video.currentTime = time;
+            }
+            updateTimelineVisuals();
+        }
+        
+        if (isDraggingCrop) {
+            let dx = e.clientX - startX; let dy = e.clientY - startY;
+            let newL = Math.max(0, Math.min(startLeft + dx, videoWrapper.clientWidth - cropBox.offsetWidth));
+            let newT = Math.max(0, Math.min(startTop + dy, videoWrapper.clientHeight - cropBox.offsetHeight));
+            cropBox.style.left = newL + 'px'; cropBox.style.top = newT + 'px';
+            updateCmd();
+        } else if (isResizingCrop) {
+            let dx = e.clientX - startX; let dy = e.clientY - startY;
+            let newW = Math.max(20, Math.min(startW + dx, videoWrapper.clientWidth - cropBox.offsetLeft));
+            let newH = Math.max(20, Math.min(startH + dy, videoWrapper.clientHeight - cropBox.offsetTop));
+            cropBox.style.width = newW + 'px'; cropBox.style.height = newH + 'px';
+            syncInputsFromCrop();
+            updateCmd();
+        }
+    };
+
+    window.onmouseup = () => { 
+        if (isDraggingCrop || isResizingCrop) syncInputsFromCrop();
+        activeHandle = null; isDraggingCrop = false; isResizingCrop = false; 
+    };
+
+    track.onclick = (e) => {
+        if (activeHandle || e.target.classList.contains('timeline-handle')) return;
+        let rect = track.getBoundingClientRect();
+        let x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        video.currentTime = (x / rect.width) * duration;
+    };
+
+    function updateCmd() {
+        if (!video.src) return;
+        
+        const st = iStart.value;
+        const et = iEnd.value;
+        const audioFlag = document.getElementById('toggle-audio').checked ? "-c:a copy" : "-an";
+        const finalName = outName.value.trim() || "output";
+        
+        let filters = [];
+
+        if (document.getElementById('toggle-crop').checked) {
+            const scaleX = video.videoWidth / videoWrapper.clientWidth;
+            const scaleY = video.videoHeight / videoWrapper.clientHeight;
+            
+            const cW = Math.round(cropBox.offsetWidth * scaleX);
+            const cH = Math.round(cropBox.offsetHeight * scaleY);
+            const cX = Math.round(cropBox.offsetLeft * scaleX);
+            const cY = Math.round(cropBox.offsetTop * scaleY);
+            
+            filters.push(`crop=${cW}:${cH}:${cX}:${cY}`);
+        }
+        
+        if (flipH.checked) filters.push("hflip");
+        if (flipV.checked) filters.push("vflip");
+
+        let filterStr = filters.length > 0 ? `-filter:v "${filters.join(',')}" ` : "";
+        
+        cmdBox.innerText = `ffmpeg -i "${fileName}" -ss ${st} -to ${et} ${filterStr}${audioFlag} "${finalName}.mp4"`;
+    }
+
+    function copyCmd() {
+        navigator.clipboard.writeText(cmdBox.innerText);
+        const btn = document.getElementById('copy-btn');
+        btn.innerText = "Copied!";
+        setTimeout(() => btn.innerText = "Copy", 2000);
+    }
+</script>
+</body>
+</html>
