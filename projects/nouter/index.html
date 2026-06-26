@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouter</title>
+    <title>Tiling Note</title>
     <style>
         :root {
             --bg: #282a36; --text: #f8f8f2; --nav: #21222c; --border: #44475a; --accent: #bd93f9; --shadow: rgba(0,0,0,0.3);
@@ -53,7 +53,10 @@
         
         .preview h1, .preview h2, .preview h3 { margin: 0.3em 0 0.1em 0; line-height: 1.2; }
         hr.md-hr { border: 0; height: 1px; background: var(--border); margin: 15px 0; }
+        .md-checkbox { display: flex; align-items: flex-start; gap: 8px; margin: 4px 0; cursor: pointer; }
+        .md-checkbox input { accent-color: var(--accent); margin-top: 4px; cursor: pointer; }
         .locked textarea, .locked .preview { opacity: 0.7; cursor: not-allowed !important; }
+        .locked .md-checkbox input { cursor: not-allowed; }
         
         .resizer { z-index: 5; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
         .resizer:hover, .resizer.active { background: var(--accent); }
@@ -94,6 +97,8 @@
                 .replace(/^# (.*$)/gim, '<h1>$1</h1>')
                 .replace(/(<\/h[1-3]>)\n/g, '$1')
                 .replace(/^---$/gim, '<hr class="md-hr">')
+                .replace(/^([ \t]*[\-\*]\s+)\[ \]\s+(.*$)/gim, '<label class="md-checkbox"><input type="checkbox"> <span>$2</span></label>')
+                .replace(/^([ \t]*[\-\*]\s+)\[[xX]\]\s+(.*$)/gim, '<label class="md-checkbox"><input type="checkbox" checked> <span>$2</span></label>')
                 .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
                 .replace(/\*(.*?)\*/gim, '<i>$1</i>')
                 .replace(/`(.*?)`/gim, '<code style="background:var(--bg);padding:2px 4px;border-radius:3px;border:1px solid var(--border)">$1</code>')
@@ -172,10 +177,43 @@
             textarea.addEventListener('input', () => triggerSave(pane));
             title.addEventListener('input', () => triggerSave(pane));
 
-            preview.addEventListener('click', () => {
+            // Title Enter logic
+            title.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    pane.classList.remove('show-md');
+                    textarea.focus();
+                }
+            });
+
+            preview.addEventListener('click', (e) => {
                 if (pane.classList.contains('locked')) return;
+                if (e.target.closest('.md-checkbox')) return;
                 pane.classList.remove('show-md');
                 textarea.focus();
+            });
+
+            preview.addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    if (pane.classList.contains('locked')) {
+                        e.target.checked = !e.target.checked; 
+                        return;
+                    }
+                    
+                    const checkboxes = Array.from(preview.querySelectorAll('input[type="checkbox"]'));
+                    const index = checkboxes.indexOf(e.target);
+                    
+                    let count = -1;
+                    textarea.value = textarea.value.replace(/^([ \t]*[\-\*]\s+)\[([ xX])\]/gim, (match, prefix) => {
+                        count++;
+                        if (count === index) {
+                            return prefix + (e.target.checked ? '[x]' : '[ ]');
+                        }
+                        return match;
+                    });
+                    
+                    triggerSave(pane);
+                }
             });
 
             textarea.addEventListener('blur', () => {
