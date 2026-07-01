@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V17</title>
+    <title>Finance Planner Pro V18</title>
     <style>
         :root { 
             --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
@@ -97,7 +97,7 @@
         .color-swatch.selected { border-color: var(--text); transform: scale(1.1); }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
-        .modal { background: var(--panel); padding: 25px; border-radius: 8px; border: 1px solid var(--border); min-width: 400px; max-width: 700px; max-height: 90vh; overflow-y: auto;}
+        .modal { background: var(--panel); padding: 25px; border-radius: 8px; border: 1px solid var(--border); min-width: 400px; max-width: 700px; max-height: 90vh; display:flex; flex-direction:column; }
 
         .pie-chart { width: 250px; height: 250px; border-radius: 50%; border: 2px solid var(--border); margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .legend-color { width: 15px; height: 15px; display: inline-block; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
@@ -105,6 +105,10 @@
         .adj-btn { border-radius: 0; padding: 8px 12px; border: none; font-weight: bold; flex-shrink:0; }
         .adj-input { width: 100%; border: none; background: transparent; text-align: center; color: var(--text); font-weight: bold; min-width: 40px;}
         .adj-container { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex: 1;}
+
+        .hist-entry { font-size: 0.85em; padding: 8px 0; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items: center; gap:10px; }
+        .hist-entry:last-child { border-bottom: none; }
+        .hist-time { color: #aaa; font-size: 0.85em; margin-top: 4px;}
 
         /* Merge UI specific */
         .merge-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px;}
@@ -125,34 +129,24 @@
             <strong id="yearDisplay"></strong>
             <button onclick="changeYear(1)">▶</button>
         </div>
-        <div style="border-left: 1px solid var(--border); padding-left: 15px;">
+        <div style="border-left: 1px solid var(--border); padding-left: 15px; margin-right: 15px;">
             <label>Yearly Baseline (₾): </label>
             <input type="text" class="num-input" id="globalSalary" style="width: 90px;" onchange="updateGlobalSalary(this.value)">
         </div>
-        
-        <select id="themeSelect" onchange="changeTheme(this.value)" style="margin-left: 10px;">
-            <option value="dark">🌙 Dark Theme</option>
-            <option value="light">☀️ Light Theme</option>
-            <option value="ocean">🌊 Ocean Theme</option>
-            <option value="sunset">🌇 Sunset Theme</option>
-            <option value="nature">🌿 Nature Theme</option>
-            <option value="berry">🔮 Berry Theme</option>
-        </select>
 
         <button id="boardLayoutBtn" class="btn-secondary" onclick="toggleBoardLayout()">Layout: Grid</button>
         
-        <label id="gridScrollLabel" style="display:inline-flex; cursor:pointer;">
+        <label id="gridScrollLabel" style="display:inline-flex; cursor:pointer; margin-left:10px;">
             <input type="checkbox" id="gridScrollCb" onchange="renderBoard()"> Scroll Grid
         </label>
         
-        <button class="btn-secondary" onclick="openTagsModal()">Tags</button>
-        <button class="btn-secondary" onclick="openAnalyticsPage()">📊 Analytics</button>
-        <button class="btn-secondary" onclick="openSettingsModal()">⚙️ Settings</button>
+        <button class="btn-secondary" style="margin-left:10px;" onclick="openTagsModal()">Tags</button>
+        <button class="btn-secondary" style="margin-left:10px;" onclick="openAnalyticsPage()">📊 Analytics</button>
+        <button class="btn-secondary" style="margin-left:10px;" onclick="openHistoryModal()">📜 History</button>
+        <button class="btn-secondary" style="margin-left:10px;" onclick="openSettingsModal()">⚙️ Settings</button>
         
         <div style="margin-left: auto; display: flex; align-items: center; gap: 15px;">
             <span id="save-status"></span>
-            <label style="cursor:pointer;" title="Saves automatically."><input type="checkbox" id="autosave" checked> Autosave</label>
-            <button onclick="manualSave()" style="background: #e91e63;">💾 Save</button>
             <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
             <button class="btn-secondary" onclick="document.getElementById('importFile').click()">📥 Import (Sync)</button>
             <button class="btn-secondary" onclick="exportJSON()">📤 Export Copy</button>
@@ -295,6 +289,18 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="historyModal" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal" style="min-width: 550px; max-width: 700px; max-height: 80vh;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold; flex-shrink: 0;">
+            <span>📜 Global History & Audit Log</span>
+            <button class="btn-danger" onclick="document.getElementById('historyModal').style.display='none'">X</button>
+        </div>
+        <div id="globalHistoryList" style="flex-grow: 1; overflow-y: auto; background: var(--bg); padding: 10px; border-radius: 4px; border: 1px solid var(--border); display:flex; flex-direction:column; gap:5px; margin-bottom: 15px;">
+        </div>
+        <button class="btn-danger" onclick="clearHistory()" style="padding: 12px; width:100%; flex-shrink: 0;">🗑️ Clear All History</button>
+    </div>
+</div>
+
 <div class="modal-overlay" id="tagsModal" onclick="if(event.target===this) this.style.display='none'">
     <div class="modal">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
@@ -310,12 +316,37 @@
 </div>
 
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) this.style.display='none'">
-    <div class="modal" style="min-width: 350px;">
+    <div class="modal" style="min-width: 400px;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
             <span>⚙️ App Settings</span>
             <button class="btn-danger" onclick="document.getElementById('settingsModal').style.display='none'">X</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:25px;">
+            
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Appearance</label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                    <span>Theme: </span>
+                    <select id="themeSelectModal" onchange="changeTheme(this.value)" style="flex-grow:1;">
+                        <option value="dark">🌙 Dark</option>
+                        <option value="light">☀️ Light</option>
+                        <option value="ocean">🌊 Ocean</option>
+                        <option value="sunset">🌇 Sunset</option>
+                        <option value="nature">🌿 Nature</option>
+                        <option value="berry">🔮 Berry</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Data & Saving</label>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
+                    <input type="checkbox" id="autosave" checked onchange="autoSave()"> 
+                    Enable Autosave (Recommended)
+                </label>
+                <span style="font-size:0.85em; color:#aaa; line-height:1.4;">Automatically saves data to browser storage after every change.</span>
+            </div>
+
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Global Exchange Rate</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
@@ -324,6 +355,7 @@
                     <span>GEL (₾)</span>
                 </div>
             </div>
+
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Financial Month (Salary Date)</label>
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
@@ -336,7 +368,7 @@
                 </div>
                 <span style="font-size:0.85em; color:#aaa; line-height:1.4;">If enabled, the "Current Month" will automatically stay on the previous month until this day arrives.</span>
             </div>
-            <button onclick="saveSettings()" style="padding: 12px; margin-top:10px;">Save Settings</button>
+            <button onclick="saveSettings()" style="padding: 12px; margin-top:10px;">💾 Save Settings</button>
 
             <div style="display:flex; flex-direction:column; gap:8px; border-top: 1px dashed #f44336; margin-top: 5px; padding-top: 15px;">
                 <label style="font-weight:bold; font-size:1.1em; color: #f44336;">Danger Zone</label>
@@ -348,7 +380,7 @@
 </div>
 
 <div class="modal-overlay" id="mergeModal" style="z-index: 300;">
-    <div class="modal" style="min-width: 600px; max-width: 800px; max-height: 85vh; display: flex; flex-direction: column;">
+    <div class="modal" style="min-width: 600px; max-width: 800px; max-height: 85vh;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.3em; font-weight:bold;">
             <span>🔄 Review Incoming Sync Data</span>
             <button class="btn-danger" onclick="document.getElementById('mergeModal').style.display='none'">Cancel Sync</button>
@@ -371,7 +403,7 @@
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const presetColors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#795548", "#9e9e9e", "#607d8b", "#ffffff"];
     
-    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", settings: { usdRate: 2.7, enableSalaryDate: false, salaryDate: 10 } };
+    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", history: [], settings: { usdRate: 2.7, enableSalaryDate: false, salaryDate: 10 } };
     
     let currentYear = new Date().getFullYear();
     let activeMonth = null;
@@ -407,6 +439,52 @@
         return { year: sysYear, monthIdx: sysMonthIdx };
     }
 
+    // --- HISTORY SYSTEM ---
+    function logHistory(itemId, itemName, action, msg) {
+        if (!state.history) state.history = [];
+        state.history.unshift({
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+            itemId, itemName, action, msg, time: Date.now()
+        });
+        if (state.history.length > 500) state.history.length = 500;
+        autoSave();
+    }
+
+    function openHistoryModal() {
+        document.getElementById('historyModal').style.display = 'flex';
+        let list = document.getElementById('globalHistoryList');
+        if (!state.history || state.history.length === 0) {
+            list.innerHTML = `<div style="color:#aaa; text-align:center; padding: 20px;">No history recorded yet.</div>`;
+            return;
+        }
+        list.innerHTML = state.history.map(h => {
+            let actColor = h.action==='ADD' ? '#4caf50' : (h.action==='DELETE' ? '#f44336' : (h.action==='ADJUST' ? '#ff9800' : '#2196f3'));
+            return `
+            <div class="hist-entry">
+                <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
+                    <div><strong style="color:${actColor}; font-size:0.9em; margin-right:5px;">[${h.action}]</strong> <strong>${h.itemName}</strong>: ${h.msg}</div>
+                    <div class="hist-time">${new Date(h.time).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</div>
+                </div>
+                <button class="btn-danger" style="padding: 6px 10px; font-weight:bold; flex-shrink:0;" onclick="deleteHistoryItem('${h.id}')">X</button>
+            </div>`;
+        }).join('');
+    }
+
+    function deleteHistoryItem(id) {
+        state.history = state.history.filter(h => h.id !== id);
+        openHistoryModal();
+        autoSave();
+    }
+
+    function clearHistory() {
+        if(confirm("Are you sure you want to delete all history logs?")) {
+            state.history = [];
+            openHistoryModal();
+            autoSave();
+        }
+    }
+    // ---------------------
+
     document.addEventListener('input', e => {
         if (e.target.classList.contains('num-input')) {
             let val = e.target.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, ''); 
@@ -417,8 +495,13 @@
     });
 
     document.addEventListener('keydown', function(event) {
+        if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'S')) {
+            event.preventDefault();
+            exportJSON();
+            return;
+        }
         if (event.key === "Escape") {
-            let modals = ['tagsModal', 'settingsModal', 'mergeModal'];
+            let modals = ['tagsModal', 'settingsModal', 'mergeModal', 'historyModal'];
             modals.forEach(m => { if(document.getElementById(m).style.display === 'flex') document.getElementById(m).style.display = 'none'; });
             if (document.getElementById('analyticsView').style.display === 'flex') closeAnalyticsPage();
             else if (activeMonth !== null) closeMonthPage();
@@ -434,6 +517,7 @@
         if (!state.settings) state.settings = { usdRate: 2.7, enableSalaryDate: false, salaryDate: 10 };
         if (state.settings.enableSalaryDate === undefined) state.settings.enableSalaryDate = false;
         if (!state.settings.salaryDate) state.settings.salaryDate = 10;
+        if (!state.history) state.history = [];
         
         if(state.tags) state.tags.sort((a,b) => a.localeCompare(b));
         
@@ -462,7 +546,7 @@
 
     function initUI() {
         changeTheme(state.theme);
-        document.getElementById('themeSelect').value = state.theme;
+        document.getElementById('themeSelectModal').value = state.theme;
         document.getElementById('globalSalary').value = state.years[currentYear].yearlySalary;
         document.getElementById('yearDisplay').innerText = currentYear;
         document.getElementById('quickNotes').value = state.notes;
@@ -491,6 +575,7 @@
         document.getElementById('usdRateSetting').value = state.settings.usdRate || 2.7;
         document.getElementById('enableSalaryDateSetting').checked = state.settings.enableSalaryDate;
         document.getElementById('salaryDateSetting').value = state.settings.salaryDate || 10;
+        document.getElementById('themeSelectModal').value = state.theme;
         document.getElementById('settingsModal').style.display = 'flex'; 
     }
     
@@ -672,6 +757,9 @@
         if(!nameInput.value) return;
         let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput };
         getActiveItemsArray().push(item);
+        
+        logHistory(item.id, item.name, 'ADD', `Created at ${item.cost} ${item.currency}`);
+        
         nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; document.getElementById('itemName').focus(); newEntryTags = []; renderNewEntryTags(); renderPageItems(); autoSave();
     }
     
@@ -679,7 +767,16 @@
         let costInput = document.getElementById(`editCost-${id}`);
         let adjInput = document.getElementById(`adjustCost-${id}`);
         let cost = parseFloat(costInput.value) || 0; let adj = parseFloat(adjInput.value) || 0;
-        if (adj > 0) { costInput.value = fmt(cost + (adj * mult)); adjInput.value = ''; }
+        if (adj > 0) { 
+            let newCost = fmt(cost + (adj * mult));
+            costInput.value = newCost; 
+            
+            let itemName = document.getElementById(`editName-${id}`).value;
+            let verb = mult > 0 ? "Added" : "Reduced";
+            logHistory(id, itemName, 'ADJUST', `${verb} ${adj}. New cost: ${newCost}`);
+            
+            adjInput.value = ''; 
+        }
     }
 
     function renderPageItems() {
@@ -713,6 +810,14 @@
                     </div>
                 `).join('');
 
+                let itemHistHtml = (state.history || []).filter(h => h.itemId === item.id).map(h => `
+                    <div class="hist-entry" style="padding:4px 0;">
+                        <span>[${h.action}] ${h.msg}</span>
+                        <span class="hist-time" style="font-size:0.8em;">${new Date(h.time).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
+                `).join('');
+                if(!itemHistHtml) itemHistHtml = `<div style="color:#aaa; font-size:0.85em;">No history yet.</div>`;
+
                 return `
                 <div class="page-item-card" style="border-left-color: ${item.color}; display:flex; flex-direction:column; gap:12px; cursor:default;" 
                      onclick="event.stopPropagation();"
@@ -741,7 +846,7 @@
                     </div>
                     <div class="adj-container" style="width: 100%;">
                         <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)" style="padding: 10px 15px;">-</button>
-                        <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Adjust Amount (±)" style="padding: 10px;">
+                        <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Adjust Amount (±)" style="padding: 10px;" onkeydown="if(event.key==='Enter') { adjustEditCost('${item.id}', 1); event.stopPropagation(); event.preventDefault(); }">
                         <button class="adj-btn btn-secondary" style="background:var(--accent); padding: 10px 15px;" onclick="adjustEditCost('${item.id}', 1)">+</button>
                     </div>
                     <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="editTagsGroup-${item.id}">
@@ -761,6 +866,12 @@
                         <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
                             <span style="font-size:0.75em; color:#aaa;">Custom</span>
                             <input type="color" id="editColor-${item.id}" value="${item.color}" style="padding:0; width:35px; height:35px; cursor:pointer; border:none; background:transparent;">
+                        </div>
+                    </div>
+                    <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:10px;">
+                        <div style="font-size:0.85em; font-weight:bold; color:var(--accent); margin-bottom:5px;">Item History:</div>
+                        <div style="max-height: 100px; overflow-y:auto; background:var(--bg); padding:5px 8px; border-radius:4px;">
+                            ${itemHistHtml}
                         </div>
                     </div>
                 </div>`;
@@ -800,8 +911,15 @@
     function saveEditItem(id) { 
         let item = getActiveItemsArray().find(i => i.id === id); 
         if(item) { 
-            item.name = document.getElementById(`editName-${id}`).value; 
-            item.cost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0; 
+            let newName = document.getElementById(`editName-${id}`).value; 
+            let newCost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0;
+            
+            if (item.name !== newName || item.cost !== newCost) {
+                logHistory(id, newName, 'EDIT', `Changed properties (Name: ${item.name}->${newName}, Cost: ${item.cost}->${newCost})`);
+            }
+
+            item.name = newName; 
+            item.cost = newCost; 
             item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; 
             item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; 
             item.currency = document.getElementById(`editCurrency-${id}`).value;
@@ -812,8 +930,30 @@
         } 
     }
     
-    function deleteItem(id) { let arr = getActiveItemsArray(); arr.splice(arr.findIndex(i => i.id === id), 1); renderPageItems(); autoSave(); }
-    function toggleDone(targetMonth, id) { let arr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let item = arr.find(i => i.id === id); if (item) item.done = !item.done; if(activeMonth === targetMonth) renderPageItems(); else { renderBoard(); renderExtras(); } autoSave(); }
+    function deleteItem(id) { 
+        if(confirm("Are you sure you want to delete this entry?")) {
+            let arr = getActiveItemsArray(); 
+            let idx = arr.findIndex(i => i.id === id);
+            let item = arr[idx];
+            
+            logHistory(id, item.name, 'DELETE', `Item deleted (${item.cost} ${item.currency})`);
+            
+            arr.splice(idx, 1); 
+            renderPageItems(); 
+            autoSave(); 
+        }
+    }
+    
+    function toggleDone(targetMonth, id) { 
+        let arr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; 
+        let item = arr.find(i => i.id === id); 
+        if (item) {
+            item.done = !item.done; 
+            logHistory(id, item.name, 'EDIT', `Marked as ${item.done ? 'Done' : 'Pending'}`);
+        }
+        if(activeMonth === targetMonth) renderPageItems(); else { renderBoard(); renderExtras(); } 
+        autoSave(); 
+    }
 
     function dashDragStart(ev, id, sourceMonth) { draggedDashItemId = id; draggedDashSourceMonth = sourceMonth; ev.dataTransfer.setData("id", id); ev.dataTransfer.setData("sourceMonth", sourceMonth); }
     function dropToMonth(ev, targetMonth) { let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); if (sourceMonth && sourceMonth !== targetMonth) { let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); } }
@@ -1051,20 +1191,11 @@
         if (document.getElementById('autosave').checked) { 
             localStorage.setItem('financeDataV10', JSON.stringify(state)); 
             let d = new Date(); 
-            document.getElementById('save-status').innerText = `Autosaved at ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`; 
-        } 
-    }
-    
-    function manualSave() {
-        localStorage.setItem('financeDataV10', JSON.stringify(state)); 
-        let d = new Date(); 
-        let el = document.getElementById('save-status');
-        el.innerText = `Saved locally!`;
-        el.style.color = "var(--accent)";
-        setTimeout(() => { 
-            el.innerText = `Autosaved at ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`; 
-            el.style.color = "#aaa"; 
-        }, 2000);
+            let el = document.getElementById('save-status');
+            el.innerText = `Autosaved ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
+        } else {
+            document.getElementById('save-status').innerText = 'Autosave Disabled';
+        }
     }
 
     function clearAllData() {
@@ -1074,7 +1205,7 @@
         }
     }
 
-    function exportJSON() { const dl = document.createElement('a'); dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2))); dl.setAttribute("download", `planner_copy_${currentYear}.json`); dl.click(); }
+    function exportJSON() { const dl = document.createElement('a'); dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2))); dl.setAttribute("download", `planner_backup_${currentYear}.json`); dl.click(); }
     
     // --- IMPORT & MERGE DIFF ENGINE ---
     
@@ -1117,7 +1248,6 @@
         let localMap = getFlatItems(state);
         let impMap = getFlatItems(importedData);
         
-        // 1. Items Comparison
         Object.keys(impMap).forEach(id => {
             let imp = impMap[id];
             let loc = localMap[id];
@@ -1131,12 +1261,10 @@
         Object.keys(localMap).forEach(id => {
             if (!impMap[id]) {
                 let loc = localMap[id];
-                // Item exists local but not in import. Safe default: Keep Local.
                 mergeConflicts.push({ id, type: 'item_del', loc, choice: 'local', title: `Missing in Import (from ${loc.locStr})` });
             }
         });
 
-        // 2. Piggy Banks Comparison
         let localPig = {}; state.piggyBanks.forEach(p => localPig[p.id] = p);
         let impPig = {}; (importedData.piggyBanks || []).forEach(p => impPig[p.id] = p);
         
@@ -1153,7 +1281,6 @@
         });
 
         if (mergeConflicts.length === 0) {
-            // Auto merge invisible things like tags and settings if no major item conflicts exist
             finalizeMerge();
             alert("Sync Complete! Everything is up to date. No conflicts found.");
             return;
@@ -1225,19 +1352,30 @@
         if(activeMonth) { closeMonthPage(); openMonthPage(activeMonth); }
         
         let el = document.getElementById('save-status');
-        el.innerText = `Merge Completed & Saved!`;
+        el.innerText = `Merge Completed!`;
         el.style.color = "var(--accent)";
-        setTimeout(() => { el.innerText = ""; el.style.color = "#aaa"; }, 3000);
+        setTimeout(() => { autoSave(); el.style.color = "#aaa"; }, 3000);
     }
 
     function finalizeMerge() {
-        let newState = JSON.parse(JSON.stringify(state)); // Deep clone
+        let newState = JSON.parse(JSON.stringify(state)); 
         let imp = mergeImportedData;
 
-        // Auto-merge non-destructive metadata
         if (imp.tags) { imp.tags.forEach(t => { if(!newState.tags.includes(t)) newState.tags.push(t); }); }
         if (imp.notes && newState.notes !== imp.notes) { newState.notes = newState.notes ? newState.notes + "\n\n--- IMPORTED NOTE ---\n" + imp.notes : imp.notes; }
         
+        if (imp.history) {
+            let existingIds = new Set(newState.history.map(h => h.id));
+            imp.history.forEach(h => {
+                if(!existingIds.has(h.id)) {
+                    newState.history.push(h);
+                    existingIds.add(h.id);
+                }
+            });
+            newState.history.sort((a,b) => b.time - a.time);
+            if(newState.history.length > 500) newState.history.length = 500;
+        }
+
         mergeConflicts.forEach(conf => {
             if (conf.choice === 'import') {
                 if (conf.type === 'item_new') {
@@ -1269,7 +1407,6 @@
             }
         });
 
-        // Clean up sorting
         newState.tags.sort((a,b) => a.localeCompare(b));
         state = newState;
     }
