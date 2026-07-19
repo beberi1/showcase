@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V18</title>
+    <title>Finance Planner Pro V20</title>
     <style>
         :root { 
             --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
@@ -77,8 +77,8 @@
         
         /* --- DEDICATED MONTH PAGE VIEW --- */
         #monthView { display: none; flex-direction: column; flex-grow: 1; overflow: hidden; }
-        .page-header { background: var(--card); padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        #pageSummaryBar { background: var(--panel); padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 1.1em; flex-shrink: 0; }
+        .page-header { background: var(--card); padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; flex-wrap: wrap; gap: 10px; }
+        #pageSummaryBar { background: var(--panel); padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 1.1em; flex-shrink: 0; flex-wrap: wrap; gap: 5px; }
         
         .page-content { padding: 20px; flex-grow: 1; overflow-y: auto; }
         .page-footer { background: var(--panel); border-top: 2px solid var(--border); padding: 25px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
@@ -118,6 +118,31 @@
         .merge-badge { font-size: 0.8em; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; margin-right: 10px;}
         .btn-merge-choice { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; text-align: center; font-weight: bold; opacity: 0.4; background: var(--bg); color: var(--text); }
         .btn-merge-choice.active { opacity: 1; border-color: var(--accent); background: var(--panel); box-shadow: inset 0 0 0 2px var(--accent); }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 10px; }
+            header > div { width: 100%; display: flex; justify-content: space-between; margin: 0 !important; border: none !important; padding: 0 !important; flex-wrap: wrap; }
+            header button { flex-grow: 1; }
+            
+            #board.board-grid { grid-template-columns: 1fr; }
+            .month-col { min-width: 100%; }
+            #bottomSections { grid-template-columns: 1fr; }
+            
+            .view-grid { grid-template-columns: 1fr; }
+            
+            .modal { min-width: 90%; max-width: 95%; padding: 15px; }
+            
+            .large-inputs input, .large-inputs select, .large-inputs button { font-size: 1em; padding: 10px; width: 100%; }
+            .large-inputs { flex-direction: column; align-items: stretch; }
+            .large-inputs > div { width: 100%; }
+            
+            .color-grid { grid-template-columns: repeat(5, 1fr); }
+            
+            #newEntryTagsContainer { max-width: 100%; }
+            
+            .page-header > div { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+        }
     </style>
 </head>
 <body data-theme="dark">
@@ -129,16 +154,6 @@
             <strong id="yearDisplay"></strong>
             <button onclick="changeYear(1)">▶</button>
         </div>
-        <div style="border-left: 1px solid var(--border); padding-left: 15px; margin-right: 15px;">
-            <label>Yearly Baseline (₾): </label>
-            <input type="text" class="num-input" id="globalSalary" style="width: 90px;" onchange="updateGlobalSalary(this.value)">
-        </div>
-
-        <button id="boardLayoutBtn" class="btn-secondary" onclick="toggleBoardLayout()">Layout: Grid</button>
-        
-        <label id="gridScrollLabel" style="display:inline-flex; cursor:pointer; margin-left:10px;">
-            <input type="checkbox" id="gridScrollCb" onchange="renderBoard()"> Scroll Grid
-        </label>
         
         <button class="btn-secondary" style="margin-left:10px;" onclick="openTagsModal()">Tags</button>
         <button class="btn-secondary" style="margin-left:10px;" onclick="openAnalyticsPage()">📊 Analytics</button>
@@ -188,7 +203,6 @@
                     <option value="tag">Group by Tag</option>
                 </select>
             </div>
-            <button id="pageLayoutBtn" class="btn-secondary" onclick="togglePageLayout()">Layout: Grid</button>
         </div>
     </div>
     
@@ -214,7 +228,7 @@
 
             <input type="text" class="num-input" id="itemQty" placeholder="Qty" value="1" style="width:70px;" onkeydown="checkEnter(event)">
             
-            <div id="newEntryTagsContainer" style="display:flex; gap:5px; flex-wrap:wrap; max-width:250px;"></div>
+            <div id="newEntryTagsContainer" style="display:flex; gap:5px; flex-wrap:wrap; max-width:250px; max-height: 90px; overflow-y: auto; padding-right: 5px;"></div>
             
             <button onclick="addItem()" style="padding: 12px 30px; margin-left:auto;">Add to List (Enter)</button>
         </div>
@@ -234,7 +248,7 @@
             <button class="btn-secondary" onclick="closeAnalyticsPage()">◀ Back (Esc)</button>
             <h2 style="margin: 0;">Analytics Dashboard</h2>
         </div>
-        <div style="display:flex; gap: 10px;">
+        <div style="display:flex; gap: 10px; flex-wrap: wrap;">
             <button class="btn-secondary" onclick="analyticsType='bar'; triggerAnalytics();">Bar Chart</button>
             <button class="btn-secondary" onclick="analyticsType='pie'; triggerAnalytics();">Pie Chart</button>
             <button class="btn-secondary" onclick="analyticsType='pyramid'; triggerAnalytics();">Pyramid Chart</button>
@@ -284,7 +298,10 @@
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = [...state.tags, 'Untagged', 'Base Salary']; triggerAnalytics();">✓ Select All</button>
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = []; triggerAnalytics();">✗ Clear All</button>
         </div>
-        <div id="analyticsTagsFilter" style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-bottom: 5px;"></div>
+        
+        <!-- FIX 1: Removed max-height and overflow. The box will now freely stretch downward for as many rows of tags as you create. -->
+        <div id="analyticsTagsFilter" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;"></div>
+        
         <div id="analyticsContent" style="display:flex; flex-direction:column; gap:10px; background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border);"></div>
     </div>
 </div>
@@ -311,17 +328,17 @@
             <input type="text" id="newTag" placeholder="New Tag Name" style="flex-grow: 1;" onkeydown="if(event.key==='Enter') addTag()">
             <button onclick="addTag()">Add Tag</button>
         </div>
-        <ul id="tagList" style="list-style: none; padding: 0;"></ul>
+        <ul id="tagList" style="list-style: none; padding: 0; flex-grow: 1; overflow-y: auto; max-height: 40vh;"></ul>
     </div>
 </div>
 
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this) this.style.display='none'">
-    <div class="modal" style="min-width: 400px;">
+    <div class="modal" style="min-width: 450px;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold;">
             <span>⚙️ App Settings</span>
             <button class="btn-danger" onclick="document.getElementById('settingsModal').style.display='none'">X</button>
         </div>
-        <div style="display:flex; flex-direction:column; gap:25px;">
+        <div style="display:flex; flex-direction:column; gap:25px; overflow-y: auto; padding-right: 10px;">
             
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Appearance</label>
@@ -339,16 +356,43 @@
             </div>
 
             <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Layout & Display</label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                    <span>Dashboard Layout: </span>
+                    <select id="boardLayoutSetting" style="flex-grow:1;">
+                        <option value="grid">Grid View</option>
+                        <option value="horizontal">Horizontal Scroll</option>
+                    </select>
+                </div>
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
+                    <input type="checkbox" id="gridScrollSetting"> 
+                    Enable Scrollable Grid Items (Dashboard)
+                </label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                    <span>Month Page Layout: </span>
+                    <select id="pageLayoutSetting" style="flex-grow:1;">
+                        <option value="view-grid">Grid View</option>
+                        <option value="view-vertical">Vertical List</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- FIX 2: Restored Per-Year functionality. Modifying this only alters the active dashboard year -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Yearly Baseline Salary</label>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                    <span>Baseline Salary for <strong id="settingsYearHighlight" style="color:var(--accent);"></strong> (₾): </span>
+                    <input type="number" id="yearlySalarySetting" style="width: 100px;">
+                </div>
+                <span style="font-size:0.85em; color:#aaa; line-height:1.4;">This setting applies only to the currently selected year. Change the year on the dashboard to set different baselines.</span>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Data & Saving</label>
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
                     <input type="checkbox" id="autosave" checked onchange="autoSave()"> 
                     Enable Autosave (Recommended)
                 </label>
-                <span style="font-size:0.85em; color:#aaa; line-height:1.4;">Automatically saves data to browser storage after every change.</span>
-            </div>
-
-            <div style="display:flex; flex-direction:column; gap:8px;">
-                <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Global Exchange Rate</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
                     <span>1 USD ($) = </span>
                     <input type="number" id="usdRateSetting" style="width: 80px;" step="0.01">
@@ -366,14 +410,13 @@
                     <span>Salary Day (1-31): </span>
                     <input type="number" id="salaryDateSetting" style="width: 60px;" min="1" max="31">
                 </div>
-                <span style="font-size:0.85em; color:#aaa; line-height:1.4;">If enabled, the "Current Month" will automatically stay on the previous month until this day arrives.</span>
             </div>
+            
             <button onclick="saveSettings()" style="padding: 12px; margin-top:10px;">💾 Save Settings</button>
 
             <div style="display:flex; flex-direction:column; gap:8px; border-top: 1px dashed #f44336; margin-top: 5px; padding-top: 15px;">
                 <label style="font-weight:bold; font-size:1.1em; color: #f44336;">Danger Zone</label>
                 <button class="btn-danger" onclick="clearAllData()" style="padding: 10px; margin-top: 5px;">🗑️ Clear All Local Data (Reset)</button>
-                <span style="font-size:0.85em; color:#aaa; line-height:1.4;">This will permanently delete all your entries from this browser's cache. Please export a copy first if needed.</span>
             </div>
         </div>
     </div>
@@ -389,7 +432,7 @@
         
         <div id="mergeContent" style="display:flex; flex-direction:column; gap:15px; overflow-y:auto; padding-right:10px; flex-grow:1; margin-bottom: 15px;"></div>
         
-        <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border); padding-top: 15px; flex-shrink: 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border); padding-top: 15px; flex-shrink: 0; flex-wrap: wrap; gap: 10px;">
             <div style="display:flex; gap: 10px;">
                 <button class="btn-secondary" onclick="setAllMergeChoices('local')">Keep All Local</button>
                 <button class="btn-secondary" onclick="setAllMergeChoices('import')">Accept All Imports</button>
@@ -403,14 +446,11 @@
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const presetColors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#795548", "#9e9e9e", "#607d8b", "#ffffff"];
     
-    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", history: [], settings: { usdRate: 2.7, enableSalaryDate: false, salaryDate: 10 } };
+    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", history: [], settings: {} };
     
     let currentYear = new Date().getFullYear();
     let activeMonth = null;
     let selectedColor = "#4caf50";
-    
-    let boardLayout = 'grid';
-    let pageLayout = 'view-grid';
     
     let analyticsType = 'bar';
     let draggedDashItemId = null; let draggedDashSourceMonth = null; let draggedPageItemId = null; let draggedPiggyId = null;
@@ -422,6 +462,8 @@
     
     let mergeConflicts = [];
     let mergeImportedData = null;
+
+    let analyticsInitialized = false; 
 
     function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
     function toGEL(amt, curr) { return curr === 'USD' ? amt * (state.settings.usdRate || 2.7) : amt; }
@@ -439,7 +481,6 @@
         return { year: sysYear, monthIdx: sysMonthIdx };
     }
 
-    // --- HISTORY SYSTEM ---
     function logHistory(itemId, itemName, action, msg) {
         if (!state.history) state.history = [];
         state.history.unshift({
@@ -483,7 +524,6 @@
             autoSave();
         }
     }
-    // ---------------------
 
     document.addEventListener('input', e => {
         if (e.target.classList.contains('num-input')) {
@@ -514,9 +554,14 @@
         let saved = localStorage.getItem('financeDataV10'); 
         if (saved) { state = { ...state, ...JSON.parse(saved) }; }
         
-        if (!state.settings) state.settings = { usdRate: 2.7, enableSalaryDate: false, salaryDate: 10 };
+        if (!state.settings) state.settings = {};
+        if (state.settings.usdRate === undefined) state.settings.usdRate = 2.7;
         if (state.settings.enableSalaryDate === undefined) state.settings.enableSalaryDate = false;
         if (!state.settings.salaryDate) state.settings.salaryDate = 10;
+        if (state.settings.boardLayout === undefined) state.settings.boardLayout = 'grid';
+        if (state.settings.pageLayout === undefined) state.settings.pageLayout = 'view-grid';
+        if (state.settings.gridScroll === undefined) state.settings.gridScroll = false;
+        
         if (!state.history) state.history = [];
         
         if(state.tags) state.tags.sort((a,b) => a.localeCompare(b));
@@ -525,7 +570,9 @@
         if (!state.years[currentYear]) generateYear(currentYear);
         
         for(let y in state.years) {
-            if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = state.globalSalary || 2000;
+            // FIX 2: Defaulting fallback for undefined years, without forcing overwrite
+            if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = 2000;
+            
             months.forEach(m => {
                 if(state.years[y][m]) state.years[y][m].items.forEach(i => { 
                     if(i.isIncome === undefined) i.isIncome = false; 
@@ -547,12 +594,8 @@
     function initUI() {
         changeTheme(state.theme);
         document.getElementById('themeSelectModal').value = state.theme;
-        document.getElementById('globalSalary').value = state.years[currentYear].yearlySalary;
         document.getElementById('yearDisplay').innerText = currentYear;
         document.getElementById('quickNotes').value = state.notes;
-        
-        document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid';
-        document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid';
 
         initColorPicker();
         updateTagSelects();
@@ -562,13 +605,15 @@
 
     function generateYear(year, targetState = state) { 
         if(!targetState.years[year]) {
-            targetState.years[year] = { yearlySalary: 2000 }; 
+            // Check if there's a previous year to carry over salary, otherwise 2000
+            let prevSal = targetState.years[year - 1] ? targetState.years[year - 1].yearlySalary : 2000;
+            targetState.years[year] = { yearlySalary: prevSal }; 
             months.forEach(m => targetState.years[year][m] = { salary: null, items: [] });
         }
     }
+    
     function changeYear(dir) { currentYear += dir; document.getElementById('yearDisplay').innerText = currentYear; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
     function changeTheme(th) { state.theme = th; document.body.setAttribute('data-theme', th); autoSave(); }
-    function updateGlobalSalary(val) { state.years[currentYear].yearlySalary = parseFloat(val) || 0; renderBoard(); autoSave(); }
     function updateNotes(val) { state.notes = val; autoSave(); }
 
     function openSettingsModal() { 
@@ -576,6 +621,15 @@
         document.getElementById('enableSalaryDateSetting').checked = state.settings.enableSalaryDate;
         document.getElementById('salaryDateSetting').value = state.settings.salaryDate || 10;
         document.getElementById('themeSelectModal').value = state.theme;
+        
+        // FIX 2: Bind the salary input directly to the CURRENT year selected in dashboard
+        document.getElementById('settingsYearHighlight').innerText = currentYear;
+        document.getElementById('yearlySalarySetting').value = state.years[currentYear].yearlySalary;
+        
+        document.getElementById('boardLayoutSetting').value = state.settings.boardLayout;
+        document.getElementById('pageLayoutSetting').value = state.settings.pageLayout;
+        document.getElementById('gridScrollSetting').checked = state.settings.gridScroll;
+        
         document.getElementById('settingsModal').style.display = 'flex'; 
     }
     
@@ -584,31 +638,34 @@
         state.settings.enableSalaryDate = document.getElementById('enableSalaryDateSetting').checked;
         state.settings.salaryDate = parseInt(document.getElementById('salaryDateSetting').value) || 10;
         
-        document.getElementById('settingsModal').style.display = 'none';
+        state.settings.boardLayout = document.getElementById('boardLayoutSetting').value;
+        state.settings.pageLayout = document.getElementById('pageLayoutSetting').value;
+        state.settings.gridScroll = document.getElementById('gridScrollSetting').checked;
         
-        currentYear = getFinancialDate().year;
-        document.getElementById('yearDisplay').innerText = currentYear;
-        if (!state.years[currentYear]) generateYear(currentYear);
+        // FIX 2: Only apply salary modification to the specific currentYear
+        let parsedSalary = parseFloat(document.getElementById('yearlySalarySetting').value);
+        if (!isNaN(parsedSalary)) {
+            state.years[currentYear].yearlySalary = parsedSalary;
+        }
+        
+        document.getElementById('settingsModal').style.display = 'none';
         
         if(activeMonth) renderPageItems();
         renderBoard(); renderExtras(); autoSave();
     }
 
-    function toggleBoardLayout() { boardLayout = boardLayout === 'horizontal' ? 'grid' : 'horizontal'; document.getElementById('boardLayoutBtn').innerText = boardLayout === 'horizontal' ? 'Layout: Horizontal' : 'Layout: Grid'; renderBoard(); }
-    function togglePageLayout() { pageLayout = pageLayout === 'view-vertical' ? 'view-grid' : 'view-vertical'; document.getElementById('pageLayoutBtn').innerText = pageLayout === 'view-vertical' ? 'Layout: Vertical' : 'Layout: Grid'; renderPageItems(); }
     function updateTypePlaceholder() { document.getElementById('itemCost').placeholder = document.getElementById('itemType').value === 'income' ? 'Amt' : 'Cost'; }
 
-    // --- DASHBOARD RENDERING ---
     function renderBoard() {
         const board = document.getElementById('board');
-        board.innerHTML = ''; board.className = 'board-' + boardLayout;
+        board.innerHTML = ''; 
+        board.className = 'board-' + state.settings.boardLayout;
         
-        let gridScrollLabel = document.getElementById('gridScrollLabel');
-        let gridScrollCb = document.getElementById('gridScrollCb');
-        if (boardLayout === 'grid') {
-            gridScrollLabel.style.display = 'inline-flex';
-            if (gridScrollCb.checked) board.classList.add('scrollable-items'); else board.classList.remove('scrollable-items');
-        } else { gridScrollLabel.style.display = 'none'; board.classList.remove('scrollable-items'); }
+        if (state.settings.boardLayout === 'grid' && state.settings.gridScroll) {
+            board.classList.add('scrollable-items');
+        } else {
+            board.classList.remove('scrollable-items');
+        }
         
         let fDate = getFinancialDate();
 
@@ -896,7 +953,8 @@
             }
         };
 
-        let container = document.getElementById('pageItemsContainer'); container.className = 'page-content ' + pageLayout;
+        let container = document.getElementById('pageItemsContainer'); 
+        container.className = 'page-content ' + state.settings.pageLayout;
         let incHtml = incomes.map(renderCard).join('');
         let expHtml = expenses.map(renderCard).join('');
         
@@ -974,10 +1032,16 @@
     function openAnalyticsPage() { 
         document.getElementById('dashboardView').style.display = 'none'; 
         document.getElementById('analyticsView').style.display = 'flex'; 
-        aYearStart = currentYear; aYearEnd = currentYear; 
-        document.getElementById('aUpToCurrent').checked = false;
-        aActiveTags = [...state.tags, "Untagged", "Base Salary"];
-        renderAnalyticsUI(true);
+        
+        if (!analyticsInitialized) {
+            aYearStart = currentYear; aYearEnd = currentYear; 
+            document.getElementById('aUpToCurrent').checked = false;
+            aActiveTags = [...state.tags, "Untagged", "Base Salary"];
+            renderAnalyticsUI(true);
+            analyticsInitialized = true;
+        } else {
+            renderAnalyticsUI(false); 
+        }
     }
     
     function closeAnalyticsPage() {
@@ -1118,7 +1182,7 @@
 
         let tagsFilterHtml = displayTags.map(t => {
             let isSel = aActiveTags.includes(t);
-            return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; cursor:pointer;" onclick="toggleAnalyticsTag('${t}')">${t}</span>`;
+            return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; cursor:pointer; padding: 6px 12px; font-size: 0.9em;" onclick="toggleAnalyticsTag('${t}')">${t}</span>`;
         }).join('');
         document.getElementById('analyticsTagsFilter').innerHTML = tagsFilterHtml;
         
@@ -1142,7 +1206,7 @@
                 sortedKeys.forEach(key => {
                     let val = totals[key];
                     if(val > 0) {
-                        let pct = Math.round((val / grandTotal) * 100);
+                        let pct = ((val / grandTotal) * 100).toFixed(1);
                         let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
                         html += `<div style="margin-bottom:15px;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span></div>
@@ -1156,11 +1220,11 @@
                 sortedKeys.forEach(key => {
                     let val = totals[key];
                     if(val > 0) {
-                        let pct = (val / grandTotal) * 100;
-                        conic.push(`${colors[key]} ${acc}% ${acc + pct}%`);
+                        let pctNum = (val / grandTotal) * 100;
+                        conic.push(`${colors[key]} ${acc}% ${acc + pctNum}%`);
                         let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
-                        legendHtml += `<div><span class="legend-color" style="background:${colors[key]}"></span>${label} (${Math.round(pct)}%)</div>`;
-                        acc += pct;
+                        legendHtml += `<div><span class="legend-color" style="background:${colors[key]}"></span>${label} (${pctNum.toFixed(1)}%)</div>`;
+                        acc += pctNum;
                     }
                 });
                 legendHtml += `</div>`;
@@ -1171,12 +1235,12 @@
                 sortedKeys.forEach(key => {
                     let val = totals[key];
                     if(val > 0) {
-                        let pctOfTotal = (val / grandTotal) * 100;
+                        let pctOfTotal = ((val / grandTotal) * 100).toFixed(1);
                         let pctOfMax = (val / maxVal) * 100;
                         let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
                         pyramidHtml += `
                         <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                            ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${Math.round(pctOfTotal)}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span>
+                            ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${pctOfTotal}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span>
                         </div>`;
                     }
                 });
