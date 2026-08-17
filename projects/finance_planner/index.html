@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V20</title>
+    <title>Finance Planner Pro V21</title>
     <style>
         :root { 
             --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
@@ -81,7 +81,13 @@
         #pageSummaryBar { background: var(--panel); padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 1.1em; flex-shrink: 0; flex-wrap: wrap; gap: 5px; }
         
         .page-content { padding: 20px; flex-grow: 1; overflow-y: auto; }
-        .page-footer { background: var(--panel); border-top: 2px solid var(--border); padding: 25px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; }
+        .page-footer { background: var(--panel); border-top: 2px solid var(--border); padding: 25px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; position: relative; min-height: 150px; }
+        
+        /* FOOTER RESIZER */
+        .resizer-bar { height: 8px; background: var(--border); cursor: ns-resize; width: 100%; position: absolute; top: 0; left: 0; transition: 0.2s; z-index: 10; display: flex; justify-content: center; align-items: center; }
+        .resizer-bar:hover { background: var(--accent); height: 12px; }
+        .resizer-bar::after { content: "==="; color: #888; font-size: 0.7em; letter-spacing: 1px; font-weight: bold; }
+
         .large-inputs input, .large-inputs select, .large-inputs button { padding: 12px 15px; font-size: 1.1em; }
         
         .view-vertical { display: flex; flex-direction: column; gap: 12px; }
@@ -138,8 +144,6 @@
             .large-inputs > div { width: 100%; }
             
             .color-grid { grid-template-columns: repeat(5, 1fr); }
-            
-            #newEntryTagsContainer { max-width: 100%; }
             
             .page-header > div { width: 100%; justify-content: space-between; flex-wrap: wrap; }
         }
@@ -209,8 +213,10 @@
     <div id="pageSummaryBar"></div>
     <div class="page-content" id="pageItemsContainer" class="view-grid"></div>
     
-    <div class="page-footer">
-        <div style="font-size: 1.2em; font-weight: bold;">Add New Entry</div>
+    <div class="page-footer" id="pageFooterElem">
+        <div id="footerResizer" class="resizer-bar"></div>
+        
+        <div style="font-size: 1.2em; font-weight: bold; margin-top: 10px;">Add New Entry</div>
         <div class="large-inputs" style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
             <select id="itemType" style="font-weight: bold; width: 140px;" onchange="updateTypePlaceholder()">
                 <option value="expense">➖ Expense</option>
@@ -227,11 +233,14 @@
             </div>
 
             <input type="text" class="num-input" id="itemQty" placeholder="Qty" value="1" style="width:70px;" onkeydown="checkEnter(event)">
-            
-            <div id="newEntryTagsContainer" style="display:flex; gap:5px; flex-wrap:wrap; max-width:250px; max-height: 90px; overflow-y: auto; padding-right: 5px;"></div>
-            
             <button onclick="addItem()" style="padding: 12px 30px; margin-left:auto;">Add to List (Enter)</button>
         </div>
+        
+        <div style="display:flex; flex-direction:column; gap:5px; flex-grow:1;">
+            <label style="font-size:0.9em; color:#aaa; margin-top:5px;">Select Tags:</label>
+            <div id="newEntryTagsContainer" style="display:flex; gap:8px; flex-wrap:wrap; flex-grow: 1; max-height: 180px; overflow-y: auto; padding: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;"></div>
+        </div>
+
         <div style="display:flex; align-items: center; gap: 20px;">
             <div class="color-grid" id="colorPicker"></div>
             <div style="display:flex; flex-direction: column; gap: 5px;">
@@ -299,7 +308,6 @@
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" onclick="aActiveTags = []; triggerAnalytics();">✗ Clear All</button>
         </div>
         
-        <!-- FIX 1: Removed max-height and overflow. The box will now freely stretch downward for as many rows of tags as you create. -->
         <div id="analyticsTagsFilter" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px;"></div>
         
         <div id="analyticsContent" style="display:flex; flex-direction:column; gap:10px; background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border);"></div>
@@ -377,7 +385,6 @@
                 </div>
             </div>
 
-            <!-- FIX 2: Restored Per-Year functionality. Modifying this only alters the active dashboard year -->
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Yearly Baseline Salary</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
@@ -525,6 +532,38 @@
         }
     }
 
+    let isResizingFooter = false;
+    let startY, startHeight;
+    
+    function initResizer() {
+        const resizer = document.getElementById('footerResizer');
+        const footer = document.getElementById('pageFooterElem');
+        
+        resizer.addEventListener('mousedown', (e) => {
+            isResizingFooter = true;
+            startY = e.clientY;
+            startHeight = footer.offsetHeight;
+            document.body.style.cursor = 'ns-resize';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizingFooter) return;
+            let diff = startY - e.clientY;
+            let newHeight = startHeight + diff;
+            if (newHeight < 150) newHeight = 150; 
+            if (newHeight > window.innerHeight * 0.8) newHeight = window.innerHeight * 0.8; 
+            footer.style.height = newHeight + 'px';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if(isResizingFooter) {
+                isResizingFooter = false;
+                document.body.style.cursor = 'default';
+            }
+        });
+    }
+
     document.addEventListener('input', e => {
         if (e.target.classList.contains('num-input')) {
             let val = e.target.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, ''); 
@@ -570,15 +609,14 @@
         if (!state.years[currentYear]) generateYear(currentYear);
         
         for(let y in state.years) {
-            // FIX 2: Defaulting fallback for undefined years, without forcing overwrite
             if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = 2000;
-            
             months.forEach(m => {
                 if(state.years[y][m]) state.years[y][m].items.forEach(i => { 
                     if(i.isIncome === undefined) i.isIncome = false; 
                     if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
                     if(!i.tags) i.tags = [];
                     if(!i.currency) i.currency = 'GEL';
+                    if(!i.subItems) i.subItems = [];
                 });
             });
         }
@@ -586,8 +624,10 @@
             if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
             if(!i.tags) i.tags = []; 
             if(!i.currency) i.currency = 'GEL';
+            if(!i.subItems) i.subItems = [];
         });
         
+        initResizer();
         initUI();
     }
 
@@ -605,7 +645,6 @@
 
     function generateYear(year, targetState = state) { 
         if(!targetState.years[year]) {
-            // Check if there's a previous year to carry over salary, otherwise 2000
             let prevSal = targetState.years[year - 1] ? targetState.years[year - 1].yearlySalary : 2000;
             targetState.years[year] = { yearlySalary: prevSal }; 
             months.forEach(m => targetState.years[year][m] = { salary: null, items: [] });
@@ -622,7 +661,6 @@
         document.getElementById('salaryDateSetting').value = state.settings.salaryDate || 10;
         document.getElementById('themeSelectModal').value = state.theme;
         
-        // FIX 2: Bind the salary input directly to the CURRENT year selected in dashboard
         document.getElementById('settingsYearHighlight').innerText = currentYear;
         document.getElementById('yearlySalarySetting').value = state.years[currentYear].yearlySalary;
         
@@ -642,7 +680,6 @@
         state.settings.pageLayout = document.getElementById('pageLayoutSetting').value;
         state.settings.gridScroll = document.getElementById('gridScrollSetting').checked;
         
-        // FIX 2: Only apply salary modification to the specific currentYear
         let parsedSalary = parseFloat(document.getElementById('yearlySalarySetting').value);
         if (!isNaN(parsedSalary)) {
             state.years[currentYear].yearlySalary = parsedSalary;
@@ -793,13 +830,52 @@
 
     function piggyDragStart(ev, id) { draggedPiggyId = id; }
     function piggyDrop(ev, targetId) { ev.preventDefault(); if(draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
-    function addPiggy() { let n = document.getElementById('newPiggyName').value; if(n){ state.piggyBanks.push({ id: Date.now().toString(), name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); renderExtras(); autoSave(); } }
+    
+    function addPiggy() { 
+        let n = document.getElementById('newPiggyName').value; 
+        if(n){ 
+            let newId = Date.now().toString();
+            state.piggyBanks.push({ id: newId, name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); 
+            logHistory(newId, n, 'ADD', `Created Piggy Bank`);
+            renderExtras(); autoSave(); 
+        } 
+    }
     function togglePiggyEdit(id) { state.piggyBanks.find(p => p.id === id).isEditing = true; renderExtras(); }
-    function savePiggy(id) { let b = state.piggyBanks.find(p => p.id === id); b.name = document.getElementById(`piggyName-${id}`).value; let pv = document.getElementById(`piggyPlan-${id}`).value; b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; b.color = document.getElementById(`piggyColor-${id}`).value; b.isEditing = false; renderExtras(); autoSave(); }
-    function updatePiggy(id, mult) { let amt = parseFloat(document.getElementById(`piggyVal-${id}`).value) || 0; let b = state.piggyBanks.find(p => p.id === id); if(b && amt > 0) { b.balance = fmt(b.balance + (amt * mult)); renderExtras(); autoSave(); } }
-    function deletePiggy(id) { if(confirm("Delete this Piggy Bank?")) { state.piggyBanks = state.piggyBanks.filter(p => p.id !== id); renderExtras(); autoSave(); } }
+    function savePiggy(id) { 
+        let b = state.piggyBanks.find(p => p.id === id); 
+        let oldName = b.name;
+        b.name = document.getElementById(`piggyName-${id}`).value; 
+        let pv = document.getElementById(`piggyPlan-${id}`).value; 
+        b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; 
+        b.color = document.getElementById(`piggyColor-${id}`).value; 
+        b.isEditing = false; 
+        logHistory(id, b.name, 'EDIT', `Updated Vault Settings`);
+        renderExtras(); autoSave(); 
+    }
+    function updatePiggy(id, mult) { 
+        let amt = parseFloat(document.getElementById(`piggyVal-${id}`).value) || 0; 
+        let b = state.piggyBanks.find(p => p.id === id); 
+        if(b && amt > 0) { 
+            b.balance = fmt(b.balance + (amt * mult)); 
+            logHistory(id, b.name, 'ADJUST', `${mult > 0 ? 'Added' : 'Removed'} ${amt}₾`);
+            renderExtras(); autoSave(); 
+        } 
+    }
+    function deletePiggy(id) { 
+        if(confirm("Delete this Piggy Bank?")) { 
+            let b = state.piggyBanks.find(p => p.id === id);
+            logHistory(id, b.name, 'DELETE', `Deleted Piggy Bank`);
+            state.piggyBanks = state.piggyBanks.filter(p => p.id !== id); 
+            renderExtras(); autoSave(); 
+        } 
+    }
 
-    function renderNewEntryTags() { document.getElementById('newEntryTagsContainer').innerHTML = state.tags.map(t => { let isSel = newEntryTags.includes(t); return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}" onclick="toggleNewEntryTag('${t}')">${t}</span>`; }).join(''); }
+    function renderNewEntryTags() { 
+        document.getElementById('newEntryTagsContainer').innerHTML = state.tags.map(t => { 
+            let isSel = newEntryTags.includes(t); 
+            return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; padding: 6px 12px; font-size: 0.9em; margin: 2px;" onclick="toggleNewEntryTag('${t}')">${t}</span>`; 
+        }).join(''); 
+    }
     function toggleNewEntryTag(t) { if(newEntryTags.includes(t)) newEntryTags = newEntryTags.filter(x => x !== t); else newEntryTags.push(t); renderNewEntryTags(); }
 
     function getActiveItemsArray() { return activeMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][activeMonth].items; }
@@ -812,7 +888,7 @@
     function addItem() {
         let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value; let currInput = document.getElementById('itemCurrency').value;
         if(!nameInput.value) return;
-        let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput };
+        let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput, subItems: [] };
         getActiveItemsArray().push(item);
         
         logHistory(item.id, item.name, 'ADD', `Created at ${item.cost} ${item.currency}`);
@@ -820,9 +896,71 @@
         nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; document.getElementById('itemName').focus(); newEntryTags = []; renderNewEntryTags(); renderPageItems(); autoSave();
     }
     
+    // V22: Sub-item Inline Sync Helper
+    function syncSubItems(id) {
+        let item = getActiveItemsArray().find(i => i.id === id);
+        if (!item || !item.subItems) return;
+        let total = 0;
+        item.subItems.forEach((sub, sIdx) => {
+            let nameEl = document.getElementById(`editSubName-${id}-${sIdx}`);
+            let costEl = document.getElementById(`editSubCost-${id}-${sIdx}`);
+            if (nameEl && costEl) {
+                sub.name = nameEl.value.trim() || sub.name;
+                let parsed = parseFloat(costEl.value);
+                sub.cost = isNaN(parsed) ? 0 : parsed;
+            }
+            total += sub.cost;
+        });
+        item.cost = total;
+        let mainCostEl = document.getElementById(`editCost-${id}`);
+        if (mainCostEl) mainCostEl.value = total;
+    }
+
+    function addSubItem(itemId) {
+        syncSubItems(itemId);
+        let item = getActiveItemsArray().find(i => i.id === itemId);
+        if(!item) return;
+        if(!item.subItems) item.subItems = [];
+        
+        let n = document.getElementById(`subName-${itemId}`).value.trim();
+        let cStr = document.getElementById(`subCost-${itemId}`).value;
+        let c = parseFloat(cStr);
+        if(isNaN(c)) c = 0; // V22 Allow 0 cost
+        
+        if(n) {
+            item.subItems.push({ name: n, cost: c });
+            item.cost = item.subItems.reduce((acc, s) => acc + s.cost, 0);
+            
+            logHistory(itemId, item.name, 'EDIT', `Added split sub-item: ${n} (${c})`);
+            renderPageItems();
+            autoSave();
+        }
+    }
+    
+    function deleteSubItem(itemId, subIdx) {
+        syncSubItems(itemId);
+        let item = getActiveItemsArray().find(i => i.id === itemId);
+        if(!item || !item.subItems) return;
+        
+        let removed = item.subItems.splice(subIdx, 1)[0];
+        item.cost = item.subItems.length > 0 ? item.subItems.reduce((acc, s) => acc + s.cost, 0) : 0;
+        
+        logHistory(itemId, item.name, 'EDIT', `Removed split sub-item: ${removed.name}`);
+        renderPageItems();
+        autoSave();
+    }
+    
     function adjustEditCost(id, mult) {
         let costInput = document.getElementById(`editCost-${id}`);
         let adjInput = document.getElementById(`adjustCost-${id}`);
+        let item = getActiveItemsArray().find(i => i.id === id);
+        
+        if (item && item.subItems && item.subItems.length > 0) {
+            alert("This item has sub-items attached. Please add or adjust sub-items instead of modifying the main sum.");
+            adjInput.value = '';
+            return;
+        }
+        
         let cost = parseFloat(costInput.value) || 0; let adj = parseFloat(adjInput.value) || 0;
         if (adj > 0) { 
             let newCost = fmt(cost + (adj * mult));
@@ -874,11 +1012,13 @@
                     </div>
                 `).join('');
                 if(!itemHistHtml) itemHistHtml = `<div style="color:#aaa; font-size:0.85em;">No history yet.</div>`;
+                
+                let hasSubItems = item.subItems && item.subItems.length > 0;
 
                 return `
                 <div class="page-item-card" style="border-left-color: ${item.color}; display:flex; flex-direction:column; gap:12px; cursor:default;" 
                      onclick="event.stopPropagation();"
-                     onkeydown="if(event.key==='Enter') { saveEditItem('${item.id}'); event.preventDefault(); }">
+                     onkeydown="if(event.key==='Enter' && event.target.tagName !== 'BUTTON' && !event.target.id.includes('subName') && !event.target.id.includes('subCost')) { saveEditItem('${item.id}'); event.preventDefault(); }">
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 5px;">
                         <select id="editType-${item.id}" style="font-weight:bold; width: 120px;">
                             <option value="expense" ${!item.isIncome ? 'selected':''}>➖ Expense</option>
@@ -892,7 +1032,7 @@
                     <input type="text" id="editName-${item.id}" value="${item.name}" style="width:100%; font-size: 1.1em; padding: 10px;" placeholder="Name">
                     <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                         <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden; flex:1; min-width: 120px;">
-                            <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none; min-width:50px; padding: 10px;" placeholder="Cost">
+                            <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none; min-width:50px; padding: 10px; ${hasSubItems ? 'opacity:0.5;' : ''}" ${hasSubItems ? 'readonly title="Cost is determined by sub-items"' : ''} placeholder="Cost">
                             <select id="editCurrency-${item.id}" style="width:55px; border:none; background:transparent; font-weight:bold;">
                                 <option value="GEL" ${item.currency==='GEL'?'selected':''}>₾</option>
                                 <option value="USD" ${item.currency==='USD'?'selected':''}>$</option>
@@ -901,22 +1041,47 @@
                         <span style="font-weight:bold; color:#aaa; font-size: 1.2em;">x</span>
                         <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:60px; padding: 10px;" placeholder="Qty">
                     </div>
+                    
+                    ${!hasSubItems ? `
                     <div class="adj-container" style="width: 100%;">
                         <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)" style="padding: 10px 15px;">-</button>
-                        <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Adjust Amount (±)" style="padding: 10px;" onkeydown="if(event.key==='Enter') { adjustEditCost('${item.id}', 1); event.stopPropagation(); event.preventDefault(); }">
+                        <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Quick Adjust Amount (±)" style="padding: 10px;" onkeydown="if(event.key==='Enter') { adjustEditCost('${item.id}', 1); event.stopPropagation(); event.preventDefault(); }">
                         <button class="adj-btn btn-secondary" style="background:var(--accent); padding: 10px 15px;" onclick="adjustEditCost('${item.id}', 1)">+</button>
+                    </div>` : ''}
+                    
+                    <!-- V22 Feature: Sub Items Edit View (Editable Inputs) -->
+                    <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:10px;">
+                        <div style="font-size:0.9em; font-weight:bold; color:var(--accent); margin-bottom:8px;">Sub-Tasks / Split Costs:</div>
+                        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+                            ${(item.subItems || []).map((sub, sIdx) => `
+                                <div style="display:flex; justify-content:space-between; background:var(--bg); padding:6px 8px; border-radius:4px; border:1px solid var(--border); gap:10px; align-items:center;">
+                                    <input type="text" id="editSubName-${item.id}-${sIdx}" value="${sub.name}" oninput="syncSubItems('${item.id}')" style="flex:1; padding:6px; min-width:100px;">
+                                    <div style="display:flex; gap:10px; align-items:center;">
+                                        <input type="text" class="num-input" id="editSubCost-${item.id}-${sIdx}" value="${sub.cost}" oninput="syncSubItems('${item.id}')" style="width:70px; padding:6px; text-align:right;">
+                                        <button class="btn-danger" style="padding:6px 10px; font-size:0.9em; font-weight:bold;" onclick="deleteSubItem('${item.id}', ${sIdx})">X</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="display:flex; gap:5px;">
+                            <input type="text" id="subName-${item.id}" placeholder="Sub-item name (e.g., Light)" style="flex:1;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
+                            <input type="text" class="num-input" id="subCost-${item.id}" placeholder="Cost (0 allowed)" style="width:70px;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
+                            <button onclick="addSubItem('${item.id}')" style="padding: 8px 12px; background: #2196f3;">Add</button>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;" id="editTagsGroup-${item.id}">
+                    
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; background: var(--bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border); max-height: 150px; overflow-y: auto;" id="editTagsGroup-${item.id}">
                         ${state.tags.map(t => {
                             let isSel = item.tags.includes(t);
                             return `
                             <label style="cursor:pointer; margin:0;">
                                 <input type="checkbox" value="${t}" class="edit-tag-cb-${item.id}" ${isSel ? 'checked' : ''} style="display:none;" onchange="this.nextElementSibling.style.opacity = this.checked ? 1 : 0.4">
-                                <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block; padding: 4px 8px;">${t}</span>
+                                <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block; padding: 6px 10px; font-size:0.9em;">${t}</span>
                             </label>`;
                         }).join('')}
                     </div>
-                    <div style="display:flex; align-items:center; gap:10px; margin-top:5px; border-top: 1px dashed var(--border); padding-top: 10px;">
+                    
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:10px; border-top: 1px dashed var(--border); padding-top: 10px;">
                         <div style="display:flex; flex-wrap:wrap; gap: 6px; flex:1;">
                             ${quickColorsHtml}
                         </div>
@@ -933,6 +1098,7 @@
                     </div>
                 </div>`;
             } else {
+                let hasSubItems = item.subItems && item.subItems.length > 0;
                 let conversionHtml = item.currency === 'USD' ? `<span style="font-size:0.85em; color:#aaa; margin-left:5px;">(~${fmt(toGEL(item.qty * item.cost, 'USD'))}₾)</span>` : '';
                 return `
                 <div class="page-item-card ${item.done ? 'done' : ''}" style="border-color: ${item.color}"
@@ -945,6 +1111,16 @@
                         </div>
                     </div>
                     <div style="font-size: 1.1em; margin-bottom: 10px;">${item.qty}x ${fmtCurr(item.cost, item.currency)} = <b style="font-size: 1.2em;">${fmtCurr(item.qty * item.cost, item.currency)}</b> ${conversionHtml}</div>
+                    
+                    ${hasSubItems ? `
+                        <div style="margin: 10px 0; background: var(--bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+                            <div style="font-size: 0.8em; color: var(--accent); margin-bottom: 6px; font-weight:bold; letter-spacing:1px; text-transform: uppercase;">Included Items:</div>
+                            <ul style="margin: 0; padding-left: 20px; font-size: 0.9em; color: var(--text);">
+                                ${item.subItems.map(s => `<li style="margin-bottom:3px;">${s.name} - <strong>${s.cost}</strong></li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div style="display:flex; gap:4px; flex-wrap:wrap;">${item.tags.map(t => `<span class="tag-badge" onclick="event.stopPropagation();">${t}</span>`).join('')}</div>
                         <label style="cursor:pointer;" onclick="event.stopPropagation();"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${activeMonth}', '${item.id}');"> Mark Done</label>
@@ -967,17 +1143,21 @@
     function toggleEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.isEditing = !item.isEditing; renderPageItems(); } }
     
     function saveEditItem(id) { 
+        syncSubItems(id);
         let item = getActiveItemsArray().find(i => i.id === id); 
         if(item) { 
             let newName = document.getElementById(`editName-${id}`).value; 
-            let newCost = parseFloat(document.getElementById(`editCost-${id}`).value) || 0;
             
-            if (item.name !== newName || item.cost !== newCost) {
+            let hasSubItems = item.subItems && item.subItems.length > 0;
+            let newCost = hasSubItems ? item.cost : (parseFloat(document.getElementById(`editCost-${id}`).value) || 0);
+            
+            if (item.name !== newName || (!hasSubItems && item.cost !== newCost)) {
                 logHistory(id, newName, 'EDIT', `Changed properties (Name: ${item.name}->${newName}, Cost: ${item.cost}->${newCost})`);
             }
 
             item.name = newName; 
-            item.cost = newCost; 
+            if(!hasSubItems) item.cost = newCost; 
+            
             item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; 
             item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; 
             item.currency = document.getElementById(`editCurrency-${id}`).value;
@@ -1274,7 +1454,7 @@
     // --- IMPORT & MERGE DIFF ENGINE ---
     
     function itemsEqual(a, b) {
-        return a.name === b.name && a.cost === b.cost && a.qty === b.qty && a.isIncome === b.isIncome && a.currency === b.currency && a.done === b.done && a.color === b.color && JSON.stringify(a.tags) === JSON.stringify(b.tags);
+        return a.name === b.name && a.cost === b.cost && a.qty === b.qty && a.isIncome === b.isIncome && a.currency === b.currency && a.done === b.done && a.color === b.color && JSON.stringify(a.tags) === JSON.stringify(b.tags) && JSON.stringify(a.subItems) === JSON.stringify(b.subItems);
     }
 
     function getFlatItems(st) {
@@ -1424,6 +1604,18 @@
     function finalizeMerge() {
         let newState = JSON.parse(JSON.stringify(state)); 
         let imp = mergeImportedData;
+
+        if (imp.settings) {
+            newState.settings = { ...newState.settings, ...imp.settings };
+        }
+        
+        if (imp.years) {
+            Object.keys(imp.years).forEach(y => {
+                if (newState.years[y] && imp.years[y].yearlySalary !== undefined) {
+                    newState.years[y].yearlySalary = imp.years[y].yearlySalary;
+                }
+            });
+        }
 
         if (imp.tags) { imp.tags.forEach(t => { if(!newState.tags.includes(t)) newState.tags.push(t); }); }
         if (imp.notes && newState.notes !== imp.notes) { newState.notes = newState.notes ? newState.notes + "\n\n--- IMPORTED NOTE ---\n" + imp.notes : imp.notes; }
