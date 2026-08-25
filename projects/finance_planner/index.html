@@ -899,7 +899,7 @@
     // V22: Sub-item Inline Sync Helper
     function syncSubItems(id) {
         let item = getActiveItemsArray().find(i => i.id === id);
-        if (!item || !item.subItems) return;
+        if (!item || !item.subItems || item.subItems.length === 0) return;
         let total = 0;
         item.subItems.forEach((sub, sIdx) => {
             let nameEl = document.getElementById(`editSubName-${id}-${sIdx}`);
