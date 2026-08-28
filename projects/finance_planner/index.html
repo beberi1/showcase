@@ -3,150 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Planner Pro V21</title>
+    <title>Finance Planner Pro V22</title>
+    <!-- Link to the CSS file -->
     <style>
-        :root { 
-            --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
-            --text: #e0e0e0; --accent: #4caf50; --border: #444444; 
-        }
-        [data-theme="light"] { 
-            --bg: #f5f7fa; --panel: #ffffff; --card: #f9fafb; 
-            --text: #1f2937; --accent: #3b82f6; --border: #e5e7eb; 
-        }
-        [data-theme="ocean"] { 
-            --bg: #0f172a; --panel: #1e293b; --card: #0f172a; 
-            --text: #f8fafc; --accent: #0ea5e9; --border: #334155; 
-        }
-        [data-theme="sunset"] { 
-            --bg: #2a1610; --panel: #3d2218; --card: #311c14; 
-            --text: #fde68a; --accent: #f97316; --border: #7c2d12; 
-        }
-        [data-theme="nature"] { 
-            --bg: #f0f4f0; --panel: #ffffff; --card: #f8faf8; 
-            --text: #1b4332; --accent: #2d6a4f; --border: #b7e4c7; 
-        }
-        [data-theme="berry"] { 
-            --bg: #2d1b2e; --panel: #4a2849; --card: #3a1f39; 
-            --text: #fce7f3; --accent: #ec4899; --border: #831843; 
-        }
+:root { 
+    --bg: #1e1e1e; --panel: #2d2d2d; --card: #222222; 
+    --text: #e0e0e0; --accent: #4caf50; --border: #444444; 
+}
+[data-theme="light"] { 
+    --bg: #f5f7fa; --panel: #ffffff; --card: #f9fafb; 
+    --text: #1f2937; --accent: #3b82f6; --border: #e5e7eb; 
+}
+[data-theme="ocean"] { 
+    --bg: #0f172a; --panel: #1e293b; --card: #0f172a; 
+    --text: #f8fafc; --accent: #0ea5e9; --border: #334155; 
+}
+[data-theme="sunset"] { 
+    --bg: #2a1610; --panel: #3d2218; --card: #311c14; 
+    --text: #fde68a; --accent: #f97316; --border: #7c2d12; 
+}
+[data-theme="nature"] { 
+    --bg: #f0f4f0; --panel: #ffffff; --card: #f8faf8; 
+    --text: #1b4332; --accent: #2d6a4f; --border: #b7e4c7; 
+}
+[data-theme="berry"] { 
+    --bg: #2d1b2e; --panel: #4a2849; --card: #3a1f39; 
+    --text: #fce7f3; --accent: #ec4899; --border: #831843; 
+}
 
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; }
-        
-        button, input, select, textarea { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 4px; font-size: 14px; box-sizing: border-box;}
-        button { background: var(--accent); color: white; cursor: pointer; border: none; font-weight: bold; transition: 0.2s;}
-        button:hover { opacity: 0.8; }
-        .btn-secondary { background: #555; color: white; }
-        .btn-danger { background: #f44336; color: white; }
-        .tag-badge { background: #444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; transition: 0.2s; cursor: pointer; display: inline-block;}
-        .pos { color: #4caf50; font-weight: bold; } .neg { color: #f44336; font-weight: bold;}
-        
-        input[type="checkbox"] { transform: scale(1.6); cursor: pointer; margin: 5px; }
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-        
-        header { background: var(--panel); padding: 15px 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        #save-status { font-size: 0.85em; color: #aaa; margin-left: auto; font-weight: bold; }
+body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; }
 
-        /* --- DASHBOARD VIEW --- */
-        #dashboardView { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        #dashScrollWrapper { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 40px; }
-        
-        #board { gap: 20px; flex-shrink: 0; }
-        #board.board-horizontal { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 15px; align-items: flex-start; }
-        #board.board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); width: 100%; align-items: flex-start; }
-        
-        .month-col { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; min-width: 400px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s; position: relative; }
-        .month-col:hover { border-color: #888; }
-        .month-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
-        .month-header button { pointer-events: auto; }
-        .summary-top { padding: 10px 15px; font-size: 0.9em; border-bottom: 1px dashed var(--border); pointer-events: none;}
-        .summary-bottom { padding: 10px 15px; font-size: 0.9em; background: var(--card); border-top: 1px dashed var(--border); border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; pointer-events: none;}
-        .items-container { padding: 10px; min-height: 150px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px; pointer-events: none;}
-        
-        .board-horizontal .month-col { min-height: 55vh; }
-        .board-grid.scrollable-items .items-container { max-height: 250px; overflow-y: auto; pointer-events: auto; }
-        .board-grid.scrollable-items .items-container::-webkit-scrollbar { width: 8px; }
-        .board-grid.scrollable-items .items-container::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
-        
-        .dash-item { background: var(--card); border-left: 5px solid; padding: 10px; border-radius: 4px; pointer-events: auto; cursor: grab; }
-        .dash-item.done { opacity: 0.4; }
-        .dash-section-title { font-size:0.8em; font-weight:bold; padding:4px 4px; letter-spacing: 1px; }
-        
-        #bottomSections { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
-        .special-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; min-height: 300px;}
-        
-        /* --- DEDICATED MONTH PAGE VIEW --- */
-        #monthView { display: none; flex-direction: column; flex-grow: 1; overflow: hidden; }
-        .page-header { background: var(--card); padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; flex-wrap: wrap; gap: 10px; }
-        #pageSummaryBar { background: var(--panel); padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 1.1em; flex-shrink: 0; flex-wrap: wrap; gap: 5px; }
-        
-        .page-content { padding: 20px; flex-grow: 1; overflow-y: auto; }
-        .page-footer { background: var(--panel); border-top: 2px solid var(--border); padding: 25px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; position: relative; min-height: 150px; }
-        
-        /* FOOTER RESIZER */
-        .resizer-bar { height: 8px; background: var(--border); cursor: ns-resize; width: 100%; position: absolute; top: 0; left: 0; transition: 0.2s; z-index: 10; display: flex; justify-content: center; align-items: center; }
-        .resizer-bar:hover { background: var(--accent); height: 12px; }
-        .resizer-bar::after { content: "==="; color: #888; font-size: 0.7em; letter-spacing: 1px; font-weight: bold; }
+button, input, select, textarea { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; border-radius: 4px; font-size: 14px; box-sizing: border-box;}
+button { background: var(--accent); color: white; cursor: pointer; border: none; font-weight: bold; transition: 0.2s;}
+button:hover { opacity: 0.8; }
+.btn-secondary { background: #555; color: white; }
+.btn-danger { background: #f44336; color: white; }
+.tag-badge { background: #444; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; transition: 0.2s; cursor: pointer; display: inline-block;}
+.pos { color: #4caf50; font-weight: bold; } .neg { color: #f44336; font-weight: bold;}
 
-        .large-inputs input, .large-inputs select, .large-inputs button { padding: 12px 15px; font-size: 1.1em; }
-        
-        .view-vertical { display: flex; flex-direction: column; gap: 12px; }
-        .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px 15px; align-items: start; align-content: start; }
-        
-        .page-item-card { background: var(--card); border-left: 6px solid; padding: 15px; border-radius: 6px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; box-sizing: border-box;}
-        .page-item-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        .page-item-card.done { opacity: 0.4; }
-        .page-section-title { grid-column: 1 / -1; font-size: 1.2em; font-weight: bold; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-top: 10px; color: var(--text); }
-        
-        .color-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; max-width: 400px;}
-        .color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #555; }
-        .color-swatch.selected { border-color: var(--text); transform: scale(1.1); }
+input[type="checkbox"] { transform: scale(1.6); cursor: pointer; margin: 5px; }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
-        .modal { background: var(--panel); padding: 25px; border-radius: 8px; border: 1px solid var(--border); min-width: 400px; max-width: 700px; max-height: 90vh; display:flex; flex-direction:column; }
+header { background: var(--panel); padding: 15px 20px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+#save-status { font-size: 0.85em; color: #aaa; margin-left: auto; font-weight: bold; }
 
-        .pie-chart { width: 250px; height: 250px; border-radius: 50%; border: 2px solid var(--border); margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .legend-color { width: 15px; height: 15px; display: inline-block; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
-        
-        .adj-btn { border-radius: 0; padding: 8px 12px; border: none; font-weight: bold; flex-shrink:0; }
-        .adj-input { width: 100%; border: none; background: transparent; text-align: center; color: var(--text); font-weight: bold; min-width: 40px;}
-        .adj-container { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex: 1;}
+/* --- DASHBOARD VIEW --- */
+#dashboardView { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+#dashScrollWrapper { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 40px; }
 
-        .hist-entry { font-size: 0.85em; padding: 8px 0; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items: center; gap:10px; }
-        .hist-entry:last-child { border-bottom: none; }
-        .hist-time { color: #aaa; font-size: 0.85em; margin-top: 4px;}
+#board { gap: 20px; flex-shrink: 0; }
+#board.board-horizontal { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 15px; align-items: flex-start; }
+#board.board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); width: 100%; align-items: flex-start; }
 
-        /* Merge UI specific */
-        .merge-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px;}
-        .merge-card.new { border-left: 5px solid #2196f3; }
-        .merge-card.mod { border-left: 5px solid #ff9800; }
-        .merge-card.del { border-left: 5px solid #f44336; }
-        .merge-badge { font-size: 0.8em; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; margin-right: 10px;}
-        .btn-merge-choice { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; text-align: center; font-weight: bold; opacity: 0.4; background: var(--bg); color: var(--text); }
-        .btn-merge-choice.active { opacity: 1; border-color: var(--accent); background: var(--panel); box-shadow: inset 0 0 0 2px var(--accent); }
+.month-col { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; min-width: 400px; display: flex; flex-direction: column; cursor: pointer; transition: transform 0.1s; position: relative; }
+.month-col:hover { border-color: #888; }
+.month-header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+.month-header button { pointer-events: auto; }
+.summary-top { padding: 10px 15px; font-size: 0.9em; border-bottom: 1px dashed var(--border); pointer-events: none;}
+.summary-bottom { padding: 10px 15px; font-size: 0.9em; background: var(--card); border-top: 1px dashed var(--border); border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; pointer-events: none;}
+.items-container { padding: 10px; min-height: 150px; flex-grow: 1; display: flex; flex-direction: column; gap: 8px; pointer-events: none;}
 
-        /* --- MOBILE RESPONSIVENESS --- */
-        @media (max-width: 768px) {
-            header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 10px; }
-            header > div { width: 100%; display: flex; justify-content: space-between; margin: 0 !important; border: none !important; padding: 0 !important; flex-wrap: wrap; }
-            header button { flex-grow: 1; }
-            
-            #board.board-grid { grid-template-columns: 1fr; }
-            .month-col { min-width: 100%; }
-            #bottomSections { grid-template-columns: 1fr; }
-            
-            .view-grid { grid-template-columns: 1fr; }
-            
-            .modal { min-width: 90%; max-width: 95%; padding: 15px; }
-            
-            .large-inputs input, .large-inputs select, .large-inputs button { font-size: 1em; padding: 10px; width: 100%; }
-            .large-inputs { flex-direction: column; align-items: stretch; }
-            .large-inputs > div { width: 100%; }
-            
-            .color-grid { grid-template-columns: repeat(5, 1fr); }
-            
-            .page-header > div { width: 100%; justify-content: space-between; flex-wrap: wrap; }
-        }
+.board-horizontal .month-col { min-height: 55vh; }
+.board-grid.scrollable-items .items-container { max-height: 250px; overflow-y: auto; pointer-events: auto; }
+.board-grid.scrollable-items .items-container::-webkit-scrollbar { width: 8px; }
+.board-grid.scrollable-items .items-container::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+
+.dash-item { background: var(--card); border-left: 5px solid; padding: 10px; border-radius: 4px; pointer-events: auto; cursor: grab; }
+.dash-item.done { opacity: 0.4; }
+.dash-section-title { font-size:0.8em; font-weight:bold; padding:4px 4px; letter-spacing: 1px; }
+
+#bottomSections { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+.special-box { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; min-height: 300px;}
+
+/* --- DEDICATED MONTH PAGE VIEW --- */
+#monthView { display: none; flex-direction: column; flex-grow: 1; overflow: hidden; }
+.page-header { background: var(--card); padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; flex-wrap: wrap; gap: 10px; }
+#pageSummaryBar { background: var(--panel); padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 1.1em; flex-shrink: 0; flex-wrap: wrap; gap: 5px; }
+
+.page-content { padding: 20px; flex-grow: 1; overflow-y: auto; }
+.page-footer { background: var(--panel); border-top: 2px solid var(--border); padding: 25px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; position: relative; min-height: 150px; }
+
+/* FOOTER RESIZER */
+.resizer-bar { height: 8px; background: var(--border); cursor: ns-resize; width: 100%; position: absolute; top: 0; left: 0; transition: 0.2s; z-index: 10; display: flex; justify-content: center; align-items: center; }
+.resizer-bar:hover { background: var(--accent); height: 12px; }
+.resizer-bar::after { content: "==="; color: #888; font-size: 0.7em; letter-spacing: 1px; font-weight: bold; }
+
+.large-inputs input, .large-inputs select, .large-inputs button { padding: 12px 15px; font-size: 1.1em; }
+
+.view-vertical { display: flex; flex-direction: column; gap: 12px; }
+.view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px 15px; align-items: start; align-content: start; }
+
+.page-item-card { background: var(--card); border-left: 6px solid; padding: 15px; border-radius: 6px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; box-sizing: border-box;}
+.page-item-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.page-item-card.done { opacity: 0.4; }
+.page-section-title { grid-column: 1 / -1; font-size: 1.2em; font-weight: bold; border-bottom: 2px solid var(--border); padding-bottom: 5px; margin-top: 10px; color: var(--text); }
+
+.color-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; max-width: 400px;}
+.color-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #555; }
+.color-swatch.selected { border-color: var(--text); transform: scale(1.1); }
+
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; }
+.modal { background: var(--panel); padding: 25px; border-radius: 8px; border: 1px solid var(--border); min-width: 400px; max-width: 700px; max-height: 90vh; display:flex; flex-direction:column; }
+
+.pie-chart { width: 250px; height: 250px; border-radius: 50%; border: 2px solid var(--border); margin: 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+.legend-color { width: 15px; height: 15px; display: inline-block; border-radius: 3px; margin-right: 8px; vertical-align: middle; }
+
+.adj-btn { border-radius: 0; padding: 8px 12px; border: none; font-weight: bold; flex-shrink:0; }
+.adj-input { width: 100%; border: none; background: transparent; text-align: center; color: var(--text); font-weight: bold; min-width: 40px;}
+.adj-container { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; flex: 1;}
+
+.hist-entry { font-size: 0.85em; padding: 8px 0; border-bottom: 1px solid var(--border); display:flex; justify-content:space-between; align-items: center; gap:10px; }
+.hist-entry:last-child { border-bottom: none; }
+.hist-time { color: #aaa; font-size: 0.85em; margin-top: 4px;}
+
+/* Merge UI specific */
+.merge-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px;}
+.merge-card.new { border-left: 5px solid #2196f3; }
+.merge-card.mod { border-left: 5px solid #ff9800; }
+.merge-card.del { border-left: 5px solid #f44336; }
+.merge-badge { font-size: 0.8em; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; margin-right: 10px;}
+.btn-merge-choice { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; text-align: center; font-weight: bold; opacity: 0.4; background: var(--bg); color: var(--text); }
+.btn-merge-choice.active { opacity: 1; border-color: var(--accent); background: var(--panel); box-shadow: inset 0 0 0 2px var(--accent); }
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 10px; }
+    header > div { width: 100%; display: flex; justify-content: space-between; margin: 0 !important; border: none !important; padding: 0 !important; flex-wrap: wrap; }
+    header button { flex-grow: 1; }
+    
+    #board.board-grid { grid-template-columns: 1fr; }
+    .month-col { min-width: 100%; }
+    #bottomSections { grid-template-columns: 1fr; }
+    
+    .view-grid { grid-template-columns: 1fr; }
+    
+    .modal { min-width: 90%; max-width: 95%; padding: 15px; }
+    
+    .large-inputs input, .large-inputs select, .large-inputs button { font-size: 1em; padding: 10px; width: 100%; }
+    .large-inputs { flex-direction: column; align-items: stretch; }
+    .large-inputs > div { width: 100%; }
+    
+    .color-grid { grid-template-columns: repeat(5, 1fr); }
+    
+    .page-header > div { width: 100%; justify-content: space-between; flex-wrap: wrap; }
+}
     </style>
 </head>
 <body data-theme="dark">
@@ -314,15 +315,46 @@
     </div>
 </div>
 
+<!-- ALL MODALS AT ROOT LEVEL -->
 <div class="modal-overlay" id="historyModal" onclick="if(event.target===this) this.style.display='none'">
     <div class="modal" style="min-width: 550px; max-width: 700px; max-height: 80vh;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 1.2em; font-weight:bold; flex-shrink: 0;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.2em; font-weight:bold; flex-shrink: 0;">
             <span>📜 Global History & Audit Log</span>
             <button class="btn-danger" onclick="document.getElementById('historyModal').style.display='none'">X</button>
         </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px; align-items:center; flex-wrap:wrap; background: var(--bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+            <strong style="font-size: 0.9em;">Clear Range:</strong>
+            <input type="date" id="histFromDate" style="padding: 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text);">
+            <span style="color:#aaa;">to</span>
+            <input type="date" id="histToDate" style="padding: 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--text);">
+            <button class="btn-secondary" onclick="clearHistoryRange()" style="margin-left:auto;">Clear Selected</button>
+        </div>
         <div id="globalHistoryList" style="flex-grow: 1; overflow-y: auto; background: var(--bg); padding: 10px; border-radius: 4px; border: 1px solid var(--border); display:flex; flex-direction:column; gap:5px; margin-bottom: 15px;">
         </div>
-        <button class="btn-danger" onclick="clearHistory()" style="padding: 12px; width:100%; flex-shrink: 0;">🗑️ Clear All History</button>
+        <button class="btn-danger" onclick="clearHistory()" style="padding: 12px; width:100%; flex-shrink: 0;">🗑️ Clear ALL History</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="spendModal" onclick="if(event.target===this) this.style.display='none'" style="z-index: 250;">
+    <div class="modal" style="min-width: 350px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.2em; font-weight:bold;">
+            <span>🛒 Spend from <span id="spendModalPiggyName" style="color:var(--accent);"></span></span>
+            <button class="btn-danger" onclick="document.getElementById('spendModal').style.display='none'">X</button>
+        </div>
+        <div style="margin-bottom: 15px; color:#aaa;">
+            Available Balance: <strong id="spendModalPiggyBal" style="color:var(--text);"></strong>₾
+        </div>
+        <div style="display:flex; flex-direction:column; gap: 15px;">
+            <div>
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">What are you buying?</label>
+                <input type="text" id="spendModalItemName" placeholder="e.g., New Phone" style="width:100%;">
+            </div>
+            <div>
+                <label style="display:block; margin-bottom:5px; font-weight:bold;">Amount (₾)</label>
+                <input type="number" id="spendModalCost" placeholder="0.00" style="width:100%;" class="num-input">
+            </div>
+            <button onclick="confirmPiggySpend()" style="padding: 12px; font-size: 1.1em; background:var(--accent); margin-top: 5px;">Confirm Purchase</button>
+        </div>
     </div>
 </div>
 
@@ -347,7 +379,6 @@
             <button class="btn-danger" onclick="document.getElementById('settingsModal').style.display='none'">X</button>
         </div>
         <div style="display:flex; flex-direction:column; gap:25px; overflow-y: auto; padding-right: 10px;">
-            
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Appearance</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
@@ -362,7 +393,6 @@
                     </select>
                 </div>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Layout & Display</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
@@ -384,7 +414,6 @@
                     </select>
                 </div>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Yearly Baseline Salary</label>
                 <div style="display:flex; align-items:center; gap:10px; margin-top:5px;">
@@ -393,7 +422,6 @@
                 </div>
                 <span style="font-size:0.85em; color:#aaa; line-height:1.4;">This setting applies only to the currently selected year. Change the year on the dashboard to set different baselines.</span>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Data & Saving</label>
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
@@ -406,7 +434,6 @@
                     <span>GEL (₾)</span>
                 </div>
             </div>
-
             <div style="display:flex; flex-direction:column; gap:8px;">
                 <label style="font-weight:bold; font-size:1.1em; border-bottom:1px solid var(--border); padding-bottom:5px;">Financial Month (Salary Date)</label>
                 <label style="cursor:pointer; display:flex; align-items:center; gap:8px; margin-top:5px;">
@@ -418,9 +445,7 @@
                     <input type="number" id="salaryDateSetting" style="width: 60px;" min="1" max="31">
                 </div>
             </div>
-            
             <button onclick="saveSettings()" style="padding: 12px; margin-top:10px;">💾 Save Settings</button>
-
             <div style="display:flex; flex-direction:column; gap:8px; border-top: 1px dashed #f44336; margin-top: 5px; padding-top: 15px;">
                 <label style="font-weight:bold; font-size:1.1em; color: #f44336;">Danger Zone</label>
                 <button class="btn-danger" onclick="clearAllData()" style="padding: 10px; margin-top: 5px;">🗑️ Clear All Local Data (Reset)</button>
@@ -436,9 +461,7 @@
             <button class="btn-danger" onclick="document.getElementById('mergeModal').style.display='none'">Cancel Sync</button>
         </div>
         <p style="color:#aaa; font-size:0.9em; margin-top:0;">The imported file contains data that differs from your current local cache. Please review the changes below.</p>
-        
         <div id="mergeContent" style="display:flex; flex-direction:column; gap:15px; overflow-y:auto; padding-right:10px; flex-grow:1; margin-bottom: 15px;"></div>
-        
         <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border); padding-top: 15px; flex-shrink: 0; flex-wrap: wrap; gap: 10px;">
             <div style="display:flex; gap: 10px;">
                 <button class="btn-secondary" onclick="setAllMergeChoices('local')">Keep All Local</button>
@@ -449,1225 +472,1332 @@
     </div>
 </div>
 
+<!-- Link to the JS file -->
 <script>
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const presetColors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#795548", "#9e9e9e", "#607d8b", "#ffffff"];
-    
-    let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", history: [], settings: {} };
-    
-    let currentYear = new Date().getFullYear();
-    let activeMonth = null;
-    let selectedColor = "#4caf50";
-    
-    let analyticsType = 'bar';
-    let draggedDashItemId = null; let draggedDashSourceMonth = null; let draggedPageItemId = null; let draggedPiggyId = null;
-    let newEntryTags = []; 
-    
-    let aYearStart = currentYear;
-    let aYearEnd = currentYear;
-    let aActiveTags = [];
-    
-    let mergeConflicts = [];
-    let mergeImportedData = null;
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const presetColors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722", "#795548", "#9e9e9e", "#607d8b", "#ffffff"];
 
-    let analyticsInitialized = false; 
+let state = { theme: 'dark', tags: ["Essentials", "Hardware", "Leisure", "Savings"], years: {}, longTerm: { items: [] }, piggyBanks: [], notes: "", history: [], settings: {} };
 
-    function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
-    function toGEL(amt, curr) { return curr === 'USD' ? amt * (state.settings.usdRate || 2.7) : amt; }
-    function fmtCurr(amt, curr) { return curr === 'USD' ? '$' + fmt(amt) : fmt(amt) + '₾'; }
+let currentYear = new Date().getFullYear();
+let activeMonth = null;
+let selectedColor = "#4caf50";
 
-    function getFinancialDate() {
-        let sysDate = new Date();
-        let sysYear = sysDate.getFullYear();
-        let sysMonthIdx = sysDate.getMonth();
-        
-        if (state.settings.enableSalaryDate && sysDate.getDate() < state.settings.salaryDate) {
-            sysMonthIdx -= 1;
-            if (sysMonthIdx < 0) { sysMonthIdx = 11; sysYear -= 1; }
-        }
-        return { year: sysYear, monthIdx: sysMonthIdx };
+let analyticsType = 'bar';
+let draggedDashItemId = null; let draggedDashSourceMonth = null; let draggedPageItemId = null; let draggedPiggyId = null;
+let newEntryTags = []; 
+
+let aYearStart = currentYear;
+let aYearEnd = currentYear;
+let aActiveTags = [];
+
+let mergeConflicts = [];
+let mergeImportedData = null;
+
+let analyticsInitialized = false; 
+
+function fmt(num) { return Number(Math.round(num + "e2") + "e-2"); }
+function toGEL(amt, curr) { return curr === 'USD' ? amt * (state.settings.usdRate || 2.7) : amt; }
+function fmtCurr(amt, curr) { return curr === 'USD' ? '$' + fmt(amt) : fmt(amt) + '₾'; }
+
+function getFinancialDate() {
+    let sysDate = new Date();
+    let sysYear = sysDate.getFullYear();
+    let sysMonthIdx = sysDate.getMonth();
+    
+    if (state.settings.enableSalaryDate && sysDate.getDate() < state.settings.salaryDate) {
+        sysMonthIdx -= 1;
+        if (sysMonthIdx < 0) { sysMonthIdx = 11; sysYear -= 1; }
     }
+    return { year: sysYear, monthIdx: sysMonthIdx };
+}
 
-    function logHistory(itemId, itemName, action, msg) {
-        if (!state.history) state.history = [];
-        state.history.unshift({
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
-            itemId, itemName, action, msg, time: Date.now()
-        });
-        if (state.history.length > 500) state.history.length = 500;
-        autoSave();
+function logHistory(itemId, itemName, action, msg) {
+    if (!state.history) state.history = [];
+    state.history.unshift({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+        itemId, itemName, action, msg, time: Date.now()
+    });
+    if (state.history.length > 500) state.history.length = 500;
+    autoSave();
+}
+
+function openHistoryModal() {
+    document.getElementById('historyModal').style.display = 'flex';
+    let list = document.getElementById('globalHistoryList');
+    if (!state.history || state.history.length === 0) {
+        list.innerHTML = `<div style="color:#aaa; text-align:center; padding: 20px;">No history recorded yet.</div>`;
+        return;
     }
+    list.innerHTML = state.history.map(h => {
+        let actColor = h.action==='ADD' ? '#4caf50' : (h.action==='DELETE' ? '#f44336' : (h.action==='ADJUST' ? '#ff9800' : '#2196f3'));
+        return `
+        <div class="hist-entry">
+            <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
+                <div><strong style="color:${actColor}; font-size:0.9em; margin-right:5px;">[${h.action}]</strong> <strong>${h.itemName}</strong>: ${h.msg}</div>
+                <div class="hist-time">${new Date(h.time).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</div>
+            </div>
+            <button class="btn-danger" style="padding: 6px 10px; font-weight:bold; flex-shrink:0;" onclick="deleteHistoryItem('${h.id}')">X</button>
+        </div>`;
+    }).join('');
+}
 
-    function openHistoryModal() {
-        document.getElementById('historyModal').style.display = 'flex';
-        let list = document.getElementById('globalHistoryList');
-        if (!state.history || state.history.length === 0) {
-            list.innerHTML = `<div style="color:#aaa; text-align:center; padding: 20px;">No history recorded yet.</div>`;
-            return;
-        }
-        list.innerHTML = state.history.map(h => {
-            let actColor = h.action==='ADD' ? '#4caf50' : (h.action==='DELETE' ? '#f44336' : (h.action==='ADJUST' ? '#ff9800' : '#2196f3'));
-            return `
-            <div class="hist-entry">
-                <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
-                    <div><strong style="color:${actColor}; font-size:0.9em; margin-right:5px;">[${h.action}]</strong> <strong>${h.itemName}</strong>: ${h.msg}</div>
-                    <div class="hist-time">${new Date(h.time).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</div>
-                </div>
-                <button class="btn-danger" style="padding: 6px 10px; font-weight:bold; flex-shrink:0;" onclick="deleteHistoryItem('${h.id}')">X</button>
-            </div>`;
-        }).join('');
-    }
+function deleteHistoryItem(id) {
+    state.history = state.history.filter(h => h.id !== id);
+    openHistoryModal();
+    autoSave();
+}
 
-    function deleteHistoryItem(id) {
-        state.history = state.history.filter(h => h.id !== id);
+function clearHistory() {
+    if(confirm("Are you sure you want to delete all history logs?")) {
+        state.history = [];
         openHistoryModal();
         autoSave();
     }
+}
 
-    function clearHistory() {
-        if(confirm("Are you sure you want to delete all history logs?")) {
-            state.history = [];
-            openHistoryModal();
-            autoSave();
-        }
-    }
-
-    let isResizingFooter = false;
-    let startY, startHeight;
+// --- 1. Clear History By Exact Date Range ---
+function clearHistoryRange() {
+    let from = document.getElementById('histFromDate').value;
+    let to = document.getElementById('histToDate').value;
+    if (!from || !to) { alert("Please select both 'from' and 'to' dates."); return; }
     
-    function initResizer() {
-        const resizer = document.getElementById('footerResizer');
-        const footer = document.getElementById('pageFooterElem');
-        
-        resizer.addEventListener('mousedown', (e) => {
-            isResizingFooter = true;
-            startY = e.clientY;
-            startHeight = footer.offsetHeight;
-            document.body.style.cursor = 'ns-resize';
-            e.preventDefault();
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (!isResizingFooter) return;
-            let diff = startY - e.clientY;
-            let newHeight = startHeight + diff;
-            if (newHeight < 150) newHeight = 150; 
-            if (newHeight > window.innerHeight * 0.8) newHeight = window.innerHeight * 0.8; 
-            footer.style.height = newHeight + 'px';
-        });
-        
-        document.addEventListener('mouseup', () => {
-            if(isResizingFooter) {
-                isResizingFooter = false;
-                document.body.style.cursor = 'default';
-            }
-        });
+    let fromDate = new Date(from);
+    let toDate = new Date(to);
+    
+    // Make sure the "to" date covers the entire day up to 11:59 PM
+    toDate.setHours(23, 59, 59, 999);
+    
+    if (confirm(`Are you sure you want to delete all history logs from ${from} to ${to}?`)) {
+        // Keep logs that happened BEFORE the fromDate OR AFTER the toDate
+        state.history = state.history.filter(h => h.time < fromDate.getTime() || h.time > toDate.getTime());
+        openHistoryModal();
+        autoSave();
     }
+}
 
-    document.addEventListener('input', e => {
-        if (e.target.classList.contains('num-input')) {
-            let val = e.target.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, ''); 
-            let parts = val.split('.');
-            if(parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
-            if (e.target.value !== val) e.target.value = val;
-        }
-    });
+let isResizingFooter = false;
+let startY, startHeight;
 
-    document.addEventListener('keydown', function(event) {
-        if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'S')) {
-            event.preventDefault();
-            exportJSON();
-            return;
-        }
-        if (event.key === "Escape") {
-            let modals = ['tagsModal', 'settingsModal', 'mergeModal', 'historyModal'];
-            modals.forEach(m => { if(document.getElementById(m).style.display === 'flex') document.getElementById(m).style.display = 'none'; });
-            if (document.getElementById('analyticsView').style.display === 'flex') closeAnalyticsPage();
-            else if (activeMonth !== null) closeMonthPage();
-        }
+function initResizer() {
+    const resizer = document.getElementById('footerResizer');
+    const footer = document.getElementById('pageFooterElem');
+    
+    resizer.addEventListener('mousedown', (e) => {
+        isResizingFooter = true;
+        startY = e.clientY;
+        startHeight = footer.offsetHeight;
+        document.body.style.cursor = 'ns-resize';
+        e.preventDefault();
     });
     
-    function checkEnter(event) { if (event.key === "Enter") addItem(); }
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizingFooter) return;
+        let diff = startY - e.clientY;
+        let newHeight = startHeight + diff;
+        if (newHeight < 150) newHeight = 150; 
+        if (newHeight > window.innerHeight * 0.8) newHeight = window.innerHeight * 0.8; 
+        footer.style.height = newHeight + 'px';
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if(isResizingFooter) {
+            isResizingFooter = false;
+            document.body.style.cursor = 'default';
+        }
+    });
+}
 
-    function init() {
-        let saved = localStorage.getItem('financeDataV10'); 
-        if (saved) { state = { ...state, ...JSON.parse(saved) }; }
-        
-        if (!state.settings) state.settings = {};
-        if (state.settings.usdRate === undefined) state.settings.usdRate = 2.7;
-        if (state.settings.enableSalaryDate === undefined) state.settings.enableSalaryDate = false;
-        if (!state.settings.salaryDate) state.settings.salaryDate = 10;
-        if (state.settings.boardLayout === undefined) state.settings.boardLayout = 'grid';
-        if (state.settings.pageLayout === undefined) state.settings.pageLayout = 'view-grid';
-        if (state.settings.gridScroll === undefined) state.settings.gridScroll = false;
-        
-        if (!state.history) state.history = [];
-        
-        if(state.tags) state.tags.sort((a,b) => a.localeCompare(b));
-        
-        currentYear = getFinancialDate().year; 
-        if (!state.years[currentYear]) generateYear(currentYear);
-        
-        for(let y in state.years) {
-            if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = 2000;
-            months.forEach(m => {
-                if(state.years[y][m]) state.years[y][m].items.forEach(i => { 
-                    if(i.isIncome === undefined) i.isIncome = false; 
-                    if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
-                    if(!i.tags) i.tags = [];
-                    if(!i.currency) i.currency = 'GEL';
-                    if(!i.subItems) i.subItems = [];
-                });
+document.addEventListener('input', e => {
+    if (e.target.classList.contains('num-input')) {
+        let val = e.target.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, ''); 
+        let parts = val.split('.');
+        if(parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
+        if (e.target.value !== val) e.target.value = val;
+    }
+});
+
+document.addEventListener('keydown', function(event) {
+    if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'S')) {
+        event.preventDefault();
+        exportJSON();
+        return;
+    }
+    if (event.key === "Escape") {
+        let modals = ['tagsModal', 'settingsModal', 'mergeModal', 'historyModal', 'spendModal'];
+        modals.forEach(m => { if(document.getElementById(m).style.display === 'flex') document.getElementById(m).style.display = 'none'; });
+        if (document.getElementById('analyticsView').style.display === 'flex') closeAnalyticsPage();
+        else if (activeMonth !== null) closeMonthPage();
+    }
+});
+
+function checkEnter(event) { if (event.key === "Enter") addItem(); }
+
+function init() {
+    let saved = localStorage.getItem('financeDataV10'); 
+    if (saved) { state = { ...state, ...JSON.parse(saved) }; }
+    
+    if (!state.settings) state.settings = {};
+    if (state.settings.usdRate === undefined) state.settings.usdRate = 2.7;
+    if (state.settings.enableSalaryDate === undefined) state.settings.enableSalaryDate = false;
+    if (!state.settings.salaryDate) state.settings.salaryDate = 10;
+    if (state.settings.boardLayout === undefined) state.settings.boardLayout = 'grid';
+    if (state.settings.pageLayout === undefined) state.settings.pageLayout = 'view-grid';
+    if (state.settings.gridScroll === undefined) state.settings.gridScroll = false;
+    
+    if (!state.history) state.history = [];
+    if(state.tags) state.tags.sort((a,b) => a.localeCompare(b));
+    
+    currentYear = getFinancialDate().year; 
+    if (!state.years[currentYear]) generateYear(currentYear);
+    
+    for(let y in state.years) {
+        if (state.years[y].yearlySalary === undefined) state.years[y].yearlySalary = 2000;
+        months.forEach(m => {
+            if(state.years[y][m]) state.years[y][m].items.forEach(i => { 
+                if(i.isIncome === undefined) i.isIncome = false; 
+                if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
+                if(!i.tags) i.tags = [];
+                if(!i.currency) i.currency = 'GEL';
+                if(!i.subItems) i.subItems = [];
             });
-        }
-        if(state.longTerm.items) state.longTerm.items.forEach(i => { 
-            if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
-            if(!i.tags) i.tags = []; 
-            if(!i.currency) i.currency = 'GEL';
-            if(!i.subItems) i.subItems = [];
         });
-        
-        initResizer();
-        initUI();
     }
+    if(state.longTerm.items) state.longTerm.items.forEach(i => { 
+        if(typeof i.tag === 'string') { i.tags = [i.tag]; delete i.tag; }
+        if(!i.tags) i.tags = []; 
+        if(!i.currency) i.currency = 'GEL';
+        if(!i.subItems) i.subItems = [];
+    });
+    
+    initResizer();
+    initUI();
+}
 
-    function initUI() {
-        changeTheme(state.theme);
-        document.getElementById('themeSelectModal').value = state.theme;
-        document.getElementById('yearDisplay').innerText = currentYear;
-        document.getElementById('quickNotes').value = state.notes;
+function initUI() {
+    changeTheme(state.theme);
+    document.getElementById('themeSelectModal').value = state.theme;
+    document.getElementById('yearDisplay').innerText = currentYear;
+    document.getElementById('quickNotes').value = state.notes;
 
-        initColorPicker();
-        updateTagSelects();
-        renderBoard();
-        renderExtras();
+    initColorPicker();
+    updateTagSelects();
+    renderBoard();
+    renderExtras();
+}
+
+function generateYear(year, targetState = state) { 
+    if(!targetState.years[year]) {
+        let prevSal = targetState.years[year - 1] ? targetState.years[year - 1].yearlySalary : 2000;
+        targetState.years[year] = { yearlySalary: prevSal }; 
+        months.forEach(m => targetState.years[year][m] = { salary: null, items: [] });
     }
+}
 
-    function generateYear(year, targetState = state) { 
-        if(!targetState.years[year]) {
-            let prevSal = targetState.years[year - 1] ? targetState.years[year - 1].yearlySalary : 2000;
-            targetState.years[year] = { yearlySalary: prevSal }; 
-            months.forEach(m => targetState.years[year][m] = { salary: null, items: [] });
-        }
+function changeYear(dir) { currentYear += dir; document.getElementById('yearDisplay').innerText = currentYear; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
+function changeTheme(th) { state.theme = th; document.body.setAttribute('data-theme', th); autoSave(); }
+function updateNotes(val) { state.notes = val; autoSave(); }
+
+function openSettingsModal() { 
+    document.getElementById('usdRateSetting').value = state.settings.usdRate || 2.7;
+    document.getElementById('enableSalaryDateSetting').checked = state.settings.enableSalaryDate;
+    document.getElementById('salaryDateSetting').value = state.settings.salaryDate || 10;
+    document.getElementById('themeSelectModal').value = state.theme;
+    
+    document.getElementById('settingsYearHighlight').innerText = currentYear;
+    document.getElementById('yearlySalarySetting').value = state.years[currentYear].yearlySalary;
+    
+    document.getElementById('boardLayoutSetting').value = state.settings.boardLayout;
+    document.getElementById('pageLayoutSetting').value = state.settings.pageLayout;
+    document.getElementById('gridScrollSetting').checked = state.settings.gridScroll;
+    
+    document.getElementById('settingsModal').style.display = 'flex'; 
+}
+
+function saveSettings() {
+    state.settings.usdRate = parseFloat(document.getElementById('usdRateSetting').value) || 2.7;
+    state.settings.enableSalaryDate = document.getElementById('enableSalaryDateSetting').checked;
+    state.settings.salaryDate = parseInt(document.getElementById('salaryDateSetting').value) || 10;
+    
+    state.settings.boardLayout = document.getElementById('boardLayoutSetting').value;
+    state.settings.pageLayout = document.getElementById('pageLayoutSetting').value;
+    state.settings.gridScroll = document.getElementById('gridScrollSetting').checked;
+    
+    let parsedSalary = parseFloat(document.getElementById('yearlySalarySetting').value);
+    if (!isNaN(parsedSalary)) {
+        state.years[currentYear].yearlySalary = parsedSalary;
     }
     
-    function changeYear(dir) { currentYear += dir; document.getElementById('yearDisplay').innerText = currentYear; if (!state.years[currentYear]) generateYear(currentYear); initUI(); }
-    function changeTheme(th) { state.theme = th; document.body.setAttribute('data-theme', th); autoSave(); }
-    function updateNotes(val) { state.notes = val; autoSave(); }
+    document.getElementById('settingsModal').style.display = 'none';
+    
+    if(activeMonth) renderPageItems();
+    renderBoard(); renderExtras(); autoSave();
+}
 
-    function openSettingsModal() { 
-        document.getElementById('usdRateSetting').value = state.settings.usdRate || 2.7;
-        document.getElementById('enableSalaryDateSetting').checked = state.settings.enableSalaryDate;
-        document.getElementById('salaryDateSetting').value = state.settings.salaryDate || 10;
-        document.getElementById('themeSelectModal').value = state.theme;
-        
-        document.getElementById('settingsYearHighlight').innerText = currentYear;
-        document.getElementById('yearlySalarySetting').value = state.years[currentYear].yearlySalary;
-        
-        document.getElementById('boardLayoutSetting').value = state.settings.boardLayout;
-        document.getElementById('pageLayoutSetting').value = state.settings.pageLayout;
-        document.getElementById('gridScrollSetting').checked = state.settings.gridScroll;
-        
-        document.getElementById('settingsModal').style.display = 'flex'; 
+function updateTypePlaceholder() { document.getElementById('itemCost').placeholder = document.getElementById('itemType').value === 'income' ? 'Amt' : 'Cost'; }
+
+function renderBoard() {
+    const board = document.getElementById('board');
+    board.innerHTML = ''; 
+    board.className = 'board-' + state.settings.boardLayout;
+    
+    if (state.settings.boardLayout === 'grid' && state.settings.gridScroll) {
+        board.classList.add('scrollable-items');
+    } else {
+        board.classList.remove('scrollable-items');
     }
     
-    function saveSettings() {
-        state.settings.usdRate = parseFloat(document.getElementById('usdRateSetting').value) || 2.7;
-        state.settings.enableSalaryDate = document.getElementById('enableSalaryDateSetting').checked;
-        state.settings.salaryDate = parseInt(document.getElementById('salaryDateSetting').value) || 10;
+    let fDate = getFinancialDate();
+
+    months.forEach(month => {
+        let mData = state.years[currentYear][month];
+        let sal = mData.salary !== null ? mData.salary : state.years[currentYear].yearlySalary;
         
-        state.settings.boardLayout = document.getElementById('boardLayoutSetting').value;
-        state.settings.pageLayout = document.getElementById('pageLayoutSetting').value;
-        state.settings.gridScroll = document.getElementById('gridScrollSetting').checked;
-        
-        let parsedSalary = parseFloat(document.getElementById('yearlySalarySetting').value);
-        if (!isNaN(parsedSalary)) {
-            state.years[currentYear].yearlySalary = parsedSalary;
-        }
-        
-        document.getElementById('settingsModal').style.display = 'none';
-        
-        if(activeMonth) renderPageItems();
-        renderBoard(); renderExtras(); autoSave();
-    }
-
-    function updateTypePlaceholder() { document.getElementById('itemCost').placeholder = document.getElementById('itemType').value === 'income' ? 'Amt' : 'Cost'; }
-
-    function renderBoard() {
-        const board = document.getElementById('board');
-        board.innerHTML = ''; 
-        board.className = 'board-' + state.settings.boardLayout;
-        
-        if (state.settings.boardLayout === 'grid' && state.settings.gridScroll) {
-            board.classList.add('scrollable-items');
-        } else {
-            board.classList.remove('scrollable-items');
-        }
-        
-        let fDate = getFinancialDate();
-
-        months.forEach(month => {
-            let mData = state.years[currentYear][month];
-            let sal = mData.salary !== null ? mData.salary : state.years[currentYear].yearlySalary;
-            
-            let incomes = mData.items.filter(i => i.isIncome); let expenses = mData.items.filter(i => !i.isIncome);
-            let plannedIncome = fmt(incomes.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
-            let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
-            let plannedSpent = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
-            let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
-            
-            let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
-            
-            let isCurrentMonth = (currentYear === fDate.year && month === months[fDate.monthIdx]);
-
-            let col = document.createElement('div'); 
-            col.className = 'month-col';
-            if (isCurrentMonth) {
-                col.style.cssText = `border: 2px solid var(--accent); box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);`;
-            }
-            
-            col.onclick = () => openMonthPage(month); 
-            col.ondragover = (e) => e.preventDefault(); col.ondrop = (e) => dropToMonth(e, month);
-            let mathString = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>` : `Planned: ${sal} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`;
-
-            let incHtml = incomes.map(item => `
-                <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
-                     onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
-                     ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="color: var(--accent);">➕ ${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
-                    </div>
-                </div>`).join('');
-                
-            let expHtml = expenses.map(item => `
-                <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
-                     onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
-                     ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span>${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
-                    </div>
-                </div>`).join('');
-
-            let combinedHtml = '';
-            if(incomes.length > 0) combinedHtml += `<div class="dash-section-title" style="color:var(--accent);">INCOME</div>` + incHtml;
-            if(expenses.length > 0) combinedHtml += `<div class="dash-section-title" style="color:#aaa; border-top:1px dashed var(--border); margin-top:5px;">EXPENSES</div>` + expHtml;
-
-            let badgeHtml = isCurrentMonth ? `<span style="background:var(--accent); color:white; font-size:0.65em; padding:2px 8px; border-radius:12px; position:absolute; top:-12px; right:15px; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">CURRENT</span>` : '';
-
-            col.innerHTML = `
-                ${badgeHtml}
-                <div class="month-header"><strong style="font-size: 1.2em;">${month}</strong><button onclick="openMonthPage('${month}'); event.stopPropagation();">Edit / Add</button></div>
-                <div class="summary-top">${mathString}</div>
-                <div class="items-container" id="col-${month}">${combinedHtml}</div>
-                <div class="summary-bottom">Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></div>
-            `;
-            board.appendChild(col);
-        });
-        autoSave();
-    }
-
-    function renderExtras() {
-        let lt = state.longTerm; let incomes = lt.items.filter(i => i.isIncome); let expenses = lt.items.filter(i => !i.isIncome);
-        let ltPlanned = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
-        let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
-        let incText = incomes.length > 0 ? ` (+${fmt(incomes.reduce((s,i)=>s+toGEL(i.cost*i.qty,i.currency),0))}₾ Inc)` : '';
-        
-        document.getElementById('longTermBox').onclick = () => openMonthPage('LongTerm');
-        document.getElementById('longTermBox').innerHTML = `
-            <div class="month-header"><strong style="font-size: 1.2em;">Long Term Plans</strong><button onclick="openMonthPage('LongTerm'); event.stopPropagation();">Edit / Add</button></div>
-            <div class="summary-top">Total Planned Costs: <strong>${ltPlanned}₾</strong> ${incText}</div>
-            <div class="items-container" ondragover="event.preventDefault()" ondrop="dropToMonth(event, 'LongTerm')">
-                ${lt.items.map(item => `
-                    <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', 'LongTerm'); event.stopPropagation();" ondragover="event.preventDefault()" ondrop="dashDropOnItem(event, '${item.id}', 'LongTerm');">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
-                            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('LongTerm', '${item.id}'); event.stopPropagation();">
-                        </div>
-                    </div>`).join('')}
-            </div>
-            <div class="summary-bottom">Finished (Paid) Costs: <strong class="pos">${ltFinished}₾</strong></div>
-        `;
-
-        let totalPlanMonthly = fmt(state.piggyBanks.reduce((s, p) => s + (p.monthlyPlan || 0), 0));
-        let monthlyPlanHtml = totalPlanMonthly > 0 ? `<span style="font-size:0.85em; color:#aaa; margin-left: 10px;">(Goal: ${totalPlanMonthly}₾/mo)</span>` : '';
-
-        document.getElementById('piggyBox').innerHTML = `
-            <div class="month-header" style="border-bottom: 1px dashed var(--border);"><strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong></div>
-            <div style="padding:15px; display:flex; flex-direction:column; gap:10px; flex-grow:1; overflow-y:auto;">
-                ${state.piggyBanks.map(p => `
-                    <div style="background:var(--card); padding:12px; border-radius:6px; border-left:6px solid ${p.color}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:grab;"
-                         draggable="true" ondragstart="piggyDragStart(event, '${p.id}')" ondragover="event.preventDefault()" ondrop="piggyDrop(event, '${p.id}')">
-                        ${p.isEditing ? `
-                            <input type="text" id="piggyName-${p.id}" value="${p.name}" style="flex-grow:1; min-width: 100px;">
-                            <input type="text" class="num-input" id="piggyPlan-${p.id}" value="${p.monthlyPlan || ''}" placeholder="Plan/mo ₾" style="width:80px;">
-                            <input type="color" id="piggyColor-${p.id}" value="${p.color}" style="padding:0; width:30px; height:30px; cursor:pointer; border:none; background:transparent;">
-                            <button onclick="savePiggy('${p.id}')">Save</button>
-                        ` : `
-                            <div style="flex-grow:1; pointer-events:none;">
-                                <strong style="font-size:1.1em;">${p.name}</strong>
-                                ${p.monthlyPlan ? `<div style="font-size:0.85em; color:#aaa;">Plan: ${p.monthlyPlan}₾ / mo</div>` : ''}
-                            </div>
-                            <div style="font-size:1.3em; font-weight:bold; color:var(--accent); min-width:80px; text-align:right;">${fmt(p.balance)}₾</div>
-                            <div style="display:flex; gap:5px; align-items:center;">
-                                <input type="text" class="num-input" id="piggyVal-${p.id}" placeholder="₾" style="width:70px;">
-                                <button onclick="updatePiggy('${p.id}', 1)">+</button>
-                                <button class="btn-danger" onclick="updatePiggy('${p.id}', -1)">-</button>
-                                <button class="btn-secondary" style="margin-left:10px;" onclick="togglePiggyEdit('${p.id}')">✏️</button>
-                                <button class="btn-danger" onclick="deletePiggy('${p.id}')">X</button>
-                            </div>
-                        `}
-                    </div>
-                `).join('')}
-                <div style="margin-top:auto; border-top:1px dashed var(--border); padding-top:15px; display:flex; gap:10px;">
-                    <input type="text" id="newPiggyName" placeholder="New Piggy Bank Name" style="flex-grow:1;" onkeydown="if(event.key==='Enter') addPiggy()">
-                    <button onclick="addPiggy()">Create Vault</button>
-                </div>
-            </div>
-        `;
-    }
-
-    function piggyDragStart(ev, id) { draggedPiggyId = id; }
-    function piggyDrop(ev, targetId) { ev.preventDefault(); if(draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
-    
-    function addPiggy() { 
-        let n = document.getElementById('newPiggyName').value; 
-        if(n){ 
-            let newId = Date.now().toString();
-            state.piggyBanks.push({ id: newId, name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); 
-            logHistory(newId, n, 'ADD', `Created Piggy Bank`);
-            renderExtras(); autoSave(); 
-        } 
-    }
-    function togglePiggyEdit(id) { state.piggyBanks.find(p => p.id === id).isEditing = true; renderExtras(); }
-    function savePiggy(id) { 
-        let b = state.piggyBanks.find(p => p.id === id); 
-        let oldName = b.name;
-        b.name = document.getElementById(`piggyName-${id}`).value; 
-        let pv = document.getElementById(`piggyPlan-${id}`).value; 
-        b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; 
-        b.color = document.getElementById(`piggyColor-${id}`).value; 
-        b.isEditing = false; 
-        logHistory(id, b.name, 'EDIT', `Updated Vault Settings`);
-        renderExtras(); autoSave(); 
-    }
-    function updatePiggy(id, mult) { 
-        let amt = parseFloat(document.getElementById(`piggyVal-${id}`).value) || 0; 
-        let b = state.piggyBanks.find(p => p.id === id); 
-        if(b && amt > 0) { 
-            b.balance = fmt(b.balance + (amt * mult)); 
-            logHistory(id, b.name, 'ADJUST', `${mult > 0 ? 'Added' : 'Removed'} ${amt}₾`);
-            renderExtras(); autoSave(); 
-        } 
-    }
-    function deletePiggy(id) { 
-        if(confirm("Delete this Piggy Bank?")) { 
-            let b = state.piggyBanks.find(p => p.id === id);
-            logHistory(id, b.name, 'DELETE', `Deleted Piggy Bank`);
-            state.piggyBanks = state.piggyBanks.filter(p => p.id !== id); 
-            renderExtras(); autoSave(); 
-        } 
-    }
-
-    function renderNewEntryTags() { 
-        document.getElementById('newEntryTagsContainer').innerHTML = state.tags.map(t => { 
-            let isSel = newEntryTags.includes(t); 
-            return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; padding: 6px 12px; font-size: 0.9em; margin: 2px;" onclick="toggleNewEntryTag('${t}')">${t}</span>`; 
-        }).join(''); 
-    }
-    function toggleNewEntryTag(t) { if(newEntryTags.includes(t)) newEntryTags = newEntryTags.filter(x => x !== t); else newEntryTags.push(t); renderNewEntryTags(); }
-
-    function getActiveItemsArray() { return activeMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][activeMonth].items; }
-    function openMonthPage(month) { activeMonth = month; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('monthView').style.display = 'flex'; if (month === 'LongTerm') { document.getElementById('pageMonthTitle').innerText = "Long Term Plans"; document.getElementById('salaryOverrideContainer').style.display = 'none'; } else { document.getElementById('pageMonthTitle').innerText = `${month} ${currentYear} Planning`; document.getElementById('salaryOverrideContainer').style.display = 'block'; document.getElementById('pageSalary').value = state.years[currentYear][month].salary || ''; } renderPageItems(); }
-    function closeMonthPage() { activeMonth = null; document.getElementById('monthView').style.display = 'none'; document.getElementById('dashboardView').style.display = 'flex'; renderBoard(); renderExtras(); }
-    function setMonthSalary(val) { if(activeMonth !== 'LongTerm') { state.years[currentYear][activeMonth].salary = val === "" ? null : parseFloat(val); renderPageItems(); autoSave(); } }
-
-    function checkAutoTag(val) { if(!val) return; let firstWord = val.trim().split(' ')[0].toLowerCase(); let match = state.tags.find(t => t.toLowerCase() === firstWord); if(match && !newEntryTags.includes(match)) { newEntryTags.push(match); renderNewEntryTags(); } }
-
-    function addItem() {
-        let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value; let currInput = document.getElementById('itemCurrency').value;
-        if(!nameInput.value) return;
-        let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput, subItems: [] };
-        getActiveItemsArray().push(item);
-        
-        logHistory(item.id, item.name, 'ADD', `Created at ${item.cost} ${item.currency}`);
-        
-        nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; document.getElementById('itemName').focus(); newEntryTags = []; renderNewEntryTags(); renderPageItems(); autoSave();
-    }
-    
-    // V22: Sub-item Inline Sync Helper
-    function syncSubItems(id) {
-        let item = getActiveItemsArray().find(i => i.id === id);
-        if (!item || !item.subItems || item.subItems.length === 0) return;
-        let total = 0;
-        item.subItems.forEach((sub, sIdx) => {
-            let nameEl = document.getElementById(`editSubName-${id}-${sIdx}`);
-            let costEl = document.getElementById(`editSubCost-${id}-${sIdx}`);
-            if (nameEl && costEl) {
-                sub.name = nameEl.value.trim() || sub.name;
-                let parsed = parseFloat(costEl.value);
-                sub.cost = isNaN(parsed) ? 0 : parsed;
-            }
-            total += sub.cost;
-        });
-        item.cost = total;
-        let mainCostEl = document.getElementById(`editCost-${id}`);
-        if (mainCostEl) mainCostEl.value = total;
-    }
-
-    function addSubItem(itemId) {
-        syncSubItems(itemId);
-        let item = getActiveItemsArray().find(i => i.id === itemId);
-        if(!item) return;
-        if(!item.subItems) item.subItems = [];
-        
-        let n = document.getElementById(`subName-${itemId}`).value.trim();
-        let cStr = document.getElementById(`subCost-${itemId}`).value;
-        let c = parseFloat(cStr);
-        if(isNaN(c)) c = 0; // V22 Allow 0 cost
-        
-        if(n) {
-            item.subItems.push({ name: n, cost: c });
-            item.cost = item.subItems.reduce((acc, s) => acc + s.cost, 0);
-            
-            logHistory(itemId, item.name, 'EDIT', `Added split sub-item: ${n} (${c})`);
-            renderPageItems();
-            autoSave();
-        }
-    }
-    
-    function deleteSubItem(itemId, subIdx) {
-        syncSubItems(itemId);
-        let item = getActiveItemsArray().find(i => i.id === itemId);
-        if(!item || !item.subItems) return;
-        
-        let removed = item.subItems.splice(subIdx, 1)[0];
-        item.cost = item.subItems.length > 0 ? item.subItems.reduce((acc, s) => acc + s.cost, 0) : 0;
-        
-        logHistory(itemId, item.name, 'EDIT', `Removed split sub-item: ${removed.name}`);
-        renderPageItems();
-        autoSave();
-    }
-    
-    function adjustEditCost(id, mult) {
-        let costInput = document.getElementById(`editCost-${id}`);
-        let adjInput = document.getElementById(`adjustCost-${id}`);
-        let item = getActiveItemsArray().find(i => i.id === id);
-        
-        if (item && item.subItems && item.subItems.length > 0) {
-            alert("This item has sub-items attached. Please add or adjust sub-items instead of modifying the main sum.");
-            adjInput.value = '';
-            return;
-        }
-        
-        let cost = parseFloat(costInput.value) || 0; let adj = parseFloat(adjInput.value) || 0;
-        if (adj > 0) { 
-            let newCost = fmt(cost + (adj * mult));
-            costInput.value = newCost; 
-            
-            let itemName = document.getElementById(`editName-${id}`).value;
-            let verb = mult > 0 ? "Added" : "Reduced";
-            logHistory(id, itemName, 'ADJUST', `${verb} ${adj}. New cost: ${newCost}`);
-            
-            adjInput.value = ''; 
-        }
-    }
-
-    function renderPageItems() {
-        if(!activeMonth) return;
-        let arr = getActiveItemsArray(); let items = [...arr]; let sortType = document.getElementById('pageSort').value;
-        if (sortType === 'costDesc') items.sort((a,b) => toGEL(b.cost*b.qty, b.currency) - toGEL(a.cost*a.qty, a.currency));
-        if (sortType === 'costAsc') items.sort((a,b) => toGEL(a.cost*a.qty, a.currency) - toGEL(b.cost*b.qty, b.currency));
-        if (sortType === 'tag') items.sort((a,b) => { let tA = a.tags[0] || ''; let tB = b.tags[0] || ''; return tA.localeCompare(tB); });
-
-        let incomes = items.filter(i => i.isIncome); let expenses = items.filter(i => !i.isIncome);
+        let incomes = mData.items.filter(i => i.isIncome); let expenses = mData.items.filter(i => !i.isIncome);
         let plannedIncome = fmt(incomes.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
         let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
         let plannedSpent = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
         let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
-
-        if (activeMonth === 'LongTerm') {
-            document.getElementById('pageSummaryBar').innerHTML = `<span>Total Planned Costs: <strong>${plannedSpent}₾</strong> ${plannedIncome>0 ? `(+${plannedIncome}₾ Inc)` : ''}</span><span>Finished (Paid): <strong class="pos">${actualSpent}₾</strong></span>`;
-        } else {
-            let sal = state.years[currentYear][activeMonth].salary !== null ? state.years[currentYear][activeMonth].salary : state.years[currentYear].yearlySalary;
-            let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
-            let str = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = ` : `Planned: ${sal} - ${plannedSpent} = `;
-            document.getElementById('pageSummaryBar').innerHTML = `<span>${str} <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong></span><span>Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></span>`;
-        }
-
-        const renderCard = (item) => {
-            if (item.isEditing) {
-                let quickColorsHtml = presetColors.map(c => `
-                    <div class="color-swatch ${item.color === c ? 'selected' : ''}" 
-                         style="background:${c}; width: 22px; height: 22px; border:1px solid #555; cursor:pointer;" 
-                         onclick="document.getElementById('editColor-${item.id}').value='${c}'; this.parentElement.querySelectorAll('.color-swatch').forEach(e=>e.classList.remove('selected')); this.classList.add('selected');">
-                    </div>
-                `).join('');
-
-                let itemHistHtml = (state.history || []).filter(h => h.itemId === item.id).map(h => `
-                    <div class="hist-entry" style="padding:4px 0;">
-                        <span>[${h.action}] ${h.msg}</span>
-                        <span class="hist-time" style="font-size:0.8em;">${new Date(h.time).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
-                    </div>
-                `).join('');
-                if(!itemHistHtml) itemHistHtml = `<div style="color:#aaa; font-size:0.85em;">No history yet.</div>`;
-                
-                let hasSubItems = item.subItems && item.subItems.length > 0;
-
-                return `
-                <div class="page-item-card" style="border-left-color: ${item.color}; display:flex; flex-direction:column; gap:12px; cursor:default;" 
-                     onclick="event.stopPropagation();"
-                     onkeydown="if(event.key==='Enter' && event.target.tagName !== 'BUTTON' && !event.target.id.includes('subName') && !event.target.id.includes('subCost')) { saveEditItem('${item.id}'); event.preventDefault(); }">
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 5px;">
-                        <select id="editType-${item.id}" style="font-weight:bold; width: 120px;">
-                            <option value="expense" ${!item.isIncome ? 'selected':''}>➖ Expense</option>
-                            <option value="income" ${item.isIncome ? 'selected':''}>➕ Income</option>
-                        </select>
-                        <div style="display:flex; gap: 8px; margin-left: auto;">
-                            <button onclick="saveEditItem('${item.id}')" style="padding: 10px 18px; font-size: 1.1em; border-radius: 6px;">💾 Save</button>
-                            <button class="btn-secondary" onclick="toggleEditItem('${item.id}')" style="padding: 10px 18px; font-size: 1.1em; border-radius: 6px;">X</button>
-                        </div>
-                    </div>
-                    <input type="text" id="editName-${item.id}" value="${item.name}" style="width:100%; font-size: 1.1em; padding: 10px;" placeholder="Name">
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                        <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden; flex:1; min-width: 120px;">
-                            <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none; min-width:50px; padding: 10px; ${hasSubItems ? 'opacity:0.5;' : ''}" ${hasSubItems ? 'readonly title="Cost is determined by sub-items"' : ''} placeholder="Cost">
-                            <select id="editCurrency-${item.id}" style="width:55px; border:none; background:transparent; font-weight:bold;">
-                                <option value="GEL" ${item.currency==='GEL'?'selected':''}>₾</option>
-                                <option value="USD" ${item.currency==='USD'?'selected':''}>$</option>
-                            </select>
-                        </div>
-                        <span style="font-weight:bold; color:#aaa; font-size: 1.2em;">x</span>
-                        <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:60px; padding: 10px;" placeholder="Qty">
-                    </div>
-                    
-                    ${!hasSubItems ? `
-                    <div class="adj-container" style="width: 100%;">
-                        <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)" style="padding: 10px 15px;">-</button>
-                        <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Quick Adjust Amount (±)" style="padding: 10px;" onkeydown="if(event.key==='Enter') { adjustEditCost('${item.id}', 1); event.stopPropagation(); event.preventDefault(); }">
-                        <button class="adj-btn btn-secondary" style="background:var(--accent); padding: 10px 15px;" onclick="adjustEditCost('${item.id}', 1)">+</button>
-                    </div>` : ''}
-                    
-                    <!-- V22 Feature: Sub Items Edit View (Editable Inputs) -->
-                    <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:10px;">
-                        <div style="font-size:0.9em; font-weight:bold; color:var(--accent); margin-bottom:8px;">Sub-Tasks / Split Costs:</div>
-                        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
-                            ${(item.subItems || []).map((sub, sIdx) => `
-                                <div style="display:flex; justify-content:space-between; background:var(--bg); padding:6px 8px; border-radius:4px; border:1px solid var(--border); gap:10px; align-items:center;">
-                                    <input type="text" id="editSubName-${item.id}-${sIdx}" value="${sub.name}" oninput="syncSubItems('${item.id}')" style="flex:1; padding:6px; min-width:100px;">
-                                    <div style="display:flex; gap:10px; align-items:center;">
-                                        <input type="text" class="num-input" id="editSubCost-${item.id}-${sIdx}" value="${sub.cost}" oninput="syncSubItems('${item.id}')" style="width:70px; padding:6px; text-align:right;">
-                                        <button class="btn-danger" style="padding:6px 10px; font-size:0.9em; font-weight:bold;" onclick="deleteSubItem('${item.id}', ${sIdx})">X</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div style="display:flex; gap:5px;">
-                            <input type="text" id="subName-${item.id}" placeholder="Sub-item name (e.g., Light)" style="flex:1;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
-                            <input type="text" class="num-input" id="subCost-${item.id}" placeholder="Cost (0 allowed)" style="width:70px;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
-                            <button onclick="addSubItem('${item.id}')" style="padding: 8px 12px; background: #2196f3;">Add</button>
-                        </div>
-                    </div>
-                    
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; background: var(--bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border); max-height: 150px; overflow-y: auto;" id="editTagsGroup-${item.id}">
-                        ${state.tags.map(t => {
-                            let isSel = item.tags.includes(t);
-                            return `
-                            <label style="cursor:pointer; margin:0;">
-                                <input type="checkbox" value="${t}" class="edit-tag-cb-${item.id}" ${isSel ? 'checked' : ''} style="display:none;" onchange="this.nextElementSibling.style.opacity = this.checked ? 1 : 0.4">
-                                <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block; padding: 6px 10px; font-size:0.9em;">${t}</span>
-                            </label>`;
-                        }).join('')}
-                    </div>
-                    
-                    <div style="display:flex; align-items:center; gap:10px; margin-top:10px; border-top: 1px dashed var(--border); padding-top: 10px;">
-                        <div style="display:flex; flex-wrap:wrap; gap: 6px; flex:1;">
-                            ${quickColorsHtml}
-                        </div>
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-                            <span style="font-size:0.75em; color:#aaa;">Custom</span>
-                            <input type="color" id="editColor-${item.id}" value="${item.color}" style="padding:0; width:35px; height:35px; cursor:pointer; border:none; background:transparent;">
-                        </div>
-                    </div>
-                    <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:10px;">
-                        <div style="font-size:0.85em; font-weight:bold; color:var(--accent); margin-bottom:5px;">Item History:</div>
-                        <div style="max-height: 100px; overflow-y:auto; background:var(--bg); padding:5px 8px; border-radius:4px;">
-                            ${itemHistHtml}
-                        </div>
-                    </div>
-                </div>`;
-            } else {
-                let hasSubItems = item.subItems && item.subItems.length > 0;
-                let conversionHtml = item.currency === 'USD' ? `<span style="font-size:0.85em; color:#aaa; margin-left:5px;">(~${fmt(toGEL(item.qty * item.cost, 'USD'))}₾)</span>` : '';
-                return `
-                <div class="page-item-card ${item.done ? 'done' : ''}" style="border-color: ${item.color}"
-                     onclick="toggleEditItem('${item.id}')" draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
-                     ondragover="event.preventDefault()" ondrop="pageItemDrop(event, '${item.id}')">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <strong style="font-size: 1.2em; color: ${item.isIncome ? 'var(--accent)' : 'inherit'}">${item.isIncome ? '➕' : ''} ${item.name}</strong>
-                        <div>
-                            <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteItem('${item.id}'); event.stopPropagation();">X</button>
-                        </div>
-                    </div>
-                    <div style="font-size: 1.1em; margin-bottom: 10px;">${item.qty}x ${fmtCurr(item.cost, item.currency)} = <b style="font-size: 1.2em;">${fmtCurr(item.qty * item.cost, item.currency)}</b> ${conversionHtml}</div>
-                    
-                    ${hasSubItems ? `
-                        <div style="margin: 10px 0; background: var(--bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
-                            <div style="font-size: 0.8em; color: var(--accent); margin-bottom: 6px; font-weight:bold; letter-spacing:1px; text-transform: uppercase;">Included Items:</div>
-                            <ul style="margin: 0; padding-left: 20px; font-size: 0.9em; color: var(--text);">
-                                ${item.subItems.map(s => `<li style="margin-bottom:3px;">${s.name} - <strong>${s.cost}</strong></li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; gap:4px; flex-wrap:wrap;">${item.tags.map(t => `<span class="tag-badge" onclick="event.stopPropagation();">${t}</span>`).join('')}</div>
-                        <label style="cursor:pointer;" onclick="event.stopPropagation();"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${activeMonth}', '${item.id}');"> Mark Done</label>
-                    </div>
-                </div>`;
-            }
-        };
-
-        let container = document.getElementById('pageItemsContainer'); 
-        container.className = 'page-content ' + state.settings.pageLayout;
-        let incHtml = incomes.map(renderCard).join('');
-        let expHtml = expenses.map(renderCard).join('');
         
-        container.innerHTML = `
-            ${incomes.length > 0 ? `<div class="page-section-title" style="color:var(--accent);">➕ Income</div>${incHtml}` : ''}
-            ${expenses.length > 0 ? `<div class="page-section-title">➖ Expenses</div>${expHtml}` : ''}
+        let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
+        
+        let isCurrentMonth = (currentYear === fDate.year && month === months[fDate.monthIdx]);
+
+        let col = document.createElement('div'); 
+        col.className = 'month-col';
+        if (isCurrentMonth) {
+            col.style.cssText = `border: 2px solid var(--accent); box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);`;
+        }
+        
+        col.onclick = () => openMonthPage(month); 
+        col.ondragover = (e) => e.preventDefault(); col.ondrop = (e) => dropToMonth(e, month);
+        let mathString = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>` : `Planned: ${sal} - ${plannedSpent} = <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong>`;
+
+        let incHtml = incomes.map(item => `
+            <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
+                 onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
+                 ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="color: var(--accent);">➕ ${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
+                    <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
+                </div>
+            </div>`).join('');
+            
+        let expHtml = expenses.map(item => `
+            <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" 
+                 onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', '${month}'); event.stopPropagation();"
+                 ondragover="event.preventDefault();" ondrop="dashDropOnItem(event, '${item.id}', '${month}');">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
+                    <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${month}', '${item.id}'); event.stopPropagation();">
+                </div>
+            </div>`).join('');
+
+        let combinedHtml = '';
+        if(incomes.length > 0) combinedHtml += `<div class="dash-section-title" style="color:var(--accent);">INCOME</div>` + incHtml;
+        if(expenses.length > 0) combinedHtml += `<div class="dash-section-title" style="color:#aaa; border-top:1px dashed var(--border); margin-top:5px;">EXPENSES</div>` + expHtml;
+
+        let badgeHtml = isCurrentMonth ? `<span style="background:var(--accent); color:white; font-size:0.65em; padding:2px 8px; border-radius:12px; position:absolute; top:-12px; right:15px; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">CURRENT</span>` : '';
+
+        col.innerHTML = `
+            ${badgeHtml}
+            <div class="month-header"><strong style="font-size: 1.2em;">${month}</strong><button onclick="openMonthPage('${month}'); event.stopPropagation();">Edit / Add</button></div>
+            <div class="summary-top">${mathString}</div>
+            <div class="items-container" id="col-${month}">${combinedHtml}</div>
+            <div class="summary-bottom">Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></div>
         `;
+        board.appendChild(col);
+    });
+    autoSave();
+}
+
+function renderExtras() {
+    let lt = state.longTerm; let incomes = lt.items.filter(i => i.isIncome); let expenses = lt.items.filter(i => !i.isIncome);
+    let ltPlanned = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+    let ltFinished = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
+    let incText = incomes.length > 0 ? ` (+${fmt(incomes.reduce((s,i)=>s+toGEL(i.cost*i.qty,i.currency),0))}₾ Inc)` : '';
+    
+    document.getElementById('longTermBox').onclick = () => openMonthPage('LongTerm');
+    document.getElementById('longTermBox').innerHTML = `
+        <div class="month-header"><strong style="font-size: 1.2em;">Long Term Plans</strong><button onclick="openMonthPage('LongTerm'); event.stopPropagation();">Edit / Add</button></div>
+        <div class="summary-top">Total Planned Costs: <strong>${ltPlanned}₾</strong> ${incText}</div>
+        <div class="items-container" ondragover="event.preventDefault()" ondrop="dropToMonth(event, 'LongTerm')">
+            ${lt.items.map(item => `
+                <div class="dash-item ${item.done ? 'done' : ''}" style="border-color: ${item.color}" onclick="event.stopPropagation();" draggable="true" ondragstart="dashDragStart(event, '${item.id}', 'LongTerm'); event.stopPropagation();" ondragover="event.preventDefault()" ondrop="dashDropOnItem(event, '${item.id}', 'LongTerm');">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="color: ${item.isIncome ? 'var(--accent)' : 'inherit'};">${item.isIncome ? '➕' : ''} ${item.name} (${fmtCurr(item.cost * item.qty, item.currency)})</span>
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('LongTerm', '${item.id}'); event.stopPropagation();">
+                    </div>
+                </div>`).join('')}
+        </div>
+        <div class="summary-bottom">Finished (Paid) Costs: <strong class="pos">${ltFinished}₾</strong></div>
+    `;
+
+    let totalPlanMonthly = fmt(state.piggyBanks.reduce((s, p) => s + (p.monthlyPlan || 0), 0));
+    let monthlyPlanHtml = totalPlanMonthly > 0 ? `<span style="font-size:0.85em; color:#aaa; margin-left: 10px;">(Goal: ${totalPlanMonthly}₾/mo)</span>` : '';
+
+    document.getElementById('piggyBox').innerHTML = `
+        <div class="month-header" style="border-bottom: 1px dashed var(--border);"><strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong></div>
+        <div style="padding:15px; display:flex; flex-direction:column; gap:10px; flex-grow:1; overflow-y:auto;">
+            ${state.piggyBanks.map(p => `
+                <div style="background:var(--card); padding:12px; border-radius:6px; border-left:6px solid ${p.color}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:grab;"
+                     draggable="true" ondragstart="piggyDragStart(event, '${p.id}')" ondragover="event.preventDefault()" ondrop="piggyDrop(event, '${p.id}')">
+                    ${p.isEditing ? `
+                        <input type="text" id="piggyName-${p.id}" value="${p.name}" style="flex-grow:1; min-width: 100px;">
+                        <input type="text" class="num-input" id="piggyPlan-${p.id}" value="${p.monthlyPlan || ''}" placeholder="Plan/mo ₾" style="width:80px;">
+                        <input type="color" id="piggyColor-${p.id}" value="${p.color}" style="padding:0; width:30px; height:30px; cursor:pointer; border:none; background:transparent;">
+                        <button onclick="savePiggy('${p.id}')">Save</button>
+                        ` : `
+                            <div style="flex-grow:1; pointer-events:none; min-width: 70px;">
+                                <strong style="font-size:1.1em;">${p.name}</strong>
+                                ${p.monthlyPlan ? `<div style="font-size:0.85em; color:#aaa;">Plan: ${p.monthlyPlan}₾ / mo</div>` : ''}
+                            </div>
+                            
+                            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap; margin-left:auto; justify-content:flex-end;">
+                                <div style="font-size:1.3em; font-weight:bold; color:var(--accent); white-space:nowrap;">${fmt(p.balance)}₾</div>
+                                <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+                                    <input type="text" class="num-input" id="piggyVal-${p.id}" placeholder="₾" style="width:70px;">
+                                    <button class="btn-secondary" style="background:#2196f3; color:white; font-weight:bold;" onclick="spendFromPiggy('${p.id}')">🛒 Spend</button>
+                                    <button onclick="updatePiggy('${p.id}', 1)">+</button>
+                                    <button class="btn-danger" onclick="updatePiggy('${p.id}', -1)">-</button>
+                                    <button class="btn-secondary" style="margin-left:3px;" onclick="togglePiggyEdit('${p.id}')">✏️</button>
+                                    <button class="btn-danger" onclick="deletePiggy('${p.id}')">X</button>
+                                </div>
+                            </div>
+                        `}
+                </div>
+            `).join('')}
+            <div style="margin-top:auto; border-top:1px dashed var(--border); padding-top:15px; display:flex; gap:10px;">
+                <input type="text" id="newPiggyName" placeholder="New Piggy Bank Name" style="flex-grow:1;" onkeydown="if(event.key==='Enter') addPiggy()">
+                <button onclick="addPiggy()">Create Vault</button>
+            </div>
+        </div>
+    `;
+}
+
+let currentSpendPiggyId = null;
+
+function spendFromPiggy(id) {
+    let b = state.piggyBanks.find(p => p.id === id);
+    if (!b) return;
+    currentSpendPiggyId = id;
+    
+    document.getElementById('spendModalPiggyName').innerText = b.name;
+    document.getElementById('spendModalPiggyBal').innerText = fmt(b.balance);
+    document.getElementById('spendModalItemName').value = '';
+    document.getElementById('spendModalCost').value = '';
+    
+    document.getElementById('spendModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('spendModalItemName').focus(), 100);
+}
+
+function confirmPiggySpend() {
+    let b = state.piggyBanks.find(p => p.id === currentSpendPiggyId);
+    if (!b) return;
+    
+    let itemName = document.getElementById('spendModalItemName').value.trim();
+    let cost = parseFloat(document.getElementById('spendModalCost').value);
+    
+    if (!itemName) { alert("Please enter what you are buying."); return; }
+    if (isNaN(cost) || cost <= 0) { alert("Please enter a valid amount."); return; }
+    if (cost > b.balance) {
+        if (!confirm(`Warning: This is more than your available balance of ${fmt(b.balance)}₾. Continue anyway?`)) return;
     }
 
-    function toggleEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.isEditing = !item.isEditing; renderPageItems(); } }
+    b.balance = fmt(b.balance - cost);
+    logHistory(b.id, b.name, 'ADJUST', `Spent ${cost}₾ on ${itemName}`);
+
+    let fDate = getFinancialDate();
+    let targetMonth = months[fDate.monthIdx];
+    let targetYear = fDate.year;
+    if (!state.years[targetYear]) generateYear(targetYear);
+
+    let itemsArr = state.years[targetYear][targetMonth].items;
+
+    if (!state.tags.includes("Savings Transfer")) state.tags.push("Savings Transfer");
+    if (!state.tags.includes("Piggy Purchase")) state.tags.push("Piggy Purchase");
+
+    let existingExp = itemsArr.find(i => !i.isIncome && i.name === b.name && i.tags.includes("Piggy Purchase"));
     
-    function saveEditItem(id) { 
-        syncSubItems(id);
-        let item = getActiveItemsArray().find(i => i.id === id); 
-        if(item) { 
-            let newName = document.getElementById(`editName-${id}`).value; 
+    if (existingExp) {
+        existingExp.subItems.push({ name: itemName, cost: cost });
+        existingExp.cost = fmt(existingExp.cost + cost);
+        logHistory(existingExp.id, existingExp.name, 'EDIT', `Added sub-item: ${itemName} (${cost}₾)`);
+    } else {
+        let newExp = {
+            id: Date.now().toString() + "E", name: b.name,
+            cost: cost, qty: 1, tags: ["Piggy Purchase"], color: b.color,
+            done: true, isEditing: false, isIncome: false, currency: 'GEL',
+            subItems: [{ name: itemName, cost: cost }]
+        };
+        itemsArr.push(newExp);
+        logHistory(newExp.id, newExp.name, 'ADD', `Created Piggy Purchase item with sub-item: ${itemName}`);
+    }
+
+    let incName = `Transfer from ${b.name}`;
+    let existingInc = itemsArr.find(i => i.isIncome && i.name === incName && i.tags.includes("Savings Transfer"));
+    
+    if (existingInc) {
+        existingInc.cost = fmt(existingInc.cost + cost);
+    } else {
+        let newInc = {
+            id: Date.now().toString() + "I", name: incName,
+            cost: cost, qty: 1, tags: ["Savings Transfer"], color: b.color,
+            done: true, isEditing: false, isIncome: true, currency: 'GEL', subItems: []
+        };
+        itemsArr.push(newInc);
+    }
+
+    state.tags.sort((a,b) => a.localeCompare(b));
+    updateTagSelects();
+
+    document.getElementById('spendModal').style.display = 'none';
+    
+    renderExtras();
+    renderBoard();
+    if (activeMonth === targetMonth) renderPageItems();
+    autoSave();
+}
+
+
+function piggyDragStart(ev, id) { draggedPiggyId = id; }
+function piggyDrop(ev, targetId) { ev.preventDefault(); if(draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
+
+function addPiggy() { 
+    let n = document.getElementById('newPiggyName').value; 
+    if(n){ 
+        let newId = Date.now().toString();
+        state.piggyBanks.push({ id: newId, name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false }); 
+        logHistory(newId, n, 'ADD', `Created Piggy Bank`);
+        renderExtras(); autoSave(); 
+    } 
+}
+function togglePiggyEdit(id) { state.piggyBanks.find(p => p.id === id).isEditing = true; renderExtras(); }
+function savePiggy(id) { 
+    let b = state.piggyBanks.find(p => p.id === id); 
+    let oldName = b.name;
+    b.name = document.getElementById(`piggyName-${id}`).value; 
+    let pv = document.getElementById(`piggyPlan-${id}`).value; 
+    b.monthlyPlan = pv !== "" ? parseFloat(pv) : null; 
+    b.color = document.getElementById(`piggyColor-${id}`).value; 
+    b.isEditing = false; 
+    logHistory(id, b.name, 'EDIT', `Updated Vault Settings`);
+    renderExtras(); autoSave(); 
+}
+function updatePiggy(id, mult) { 
+    let amt = parseFloat(document.getElementById(`piggyVal-${id}`).value) || 0; 
+    let b = state.piggyBanks.find(p => p.id === id); 
+    if(b && amt > 0) { 
+        b.balance = fmt(b.balance + (amt * mult)); 
+        logHistory(id, b.name, 'ADJUST', `${mult > 0 ? 'Added' : 'Removed'} ${amt}₾`);
+        renderExtras(); autoSave(); 
+    } 
+}
+function deletePiggy(id) { 
+    if(confirm("Delete this Piggy Bank?")) { 
+        let b = state.piggyBanks.find(p => p.id === id);
+        logHistory(id, b.name, 'DELETE', `Deleted Piggy Bank`);
+        state.piggyBanks = state.piggyBanks.filter(p => p.id !== id); 
+        renderExtras(); autoSave(); 
+    } 
+}
+
+function renderNewEntryTags() { 
+    document.getElementById('newEntryTagsContainer').innerHTML = state.tags.map(t => { 
+        let isSel = newEntryTags.includes(t); 
+        return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; padding: 6px 12px; font-size: 0.9em; margin: 2px;" onclick="toggleNewEntryTag('${t}')">${t}</span>`; 
+    }).join(''); 
+}
+function toggleNewEntryTag(t) { if(newEntryTags.includes(t)) newEntryTags = newEntryTags.filter(x => x !== t); else newEntryTags.push(t); renderNewEntryTags(); }
+
+function getActiveItemsArray() { return activeMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][activeMonth].items; }
+function openMonthPage(month) { activeMonth = month; document.getElementById('dashboardView').style.display = 'none'; document.getElementById('monthView').style.display = 'flex'; if (month === 'LongTerm') { document.getElementById('pageMonthTitle').innerText = "Long Term Plans"; document.getElementById('salaryOverrideContainer').style.display = 'none'; } else { document.getElementById('pageMonthTitle').innerText = `${month} ${currentYear} Planning`; document.getElementById('salaryOverrideContainer').style.display = 'block'; document.getElementById('pageSalary').value = state.years[currentYear][month].salary || ''; } renderPageItems(); }
+function closeMonthPage() { activeMonth = null; document.getElementById('monthView').style.display = 'none'; document.getElementById('dashboardView').style.display = 'flex'; renderBoard(); renderExtras(); }
+function setMonthSalary(val) { if(activeMonth !== 'LongTerm') { state.years[currentYear][activeMonth].salary = val === "" ? null : parseFloat(val); renderPageItems(); autoSave(); } }
+
+function checkAutoTag(val) { if(!val) return; let firstWord = val.trim().split(' ')[0].toLowerCase(); let match = state.tags.find(t => t.toLowerCase() === firstWord); if(match && !newEntryTags.includes(match)) { newEntryTags.push(match); renderNewEntryTags(); } }
+
+function addItem() {
+    let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value; let currInput = document.getElementById('itemCurrency').value;
+    if(!nameInput.value) return;
+    let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput, subItems: [] };
+    getActiveItemsArray().push(item);
+    
+    logHistory(item.id, item.name, 'ADD', `Created at ${item.cost} ${item.currency}`);
+    
+    nameInput.value = ''; costInput.value = ''; qtyInput.value = '1'; document.getElementById('itemName').focus(); newEntryTags = []; renderNewEntryTags(); renderPageItems(); autoSave();
+}
+
+function syncSubItems(id) {
+    let item = getActiveItemsArray().find(i => i.id === id);
+    if (!item || !item.subItems || item.subItems.length === 0) return;
+    let total = 0;
+    item.subItems.forEach((sub, sIdx) => {
+        let nameEl = document.getElementById(`editSubName-${id}-${sIdx}`);
+        let costEl = document.getElementById(`editSubCost-${id}-${sIdx}`);
+        if (nameEl && costEl) {
+            sub.name = nameEl.value.trim() || sub.name;
+            let parsed = parseFloat(costEl.value);
+            sub.cost = isNaN(parsed) ? 0 : parsed;
+        }
+        total += sub.cost;
+    });
+    item.cost = total;
+    let mainCostEl = document.getElementById(`editCost-${id}`);
+    if (mainCostEl) mainCostEl.value = total;
+}
+
+function addSubItem(itemId) {
+    syncSubItems(itemId);
+    let item = getActiveItemsArray().find(i => i.id === itemId);
+    if(!item) return;
+    if(!item.subItems) item.subItems = [];
+    
+    let n = document.getElementById(`subName-${itemId}`).value.trim();
+    let cStr = document.getElementById(`subCost-${itemId}`).value;
+    let c = parseFloat(cStr);
+    if(isNaN(c)) c = 0; 
+    
+    if(n) {
+        item.subItems.push({ name: n, cost: c });
+        item.cost = item.subItems.reduce((acc, s) => acc + s.cost, 0);
+        
+        logHistory(itemId, item.name, 'EDIT', `Added split sub-item: ${n} (${c})`);
+        renderPageItems();
+        autoSave();
+    }
+}
+
+function deleteSubItem(itemId, subIdx) {
+    syncSubItems(itemId);
+    let item = getActiveItemsArray().find(i => i.id === itemId);
+    if(!item || !item.subItems) return;
+    
+    let removed = item.subItems.splice(subIdx, 1)[0];
+    item.cost = item.subItems.length > 0 ? item.subItems.reduce((acc, s) => acc + s.cost, 0) : 0;
+    
+    logHistory(itemId, item.name, 'EDIT', `Removed split sub-item: ${removed.name}`);
+    renderPageItems();
+    autoSave();
+}
+
+function adjustEditCost(id, mult) {
+    let costInput = document.getElementById(`editCost-${id}`);
+    let adjInput = document.getElementById(`adjustCost-${id}`);
+    let item = getActiveItemsArray().find(i => i.id === id);
+    
+    if (item && item.subItems && item.subItems.length > 0) {
+        alert("This item has sub-items attached. Please add or adjust sub-items instead of modifying the main sum.");
+        adjInput.value = '';
+        return;
+    }
+    
+    let cost = parseFloat(costInput.value) || 0; let adj = parseFloat(adjInput.value) || 0;
+    if (adj > 0) { 
+        let newCost = fmt(cost + (adj * mult));
+        costInput.value = newCost; 
+        
+        let itemName = document.getElementById(`editName-${id}`).value;
+        let verb = mult > 0 ? "Added" : "Reduced";
+        logHistory(id, itemName, 'ADJUST', `${verb} ${adj}. New cost: ${newCost}`);
+        
+        adjInput.value = ''; 
+    }
+}
+
+function renderPageItems() {
+    if(!activeMonth) return;
+    let arr = getActiveItemsArray(); let items = [...arr]; let sortType = document.getElementById('pageSort').value;
+    if (sortType === 'costDesc') items.sort((a,b) => toGEL(b.cost*b.qty, b.currency) - toGEL(a.cost*a.qty, a.currency));
+    if (sortType === 'costAsc') items.sort((a,b) => toGEL(a.cost*a.qty, a.currency) - toGEL(b.cost*b.qty, b.currency));
+    if (sortType === 'tag') items.sort((a,b) => { let tA = a.tags[0] || ''; let tB = b.tags[0] || ''; return tA.localeCompare(tB); });
+
+    let incomes = items.filter(i => i.isIncome); let expenses = items.filter(i => !i.isIncome);
+    let plannedIncome = fmt(incomes.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+    let actualIncome = fmt(incomes.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
+    let plannedSpent = fmt(expenses.reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0)); 
+    let actualSpent = fmt(expenses.filter(i => i.done).reduce((s, i) => s + toGEL(i.cost * i.qty, i.currency), 0));
+
+    if (activeMonth === 'LongTerm') {
+        document.getElementById('pageSummaryBar').innerHTML = `<span>Total Planned Costs: <strong>${plannedSpent}₾</strong> ${plannedIncome>0 ? `(+${plannedIncome}₾ Inc)` : ''}</span><span>Finished (Paid): <strong class="pos">${actualSpent}₾</strong></span>`;
+    } else {
+        let sal = state.years[currentYear][activeMonth].salary !== null ? state.years[currentYear][activeMonth].salary : state.years[currentYear].yearlySalary;
+        let plannedRem = fmt(sal + plannedIncome - plannedSpent); let actualRem = fmt(sal + actualIncome - actualSpent);
+        let str = plannedIncome > 0 ? `Budget: ${sal} + ${plannedIncome} - ${plannedSpent} = ` : `Planned: ${sal} - ${plannedSpent} = `;
+        document.getElementById('pageSummaryBar').innerHTML = `<span>${str} <strong class="${plannedRem >= 0 ? 'pos' : 'neg'}">${plannedRem}₾</strong></span><span>Real Remaining: <strong class="${actualRem >= 0 ? 'pos' : 'neg'}">${actualRem}₾</strong></span>`;
+    }
+
+    const renderCard = (item) => {
+        if (item.isEditing) {
+            let quickColorsHtml = presetColors.map(c => `
+                <div class="color-swatch ${item.color === c ? 'selected' : ''}" 
+                     style="background:${c}; width: 22px; height: 22px; border:1px solid #555; cursor:pointer;" 
+                     onclick="document.getElementById('editColor-${item.id}').value='${c}'; this.parentElement.querySelectorAll('.color-swatch').forEach(e=>e.classList.remove('selected')); this.classList.add('selected');">
+                </div>
+            `).join('');
+
+            let itemHistHtml = (state.history || []).filter(h => h.itemId === item.id).map(h => `
+                <div class="hist-entry" style="padding:4px 0;">
+                    <span>[${h.action}] ${h.msg}</span>
+                    <span class="hist-time" style="font-size:0.8em;">${new Date(h.time).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                </div>
+            `).join('');
+            if(!itemHistHtml) itemHistHtml = `<div style="color:#aaa; font-size:0.85em;">No history yet.</div>`;
             
             let hasSubItems = item.subItems && item.subItems.length > 0;
-            let newCost = hasSubItems ? item.cost : (parseFloat(document.getElementById(`editCost-${id}`).value) || 0);
-            
-            if (item.name !== newName || (!hasSubItems && item.cost !== newCost)) {
-                logHistory(id, newName, 'EDIT', `Changed properties (Name: ${item.name}->${newName}, Cost: ${item.cost}->${newCost})`);
-            }
 
-            item.name = newName; 
-            if(!hasSubItems) item.cost = newCost; 
-            
-            item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; 
-            item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; 
-            item.currency = document.getElementById(`editCurrency-${id}`).value;
-            item.color = document.getElementById(`editColor-${id}`).value;
-            let checkboxes = document.querySelectorAll(`.edit-tag-cb-${id}:checked`);
-            item.tags = Array.from(checkboxes).map(cb => cb.value);
-            item.isEditing = false; renderPageItems(); autoSave(); 
-        } 
-    }
-    
-    function deleteItem(id) { 
-        if(confirm("Are you sure you want to delete this entry?")) {
-            let arr = getActiveItemsArray(); 
-            let idx = arr.findIndex(i => i.id === id);
-            let item = arr[idx];
-            
-            logHistory(id, item.name, 'DELETE', `Item deleted (${item.cost} ${item.currency})`);
-            
-            arr.splice(idx, 1); 
-            renderPageItems(); 
-            autoSave(); 
-        }
-    }
-    
-    function toggleDone(targetMonth, id) { 
-        let arr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; 
-        let item = arr.find(i => i.id === id); 
-        if (item) {
-            item.done = !item.done; 
-            logHistory(id, item.name, 'EDIT', `Marked as ${item.done ? 'Done' : 'Pending'}`);
-        }
-        if(activeMonth === targetMonth) renderPageItems(); else { renderBoard(); renderExtras(); } 
-        autoSave(); 
-    }
-
-    function dashDragStart(ev, id, sourceMonth) { draggedDashItemId = id; draggedDashSourceMonth = sourceMonth; ev.dataTransfer.setData("id", id); ev.dataTransfer.setData("sourceMonth", sourceMonth); }
-    function dropToMonth(ev, targetMonth) { let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); if (sourceMonth && sourceMonth !== targetMonth) { let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); } }
-    function dashDropOnItem(ev, targetId, targetMonth) { ev.preventDefault(); ev.stopPropagation(); if (!draggedDashItemId) return; let sArr = draggedDashSourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][draggedDashSourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let dIdx = sArr.findIndex(i => i.id === draggedDashItemId); let [draggedItem] = sArr.splice(dIdx, 1); let tIdx = tArr.findIndex(i => i.id === targetId); tArr.splice(tIdx, 0, draggedItem); draggedDashItemId = null; draggedDashSourceMonth = null; renderBoard(); renderExtras(); autoSave(); }
-    function pageItemDragStart(ev, id) { draggedPageItemId = id; }
-    function pageItemDrop(ev, targetId) { ev.preventDefault(); if (draggedPageItemId === targetId || !draggedPageItemId) return; let items = getActiveItemsArray(); let dIdx = items.findIndex(i => i.id === draggedPageItemId); let tIdx = items.findIndex(i => i.id === targetId); items.splice(tIdx, 0, items.splice(dIdx, 1)[0]); draggedPageItemId = null; document.getElementById('pageSort').value = 'none'; renderPageItems(); autoSave(); }
-
-    function openTagsModal() { document.getElementById('tagsModal').style.display = 'flex'; renderTags(); }
-    function renderTags() { document.getElementById('tagList').innerHTML = state.tags.map((t, i) => `<li style="margin-bottom: 8px; display:flex; justify-content:space-between; background:var(--card); padding:8px 12px; border-radius:4px; border:1px solid var(--border);">${t} <button class="btn-danger" style="padding: 2px 6px;" onclick="removeTag(${i})">Del</button></li>`).join(''); updateTagSelects(); }
-    function addTag() { let t = document.getElementById('newTag').value.trim(); if(t && !state.tags.includes(t)) { state.tags.push(t); state.tags.sort((a,b) => a.localeCompare(b)); document.getElementById('newTag').value = ''; renderTags(); autoSave(); } }
-    function removeTag(idx) { state.tags.splice(idx, 1); renderTags(); autoSave(); }
-    function updateTagSelects() { renderNewEntryTags(); }
-
-    function initColorPicker() { document.getElementById('colorPicker').innerHTML = presetColors.map(c => `<div class="color-swatch" style="background:${c}" onclick="selectColor(this, '${c}')"></div>`).join(''); selectColor(document.getElementById('colorPicker').firstElementChild, presetColors[0]); }
-    function selectColor(elem, color) { document.querySelectorAll('#colorPicker .color-swatch').forEach(e => e.classList.remove('selected')); if(elem) elem.classList.add('selected'); selectedColor = color; document.getElementById('customColor').value = color; }
-    function selectCustomColor(color) { document.querySelectorAll('#colorPicker .color-swatch').forEach(e => e.classList.remove('selected')); selectedColor = color; }
-
-    function openAnalyticsPage() { 
-        document.getElementById('dashboardView').style.display = 'none'; 
-        document.getElementById('analyticsView').style.display = 'flex'; 
-        
-        if (!analyticsInitialized) {
-            aYearStart = currentYear; aYearEnd = currentYear; 
-            document.getElementById('aUpToCurrent').checked = false;
-            aActiveTags = [...state.tags, "Untagged", "Base Salary"];
-            renderAnalyticsUI(true);
-            analyticsInitialized = true;
-        } else {
-            renderAnalyticsUI(false); 
-        }
-    }
-    
-    function closeAnalyticsPage() {
-        document.getElementById('analyticsView').style.display = 'none';
-        document.getElementById('dashboardView').style.display = 'flex';
-        renderBoard();
-        renderExtras();
-    }
-    
-    function toggleAnalyticsTag(t) { if(aActiveTags.includes(t)) aActiveTags = aActiveTags.filter(x => x!==t); else aActiveTags.push(t); triggerAnalytics(); }
-    
-    function selectAllYearsAnalytics() { 
-        let yArr = Object.keys(state.years).map(Number); 
-        document.getElementById('aYearFrom').value = Math.min(...yArr);
-        document.getElementById('aYearTo').value = Math.max(...yArr);
-        document.getElementById('aMonthFrom').value = "0"; 
-        document.getElementById('aMonthTo').value = "11"; 
-        aActiveTags = [...state.tags, "Untagged", "Base Salary"];
-        triggerAnalytics(); 
-    }
-    
-    function triggerAnalytics() { renderAnalyticsUI(false); }
-    
-    function renderAnalyticsUI(initSelects = false) {
-        let years = Object.keys(state.years).sort();
-        let ySelHtml = years.map(y => `<option value="${y}">${y}</option>`).join('');
-        let mSelHtml = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
-        
-        let yFromObj = document.getElementById('aYearFrom');
-        let yToObj = document.getElementById('aYearTo');
-        let mFromObj = document.getElementById('aMonthFrom');
-        let mToObj = document.getElementById('aMonthTo');
-        
-        if(!yFromObj.innerHTML) { yFromObj.innerHTML = ySelHtml; yToObj.innerHTML = ySelHtml; }
-        if(!mFromObj.innerHTML) { mFromObj.innerHTML = mSelHtml; mToObj.innerHTML = mSelHtml; }
-        
-        if(initSelects) {
-            yFromObj.value = aYearStart; yToObj.value = aYearEnd;
-            mFromObj.value = "0"; mToObj.value = "11";
-        }
-
-        aYearStart = parseInt(yFromObj.value);
-        aYearEnd = parseInt(yToObj.value);
-        let aMonthStartIdx = parseInt(mFromObj.value);
-        let aMonthEndIdx = parseInt(mToObj.value);
-
-        let targetFilter = document.getElementById('analyticsTarget').value;
-        let groupBy = document.getElementById('analyticsGroup').value;
-        let statusFilter = document.getElementById('analyticsStatus').value || 'all';
-        let sortMode = document.getElementById('analyticsSort').value || 'valDesc';
-        let limitToCurrent = document.getElementById('aUpToCurrent').checked;
-
-        let displayTags = [...state.tags, "Untagged"];
-        if (targetFilter === 'income') displayTags.push("Base Salary");
-
-        let totals = {}; let colors = {}; let grandTotal = 0; let totalMonthsCount = 0;
-        
-        let fDate = getFinancialDate();
-        let currentMonthVal = fDate.year * 100 + fDate.monthIdx;
-        let startVal = aYearStart * 100 + aMonthStartIdx;
-        let endVal = aYearEnd * 100 + aMonthEndIdx;
-
-        for (let y = Math.min(aYearStart, aYearEnd); y <= Math.max(aYearStart, aYearEnd); y++) {
-            if(!state.years[y]) continue;
-            let yearlySal = state.years[y].yearlySalary || 0;
-            
-            months.forEach((m, mIdx) => {
-                let loopVal = y * 100 + mIdx;
-                if (loopVal < startVal || loopVal > endVal) return;
-                if (limitToCurrent && loopVal > currentMonthVal) return;
+            return `
+            <div class="page-item-card" style="border-left-color: ${item.color}; display:flex; flex-direction:column; gap:12px; cursor:default;" 
+                 onclick="event.stopPropagation();"
+                 onkeydown="if(event.key==='Enter' && event.target.tagName !== 'BUTTON' && !event.target.id.includes('subName') && !event.target.id.includes('subCost')) { saveEditItem('${item.id}'); event.preventDefault(); }">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 5px;">
+                    <select id="editType-${item.id}" style="font-weight:bold; width: 120px;">
+                        <option value="expense" ${!item.isIncome ? 'selected':''}>➖ Expense</option>
+                        <option value="income" ${item.isIncome ? 'selected':''}>➕ Income</option>
+                    </select>
+                    <div style="display:flex; gap: 8px; margin-left: auto;">
+                        <button onclick="saveEditItem('${item.id}')" style="padding: 10px 18px; font-size: 1.1em; border-radius: 6px;">💾 Save</button>
+                        <button class="btn-secondary" onclick="toggleEditItem('${item.id}')" style="padding: 10px 18px; font-size: 1.1em; border-radius: 6px;">X</button>
+                    </div>
+                </div>
+                <input type="text" id="editName-${item.id}" value="${item.name}" style="width:100%; font-size: 1.1em; padding: 10px;" placeholder="Name">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden; flex:1; min-width: 120px;">
+                        <input type="text" class="num-input" id="editCost-${item.id}" value="${item.cost}" style="width:100%; border:none; min-width:50px; padding: 10px; ${hasSubItems ? 'opacity:0.5;' : ''}" ${hasSubItems ? 'readonly title="Cost is determined by sub-items"' : ''} placeholder="Cost">
+                        <select id="editCurrency-${item.id}" style="width:55px; border:none; background:transparent; font-weight:bold;">
+                            <option value="GEL" ${item.currency==='GEL'?'selected':''}>₾</option>
+                            <option value="USD" ${item.currency==='USD'?'selected':''}>$</option>
+                        </select>
+                    </div>
+                    <span style="font-weight:bold; color:#aaa; font-size: 1.2em;">x</span>
+                    <input type="text" class="num-input" id="editQty-${item.id}" value="${item.qty}" style="width:60px; padding: 10px;" placeholder="Qty">
+                </div>
                 
-                totalMonthsCount++;
-
-                let mData = state.years[y][m];
-                let monthSal = mData.salary !== null ? mData.salary : yearlySal;
-
-                if (targetFilter === 'income' && statusFilter !== 'planned' && aActiveTags.includes("Base Salary")) {
-                    if (groupBy === 'tag') {
-                        totals["Base Salary"] = (totals["Base Salary"] || 0) + monthSal;
-                        colors["Base Salary"] = "#d946ef"; 
-                    } else if (groupBy === 'color') {
-                        totals["#d946ef"] = (totals["#d946ef"] || 0) + monthSal;
-                        colors["#d946ef"] = "#d946ef";
-                    } else if (groupBy === 'month') {
-                        totals[m] = (totals[m] || 0) + monthSal;
-                        colors[m] = presetColors[months.indexOf(m) % presetColors.length];
-                    }
-                    grandTotal += monthSal;
-                }
-
-                mData.items.forEach(item => {
-                    let costInGEL = toGEL(item.cost * item.qty, item.currency);
-                    if (statusFilter === 'done' && !item.done) return;
-                    if (statusFilter === 'planned' && item.done) return;
-                    if (targetFilter === 'expenses' && item.isIncome) return;
-                    if (targetFilter === 'income' && !item.isIncome) return;
-                    
-                    if (groupBy === 'tag') {
-                        let validTags = item.tags.filter(t => aActiveTags.includes(t));
-                        if(item.tags.length === 0 && aActiveTags.includes("Untagged")) validTags = ["Untagged"];
-                        if(validTags.length === 0) return; 
-                        
-                        let splitCost = costInGEL / (item.tags.length || 1); 
-                        validTags.forEach(t => {
-                            totals[t] = (totals[t] || 0) + splitCost;
-                            let tagIdx = state.tags.indexOf(t);
-                            colors[t] = t === "Untagged" ? "#888888" : (presetColors[tagIdx % presetColors.length] || "#888");
-                        });
-                        grandTotal += costInGEL; 
-                    } else if (groupBy === 'color') {
-                        let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
-                        if(!hasValidTag) return;
-                        let key = item.color;
-                        if(totals[key] === undefined) totals[key] = 0;
-                        totals[key] += costInGEL;
-                        colors[key] = item.color;
-                        grandTotal += costInGEL;
-                    } else if (groupBy === 'month') {
-                        let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
-                        if(!hasValidTag) return;
-                        let key = m; 
-                        if(totals[key] === undefined) totals[key] = 0;
-                        totals[key] += costInGEL;
-                        colors[key] = presetColors[months.indexOf(m) % presetColors.length];
-                        grandTotal += costInGEL;
-                    }
-                });
-            });
-        }
-        
-        displayTags.sort((a, b) => {
-            if (groupBy === 'tag') {
-                if (sortMode === 'valDesc') return (totals[b] || 0) - (totals[a] || 0);
-                if (sortMode === 'valAsc') return (totals[a] || 0) - (totals[b] || 0);
-            }
-            return a.localeCompare(b);
-        });
-
-        let tagsFilterHtml = displayTags.map(t => {
-            let isSel = aActiveTags.includes(t);
-            return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; cursor:pointer; padding: 6px 12px; font-size: 0.9em;" onclick="toggleAnalyticsTag('${t}')">${t}</span>`;
-        }).join('');
-        document.getElementById('analyticsTagsFilter').innerHTML = tagsFilterHtml;
-        
-        let actualMonths = totalMonthsCount || 1; 
-        let labelMode = targetFilter === 'income' ? 'Income' : 'Spent/Planned';
-        let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Filtered ${labelMode}: <strong>${fmt(grandTotal)}₾</strong> | Monthly Avg (${totalMonthsCount} mos): <strong>${fmt(grandTotal/actualMonths)}₾/mo</strong></div>`;
-        
-        if(grandTotal === 0) { html += `<div>No data matches your filters.</div>`; } 
-        else {
-            let sortedKeys = Object.keys(totals);
-            if (groupBy === 'month' && sortMode === 'valDesc') { sortedKeys.sort((a,b) => totals[b] - totals[a]); } 
-            else if (groupBy === 'month' && sortMode === 'valAsc') { sortedKeys.sort((a,b) => totals[a] - totals[b]); } 
-            else if (groupBy === 'month') { sortedKeys.sort((a,b) => months.indexOf(a) - months.indexOf(b)); } 
-            else {
-                if (sortMode === 'valDesc') sortedKeys.sort((a,b) => totals[b] - totals[a]);
-                if (sortMode === 'valAsc') sortedKeys.sort((a,b) => totals[a] - totals[b]);
-                if (sortMode === 'alpha') sortedKeys.sort((a,b) => a.localeCompare(b));
-            }
-
-            if (analyticsType === 'bar') {
-                sortedKeys.forEach(key => {
-                    let val = totals[key];
-                    if(val > 0) {
-                        let pct = ((val / grandTotal) * 100).toFixed(1);
-                        let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
-                        html += `<div style="margin-bottom:15px;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span></div>
-                            <div style="background:var(--card); width:100%; height:10px; border-radius:5px; overflow:hidden; border:1px solid var(--border);">
-                                <div style="background:${colors[key]}; width:${pct}%; height:100%;"></div>
-                            </div></div>`;
-                    }
-                });
-            } else if (analyticsType === 'pie') {
-                let conic = []; let acc = 0; let legendHtml = `<div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center; margin-top:20px;">`;
-                sortedKeys.forEach(key => {
-                    let val = totals[key];
-                    if(val > 0) {
-                        let pctNum = (val / grandTotal) * 100;
-                        conic.push(`${colors[key]} ${acc}% ${acc + pctNum}%`);
-                        let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
-                        legendHtml += `<div><span class="legend-color" style="background:${colors[key]}"></span>${label} (${pctNum.toFixed(1)}%)</div>`;
-                        acc += pctNum;
-                    }
-                });
-                legendHtml += `</div>`;
-                html += `<div class="pie-chart" style="background: conic-gradient(${conic.join(', ')});"></div>` + legendHtml;
-            } else if (analyticsType === 'pyramid') {
-                let maxVal = Math.max(...Object.values(totals));
-                let pyramidHtml = `<div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:100%; margin-top:20px; padding-bottom: 20px;">`;
-                sortedKeys.forEach(key => {
-                    let val = totals[key];
-                    if(val > 0) {
-                        let pctOfTotal = ((val / grandTotal) * 100).toFixed(1);
-                        let pctOfMax = (val / maxVal) * 100;
-                        let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
-                        pyramidHtml += `
-                        <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                            ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${pctOfTotal}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span>
-                        </div>`;
-                    }
-                });
-                pyramidHtml += `</div>`;
-                html += pyramidHtml;
-            }
-        }
-        document.getElementById('analyticsContent').innerHTML = html;
-    }
-
-    function autoSave() { 
-        if (document.getElementById('autosave').checked) { 
-            localStorage.setItem('financeDataV10', JSON.stringify(state)); 
-            let d = new Date(); 
-            let el = document.getElementById('save-status');
-            el.innerText = `Autosaved ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
-        } else {
-            document.getElementById('save-status').innerText = 'Autosave Disabled';
-        }
-    }
-
-    function clearAllData() {
-        if(confirm("WARNING: Are you sure you want to delete all data? This cannot be undone!")) {
-            localStorage.removeItem('financeDataV10');
-            location.reload();
-        }
-    }
-
-    function exportJSON() { const dl = document.createElement('a'); dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2))); dl.setAttribute("download", `planner_backup_${currentYear}.json`); dl.click(); }
-    
-    // --- IMPORT & MERGE DIFF ENGINE ---
-    
-    function itemsEqual(a, b) {
-        return a.name === b.name && a.cost === b.cost && a.qty === b.qty && a.isIncome === b.isIncome && a.currency === b.currency && a.done === b.done && a.color === b.color && JSON.stringify(a.tags) === JSON.stringify(b.tags) && JSON.stringify(a.subItems) === JSON.stringify(b.subItems);
-    }
-
-    function getFlatItems(st) {
-        let map = {};
-        if (st.years) {
-            for(let y in st.years) {
-                months.forEach(m => {
-                    if (st.years[y][m] && st.years[y][m].items) {
-                        st.years[y][m].items.forEach(i => map[i.id] = { item: i, locStr: `${m} ${y}`, y: y, m: m });
-                    }
-                });
-            }
-        }
-        if (st.longTerm && st.longTerm.items) {
-            st.longTerm.items.forEach(i => map[i.id] = { item: i, locStr: `Long Term`, y: null, m: 'LongTerm' });
-        }
-        return map;
-    }
-
-    function importJSON(event) { 
-        const file = event.target.files[0]; if (!file) return; 
-        const reader = new FileReader(); 
-        reader.onload = function(e) { 
-            try { 
-                let parsed = JSON.parse(e.target.result); 
-                startMergeProcess(parsed);
-            } catch(err) { alert("Invalid JSON file"); } 
-        }; reader.readAsText(file); event.target.value = ''; 
-    }
-
-    function startMergeProcess(importedData) {
-        mergeConflicts = [];
-        mergeImportedData = importedData;
-        
-        let localMap = getFlatItems(state);
-        let impMap = getFlatItems(importedData);
-        
-        Object.keys(impMap).forEach(id => {
-            let imp = impMap[id];
-            let loc = localMap[id];
-            if (!loc) {
-                mergeConflicts.push({ id, type: 'item_new', imp, choice: 'import', title: `New Entry in ${imp.locStr}` });
-            } else if (!itemsEqual(loc.item, imp.item)) {
-                mergeConflicts.push({ id, type: 'item_mod', loc, imp, choice: 'import', title: `Modified Entry in ${imp.locStr}` });
-            }
-        });
-
-        Object.keys(localMap).forEach(id => {
-            if (!impMap[id]) {
-                let loc = localMap[id];
-                mergeConflicts.push({ id, type: 'item_del', loc, choice: 'local', title: `Missing in Import (from ${loc.locStr})` });
-            }
-        });
-
-        let localPig = {}; state.piggyBanks.forEach(p => localPig[p.id] = p);
-        let impPig = {}; (importedData.piggyBanks || []).forEach(p => impPig[p.id] = p);
-        
-        Object.keys(impPig).forEach(id => {
-            let imp = impPig[id];
-            let loc = localPig[id];
-            if(!loc) { mergeConflicts.push({ id, type: 'pig_new', imp, choice: 'import', title: `New Piggy Bank` }); }
-            else if (loc.name !== imp.name || loc.balance !== imp.balance || loc.monthlyPlan !== imp.monthlyPlan) {
-                mergeConflicts.push({ id, type: 'pig_mod', loc, imp, choice: 'import', title: `Modified Piggy Bank` });
-            }
-        });
-        Object.keys(localPig).forEach(id => {
-            if(!impPig[id]) mergeConflicts.push({ id, type: 'pig_del', loc: localPig[id], choice: 'local', title: `Piggy Bank Missing in Import` });
-        });
-
-        if (mergeConflicts.length === 0) {
-            finalizeMerge();
-            alert("Sync Complete! Everything is up to date. No conflicts found.");
-            return;
-        }
-
-        renderMergeModal();
-        document.getElementById('mergeModal').style.display = 'flex';
-    }
-
-    function setMergeChoice(id, choice) {
-        let conf = mergeConflicts.find(c => c.id === id);
-        if(conf) conf.choice = choice;
-        renderMergeModal();
-    }
-
-    function setAllMergeChoices(choice) {
-        mergeConflicts.forEach(c => c.choice = choice);
-        renderMergeModal();
-    }
-
-    function renderMergeModal() {
-        let html = '';
-        mergeConflicts.forEach(conf => {
-            let badgeClass = conf.type.includes('new') ? 'new' : (conf.type.includes('mod') ? 'mod' : 'del');
-            let badgeText = conf.type.includes('new') ? 'NEW (IN IMPORT)' : (conf.type.includes('mod') ? 'MODIFIED' : 'NOT IN IMPORT');
-            
-            let details = '';
-            if(conf.type === 'item_new') {
-                details = `<div style="color:#aaa;">➕ ${conf.imp.item.name} | ${conf.imp.item.cost}₾ | Done: ${conf.imp.item.done ? 'Yes':'No'}</div>`;
-            } else if (conf.type === 'item_mod') {
-                details = `
-                    <div style="color:#aaa; text-decoration: line-through;">Local: ${conf.loc.item.name} | ${conf.loc.item.cost}₾ | Done: ${conf.loc.item.done ? 'Yes':'No'}</div>
-                    <div style="color:var(--text);">Import: ${conf.imp.item.name} | ${conf.imp.item.cost}₾ | Done: ${conf.imp.item.done ? 'Yes':'No'}</div>
-                `;
-            } else if (conf.type === 'item_del') {
-                details = `<div style="color:#aaa;">Existing Local: ${conf.loc.item.name} | ${conf.loc.item.cost}₾ | Done: ${conf.loc.item.done ? 'Yes':'No'}</div>`;
-            } else if (conf.type === 'pig_new') {
-                details = `<div style="color:#aaa;">➕ Vault: ${conf.imp.name} | Bal: ${conf.imp.balance}₾</div>`;
-            } else if (conf.type === 'pig_mod') {
-                details = `
-                    <div style="color:#aaa; text-decoration: line-through;">Local Vault: ${conf.loc.name} | Bal: ${conf.loc.balance}₾</div>
-                    <div style="color:var(--text);">Import Vault: ${conf.imp.name} | Bal: ${conf.imp.balance}₾</div>
-                `;
-            } else if (conf.type === 'pig_del') {
-                details = `<div style="color:#aaa;">Existing Local Vault: ${conf.loc.name} | Bal: ${conf.loc.balance}₾</div>`;
-            }
-
-            html += `
-            <div class="merge-card ${badgeClass}">
-                <div style="font-weight:bold;"><span class="merge-badge" style="background: ${badgeClass==='new'?'#2196f3':(badgeClass==='mod'?'#ff9800':'#f44336')}">${badgeText}</span>${conf.title}</div>
-                ${details}
-                <div style="display:flex; gap: 10px; margin-top: 5px;">
-                    <div class="btn-merge-choice ${conf.choice === 'local' ? 'active' : ''}" onclick="setMergeChoice('${conf.id}', 'local')">Keep Local Version</div>
-                    <div class="btn-merge-choice ${conf.choice === 'import' ? 'active' : ''}" onclick="setMergeChoice('${conf.id}', 'import')">${badgeClass==='del' ? 'Accept Deletion' : 'Use Imported Version'}</div>
+                ${!hasSubItems ? `
+                <div class="adj-container" style="width: 100%;">
+                    <button class="adj-btn btn-danger" onclick="adjustEditCost('${item.id}', -1)" style="padding: 10px 15px;">-</button>
+                    <input type="text" class="num-input adj-input" id="adjustCost-${item.id}" placeholder="Quick Adjust Amount (±)" style="padding: 10px;" onkeydown="if(event.key==='Enter') { adjustEditCost('${item.id}', 1); event.stopPropagation(); event.preventDefault(); }">
+                    <button class="adj-btn btn-secondary" style="background:var(--accent); padding: 10px 15px;" onclick="adjustEditCost('${item.id}', 1)">+</button>
+                </div>` : ''}
+                
+                <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:10px;">
+                    <div style="font-size:0.9em; font-weight:bold; color:var(--accent); margin-bottom:8px;">Sub-Tasks / Split Costs:</div>
+                    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+                        ${(item.subItems || []).map((sub, sIdx) => `
+                            <div style="display:flex; justify-content:space-between; background:var(--bg); padding:6px 8px; border-radius:4px; border:1px solid var(--border); gap:10px; align-items:center;">
+                                <input type="text" id="editSubName-${item.id}-${sIdx}" value="${sub.name}" oninput="syncSubItems('${item.id}')" style="flex:1; padding:6px; min-width:100px;">
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <input type="text" class="num-input" id="editSubCost-${item.id}-${sIdx}" value="${sub.cost}" oninput="syncSubItems('${item.id}')" style="width:70px; padding:6px; text-align:right;">
+                                    <button class="btn-danger" style="padding:6px 10px; font-size:0.9em; font-weight:bold;" onclick="deleteSubItem('${item.id}', ${sIdx})">X</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="display:flex; gap:5px; flex-wrap: wrap;">
+                        <input type="text" id="subName-${item.id}" placeholder="Sub-item name" style="flex:1; min-width: 120px;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
+                        <input type="text" class="num-input" id="subCost-${item.id}" placeholder="Cost" style="width:70px;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
+                        <button onclick="addSubItem('${item.id}')" style="padding: 8px 12px; background: #2196f3; flex-shrink: 0; white-space: nowrap;">Add</button>
+                    </div>
+                </div>
+                
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; background: var(--bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border); max-height: 150px; overflow-y: auto;" id="editTagsGroup-${item.id}">
+                    ${state.tags.map(t => {
+                        let isSel = item.tags.includes(t);
+                        return `
+                        <label style="cursor:pointer; margin:0;">
+                            <input type="checkbox" value="${t}" class="edit-tag-cb-${item.id}" ${isSel ? 'checked' : ''} style="display:none;" onchange="this.nextElementSibling.style.opacity = this.checked ? 1 : 0.4">
+                            <span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; display:inline-block; padding: 6px 10px; font-size:0.9em;">${t}</span>
+                        </label>`;
+                    }).join('')}
+                </div>
+                
+                <div style="display:flex; align-items:center; gap:10px; margin-top:10px; border-top: 1px dashed var(--border); padding-top: 10px;">
+                    <div style="display:flex; flex-wrap:wrap; gap: 6px; flex:1;">
+                        ${quickColorsHtml}
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                        <span style="font-size:0.75em; color:#aaa;">Custom</span>
+                        <input type="color" id="editColor-${item.id}" value="${item.color}" style="padding:0; width:35px; height:35px; cursor:pointer; border:none; background:transparent;">
+                    </div>
+                </div>
+                <div style="margin-top:10px; border-top:1px dashed var(--border); padding-top:10px;">
+                    <div style="font-size:0.85em; font-weight:bold; color:var(--accent); margin-bottom:5px;">Item History:</div>
+                    <div style="max-height: 100px; overflow-y:auto; background:var(--bg); padding:5px 8px; border-radius:4px;">
+                        ${itemHistHtml}
+                    </div>
                 </div>
             </div>`;
+        } else {
+            let hasSubItems = item.subItems && item.subItems.length > 0;
+            let conversionHtml = item.currency === 'USD' ? `<span style="font-size:0.85em; color:#aaa; margin-left:5px;">(~${fmt(toGEL(item.qty * item.cost, 'USD'))}₾)</span>` : '';
+            return `
+            <div class="page-item-card ${item.done ? 'done' : ''}" style="border-color: ${item.color}"
+                 onclick="toggleEditItem('${item.id}')" draggable="true" ondragstart="pageItemDragStart(event, '${item.id}')" 
+                 ondragover="event.preventDefault()" ondrop="pageItemDrop(event, '${item.id}')">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <strong style="font-size: 1.2em; color: ${item.isIncome ? 'var(--accent)' : 'inherit'}">${item.isIncome ? '➕' : ''} ${item.name}</strong>
+                    <div>
+                        <button class="btn-danger" style="padding: 4px 8px;" onclick="deleteItem('${item.id}'); event.stopPropagation();">X</button>
+                    </div>
+                </div>
+                <div style="font-size: 1.1em; margin-bottom: 10px;">${item.qty}x ${fmtCurr(item.cost, item.currency)} = <b style="font-size: 1.2em;">${fmtCurr(item.qty * item.cost, item.currency)}</b> ${conversionHtml}</div>
+                
+                ${hasSubItems ? `
+                    <div style="margin: 10px 0; background: var(--bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border);">
+                        <div style="font-size: 0.8em; color: var(--accent); margin-bottom: 6px; font-weight:bold; letter-spacing:1px; text-transform: uppercase;">Included Items:</div>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 0.9em; color: var(--text);">
+                            ${item.subItems.map(s => `<li style="margin-bottom:3px;">${s.name} - <strong>${s.cost}</strong></li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">${item.tags.map(t => `<span class="tag-badge" onclick="event.stopPropagation();">${t}</span>`).join('')}</div>
+                    <label style="cursor:pointer;" onclick="event.stopPropagation();"><input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleDone('${activeMonth}', '${item.id}');"> Mark Done</label>
+                </div>
+            </div>`;
+        }
+    };
+
+    let container = document.getElementById('pageItemsContainer'); 
+    container.className = 'page-content ' + state.settings.pageLayout;
+    let incHtml = incomes.map(renderCard).join('');
+    let expHtml = expenses.map(renderCard).join('');
+    
+    container.innerHTML = `
+        ${incomes.length > 0 ? `<div class="page-section-title" style="color:var(--accent);">➕ Income</div>${incHtml}` : ''}
+        ${expenses.length > 0 ? `<div class="page-section-title">➖ Expenses</div>${expHtml}` : ''}
+    `;
+}
+
+function toggleEditItem(id) { let item = getActiveItemsArray().find(i => i.id === id); if(item) { item.isEditing = !item.isEditing; renderPageItems(); } }
+
+function saveEditItem(id) { 
+    syncSubItems(id);
+    let item = getActiveItemsArray().find(i => i.id === id); 
+    if(item) { 
+        let newName = document.getElementById(`editName-${id}`).value; 
+        
+        let hasSubItems = item.subItems && item.subItems.length > 0;
+        let newCost = hasSubItems ? item.cost : (parseFloat(document.getElementById(`editCost-${id}`).value) || 0);
+        
+        if (item.name !== newName || (!hasSubItems && item.cost !== newCost)) {
+            logHistory(id, newName, 'EDIT', `Changed properties (Name: ${item.name}->${newName}, Cost: ${item.cost}->${newCost})`);
+        }
+
+        item.name = newName; 
+        if(!hasSubItems) item.cost = newCost; 
+        
+        item.qty = parseFloat(document.getElementById(`editQty-${id}`).value) || 1; 
+        item.isIncome = document.getElementById(`editType-${id}`).value === 'income'; 
+        item.currency = document.getElementById(`editCurrency-${id}`).value;
+        item.color = document.getElementById(`editColor-${id}`).value;
+        let checkboxes = document.querySelectorAll(`.edit-tag-cb-${id}:checked`);
+        item.tags = Array.from(checkboxes).map(cb => cb.value);
+        item.isEditing = false; renderPageItems(); autoSave(); 
+    } 
+}
+
+function deleteItem(id) { 
+    if(confirm("Are you sure you want to delete this entry?")) {
+        let arr = getActiveItemsArray(); 
+        let idx = arr.findIndex(i => i.id === id);
+        let item = arr[idx];
+        
+        logHistory(id, item.name, 'DELETE', `Item deleted (${item.cost} ${item.currency})`);
+        
+        arr.splice(idx, 1); 
+        renderPageItems(); 
+        autoSave(); 
+    }
+}
+
+function toggleDone(targetMonth, id) { 
+    let arr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; 
+    let item = arr.find(i => i.id === id); 
+    if (item) {
+        item.done = !item.done; 
+        logHistory(id, item.name, 'EDIT', `Marked as ${item.done ? 'Done' : 'Pending'}`);
+    }
+    if(activeMonth === targetMonth) renderPageItems(); else { renderBoard(); renderExtras(); } 
+    autoSave(); 
+}
+
+function dashDragStart(ev, id, sourceMonth) { draggedDashItemId = id; draggedDashSourceMonth = sourceMonth; ev.dataTransfer.setData("id", id); ev.dataTransfer.setData("sourceMonth", sourceMonth); }
+function dropToMonth(ev, targetMonth) { let id = ev.dataTransfer.getData("id"); let sourceMonth = ev.dataTransfer.getData("sourceMonth"); if (sourceMonth && sourceMonth !== targetMonth) { let sArr = sourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][sourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; tArr.push(sArr.splice(sArr.findIndex(i => i.id === id), 1)[0]); renderBoard(); renderExtras(); } }
+function dashDropOnItem(ev, targetId, targetMonth) { ev.preventDefault(); ev.stopPropagation(); if (!draggedDashItemId) return; let sArr = draggedDashSourceMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][draggedDashSourceMonth].items; let tArr = targetMonth === 'LongTerm' ? state.longTerm.items : state.years[currentYear][targetMonth].items; let dIdx = sArr.findIndex(i => i.id === draggedDashItemId); let [draggedItem] = sArr.splice(dIdx, 1); let tIdx = tArr.findIndex(i => i.id === targetId); tArr.splice(tIdx, 0, draggedItem); draggedDashItemId = null; draggedDashSourceMonth = null; renderBoard(); renderExtras(); autoSave(); }
+function pageItemDragStart(ev, id) { draggedPageItemId = id; }
+function pageItemDrop(ev, targetId) { ev.preventDefault(); if (draggedPageItemId === targetId || !draggedPageItemId) return; let items = getActiveItemsArray(); let dIdx = items.findIndex(i => i.id === draggedPageItemId); let tIdx = items.findIndex(i => i.id === targetId); items.splice(tIdx, 0, items.splice(dIdx, 1)[0]); draggedPageItemId = null; document.getElementById('pageSort').value = 'none'; renderPageItems(); autoSave(); }
+
+function openTagsModal() { document.getElementById('tagsModal').style.display = 'flex'; renderTags(); }
+function renderTags() { document.getElementById('tagList').innerHTML = state.tags.map((t, i) => `<li style="margin-bottom: 8px; display:flex; justify-content:space-between; background:var(--card); padding:8px 12px; border-radius:4px; border:1px solid var(--border);">${t} <button class="btn-danger" style="padding: 2px 6px;" onclick="removeTag(${i})">Del</button></li>`).join(''); updateTagSelects(); }
+function addTag() { let t = document.getElementById('newTag').value.trim(); if(t && !state.tags.includes(t)) { state.tags.push(t); state.tags.sort((a,b) => a.localeCompare(b)); document.getElementById('newTag').value = ''; renderTags(); autoSave(); } }
+function removeTag(idx) { state.tags.splice(idx, 1); renderTags(); autoSave(); }
+function updateTagSelects() { renderNewEntryTags(); }
+
+function initColorPicker() { document.getElementById('colorPicker').innerHTML = presetColors.map(c => `<div class="color-swatch" style="background:${c}" onclick="selectColor(this, '${c}')"></div>`).join(''); selectColor(document.getElementById('colorPicker').firstElementChild, presetColors[0]); }
+function selectColor(elem, color) { document.querySelectorAll('#colorPicker .color-swatch').forEach(e => e.classList.remove('selected')); if(elem) elem.classList.add('selected'); selectedColor = color; document.getElementById('customColor').value = color; }
+function selectCustomColor(color) { document.querySelectorAll('#colorPicker .color-swatch').forEach(e => e.classList.remove('selected')); selectedColor = color; }
+
+function openAnalyticsPage() { 
+    document.getElementById('dashboardView').style.display = 'none'; 
+    document.getElementById('analyticsView').style.display = 'flex'; 
+    
+    if (!analyticsInitialized) {
+        aYearStart = currentYear; aYearEnd = currentYear; 
+        document.getElementById('aUpToCurrent').checked = false;
+        aActiveTags = [...state.tags, "Untagged", "Base Salary"];
+        renderAnalyticsUI(true);
+        analyticsInitialized = true;
+    } else {
+        renderAnalyticsUI(false); 
+    }
+}
+
+function closeAnalyticsPage() {
+    document.getElementById('analyticsView').style.display = 'none';
+    document.getElementById('dashboardView').style.display = 'flex';
+    renderBoard();
+    renderExtras();
+}
+
+function toggleAnalyticsTag(t) { if(aActiveTags.includes(t)) aActiveTags = aActiveTags.filter(x => x!==t); else aActiveTags.push(t); triggerAnalytics(); }
+
+function selectAllYearsAnalytics() { 
+    let yArr = Object.keys(state.years).map(Number); 
+    document.getElementById('aYearFrom').value = Math.min(...yArr);
+    document.getElementById('aYearTo').value = Math.max(...yArr);
+    document.getElementById('aMonthFrom').value = "0"; 
+    document.getElementById('aMonthTo').value = "11"; 
+    aActiveTags = [...state.tags, "Untagged", "Base Salary"];
+    triggerAnalytics(); 
+}
+
+function triggerAnalytics() { renderAnalyticsUI(false); }
+
+function renderAnalyticsUI(initSelects = false) {
+    let years = Object.keys(state.years).sort();
+    let ySelHtml = years.map(y => `<option value="${y}">${y}</option>`).join('');
+    let mSelHtml = months.map((m, i) => `<option value="${i}">${m}</option>`).join('');
+    
+    let yFromObj = document.getElementById('aYearFrom');
+    let yToObj = document.getElementById('aYearTo');
+    let mFromObj = document.getElementById('aMonthFrom');
+    let mToObj = document.getElementById('aMonthTo');
+    
+    if(!yFromObj.innerHTML) { yFromObj.innerHTML = ySelHtml; yToObj.innerHTML = ySelHtml; }
+    if(!mFromObj.innerHTML) { mFromObj.innerHTML = mSelHtml; mToObj.innerHTML = mSelHtml; }
+    
+    if(initSelects) {
+        yFromObj.value = aYearStart; yToObj.value = aYearEnd;
+        mFromObj.value = "0"; mToObj.value = "11";
+    }
+
+    aYearStart = parseInt(yFromObj.value);
+    aYearEnd = parseInt(yToObj.value);
+    let aMonthStartIdx = parseInt(mFromObj.value);
+    let aMonthEndIdx = parseInt(mToObj.value);
+
+    let targetFilter = document.getElementById('analyticsTarget').value;
+    let groupBy = document.getElementById('analyticsGroup').value;
+    let statusFilter = document.getElementById('analyticsStatus').value || 'all';
+    let sortMode = document.getElementById('analyticsSort').value || 'valDesc';
+    let limitToCurrent = document.getElementById('aUpToCurrent').checked;
+
+    let displayTags = [...state.tags, "Untagged"];
+    if (targetFilter === 'income') displayTags.push("Base Salary");
+
+    let totals = {}; let colors = {}; let grandTotal = 0; let totalMonthsCount = 0;
+    
+    let fDate = getFinancialDate();
+    let currentMonthVal = fDate.year * 100 + fDate.monthIdx;
+    let startVal = aYearStart * 100 + aMonthStartIdx;
+    let endVal = aYearEnd * 100 + aMonthEndIdx;
+
+    for (let y = Math.min(aYearStart, aYearEnd); y <= Math.max(aYearStart, aYearEnd); y++) {
+        if(!state.years[y]) continue;
+        let yearlySal = state.years[y].yearlySalary || 0;
+        
+        months.forEach((m, mIdx) => {
+            let loopVal = y * 100 + mIdx;
+            if (loopVal < startVal || loopVal > endVal) return;
+            if (limitToCurrent && loopVal > currentMonthVal) return;
+            
+            totalMonthsCount++;
+
+            let mData = state.years[y][m];
+            let monthSal = mData.salary !== null ? mData.salary : yearlySal;
+
+            if (targetFilter === 'income' && statusFilter !== 'planned' && aActiveTags.includes("Base Salary")) {
+                if (groupBy === 'tag') {
+                    totals["Base Salary"] = (totals["Base Salary"] || 0) + monthSal;
+                    colors["Base Salary"] = "#d946ef"; 
+                } else if (groupBy === 'color') {
+                    totals["#d946ef"] = (totals["#d946ef"] || 0) + monthSal;
+                    colors["#d946ef"] = "#d946ef";
+                } else if (groupBy === 'month') {
+                    totals[m] = (totals[m] || 0) + monthSal;
+                    colors[m] = presetColors[months.indexOf(m) % presetColors.length];
+                }
+                grandTotal += monthSal;
+            }
+
+            mData.items.forEach(item => {
+                let costInGEL = toGEL(item.cost * item.qty, item.currency);
+                if (statusFilter === 'done' && !item.done) return;
+                if (statusFilter === 'planned' && item.done) return;
+                if (targetFilter === 'expenses' && item.isIncome) return;
+                if (targetFilter === 'income' && !item.isIncome) return;
+                
+                if (groupBy === 'tag') {
+                    let validTags = item.tags.filter(t => aActiveTags.includes(t));
+                    if(item.tags.length === 0 && aActiveTags.includes("Untagged")) validTags = ["Untagged"];
+                    if(validTags.length === 0) return; 
+                    
+                    let splitCost = costInGEL / (item.tags.length || 1); 
+                    validTags.forEach(t => {
+                        totals[t] = (totals[t] || 0) + splitCost;
+                        let tagIdx = state.tags.indexOf(t);
+                        colors[t] = t === "Untagged" ? "#888888" : (presetColors[tagIdx % presetColors.length] || "#888");
+                    });
+                    grandTotal += costInGEL; 
+                } else if (groupBy === 'color') {
+                    let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
+                    if(!hasValidTag) return;
+                    let key = item.color;
+                    if(totals[key] === undefined) totals[key] = 0;
+                    totals[key] += costInGEL;
+                    colors[key] = item.color;
+                    grandTotal += costInGEL;
+                } else if (groupBy === 'month') {
+                    let hasValidTag = item.tags.some(t => aActiveTags.includes(t)) || (item.tags.length === 0 && aActiveTags.includes("Untagged"));
+                    if(!hasValidTag) return;
+                    let key = m; 
+                    if(totals[key] === undefined) totals[key] = 0;
+                    totals[key] += costInGEL;
+                    colors[key] = presetColors[months.indexOf(m) % presetColors.length];
+                    grandTotal += costInGEL;
+                }
+            });
         });
-        document.getElementById('mergeContent').innerHTML = html;
     }
+    
+    displayTags.sort((a, b) => {
+        if (groupBy === 'tag') {
+            if (sortMode === 'valDesc') return (totals[b] || 0) - (totals[a] || 0);
+            if (sortMode === 'valAsc') return (totals[a] || 0) - (totals[b] || 0);
+        }
+        return a.localeCompare(b);
+    });
 
-    function applyMerge() {
-        finalizeMerge();
-        document.getElementById('mergeModal').style.display = 'none';
-        
-        currentYear = getFinancialDate().year;
-        document.getElementById('yearDisplay').innerText = currentYear;
-        autoSave();
-        initUI();
-        if(activeMonth) { closeMonthPage(); openMonthPage(activeMonth); }
-        
+    let tagsFilterHtml = displayTags.map(t => {
+        let isSel = aActiveTags.includes(t);
+        return `<span class="tag-badge" style="opacity: ${isSel ? 1 : 0.4}; cursor:pointer; padding: 6px 12px; font-size: 0.9em;" onclick="toggleAnalyticsTag('${t}')">${t}</span>`;
+    }).join('');
+    document.getElementById('analyticsTagsFilter').innerHTML = tagsFilterHtml;
+    
+    let actualMonths = totalMonthsCount || 1; 
+    let labelMode = targetFilter === 'income' ? 'Income' : 'Spent/Planned';
+    let html = `<div style="font-size:1.2em; margin-bottom:10px; border-bottom:1px dashed var(--border); padding-bottom:10px;">Filtered ${labelMode}: <strong>${fmt(grandTotal)}₾</strong> | Monthly Avg (${totalMonthsCount} mos): <strong>${fmt(grandTotal/actualMonths)}₾/mo</strong></div>`;
+    
+    if(grandTotal === 0) { html += `<div>No data matches your filters.</div>`; } 
+    else {
+        let sortedKeys = Object.keys(totals);
+        if (groupBy === 'month' && sortMode === 'valDesc') { sortedKeys.sort((a,b) => totals[b] - totals[a]); } 
+        else if (groupBy === 'month' && sortMode === 'valAsc') { sortedKeys.sort((a,b) => totals[a] - totals[b]); } 
+        else if (groupBy === 'month') { sortedKeys.sort((a,b) => months.indexOf(a) - months.indexOf(b)); } 
+        else {
+            if (sortMode === 'valDesc') sortedKeys.sort((a,b) => totals[b] - totals[a]);
+            if (sortMode === 'valAsc') sortedKeys.sort((a,b) => totals[a] - totals[b]);
+            if (sortMode === 'alpha') sortedKeys.sort((a,b) => a.localeCompare(b));
+        }
+
+        if (analyticsType === 'bar') {
+            sortedKeys.forEach(key => {
+                let val = totals[key];
+                if(val > 0) {
+                    let pct = ((val / grandTotal) * 100).toFixed(1);
+                    let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
+                    html += `<div style="margin-bottom:15px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><strong>${label}</strong><span>${fmt(val)}₾ (${pct}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span></div>
+                        <div style="background:var(--card); width:100%; height:10px; border-radius:5px; overflow:hidden; border:1px solid var(--border);">
+                            <div style="background:${colors[key]}; width:${pct}%; height:100%;"></div>
+                        </div></div>`;
+                }
+            });
+        } else if (analyticsType === 'pie') {
+            let conic = []; let acc = 0; let legendHtml = `<div style="display:flex; flex-wrap:wrap; gap:15px; justify-content:center; margin-top:20px;">`;
+            sortedKeys.forEach(key => {
+                let val = totals[key];
+                if(val > 0) {
+                    let pctNum = (val / grandTotal) * 100;
+                    conic.push(`${colors[key]} ${acc}% ${acc + pctNum}%`);
+                    let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
+                    legendHtml += `<div><span class="legend-color" style="background:${colors[key]}"></span>${label} (${pctNum.toFixed(1)}%)</div>`;
+                    acc += pctNum;
+                }
+            });
+            legendHtml += `</div>`;
+            html += `<div class="pie-chart" style="background: conic-gradient(${conic.join(', ')});"></div>` + legendHtml;
+        } else if (analyticsType === 'pyramid') {
+            let maxVal = Math.max(...Object.values(totals));
+            let pyramidHtml = `<div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:100%; margin-top:20px; padding-bottom: 20px;">`;
+            sortedKeys.forEach(key => {
+                let val = totals[key];
+                if(val > 0) {
+                    let pctOfTotal = ((val / grandTotal) * 100).toFixed(1);
+                    let pctOfMax = (val / maxVal) * 100;
+                    let label = groupBy === 'tag' ? key : (groupBy === 'month' ? key : 'Color Group');
+                    pyramidHtml += `
+                    <div style="width: ${pctOfMax}%; min-width: fit-content; background: ${colors[key]}; padding: 6px 12px; border-radius: 4px; text-align: center; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                        ${label} <span style="font-size:0.85em; opacity:0.9; margin-left:8px;">${fmt(val)}₾ (${pctOfTotal}%) | Avg: ${fmt(val/actualMonths)}₾/mo</span>
+                    </div>`;
+                }
+            });
+            pyramidHtml += `</div>`;
+            html += pyramidHtml;
+        }
+    }
+    document.getElementById('analyticsContent').innerHTML = html;
+}
+
+function autoSave() { 
+    if (document.getElementById('autosave').checked) { 
+        localStorage.setItem('financeDataV10', JSON.stringify(state)); 
+        let d = new Date(); 
         let el = document.getElementById('save-status');
-        el.innerText = `Merge Completed!`;
-        el.style.color = "var(--accent)";
-        setTimeout(() => { autoSave(); el.style.color = "#aaa"; }, 3000);
+        el.innerText = `Autosaved ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
+    } else {
+        document.getElementById('save-status').innerText = 'Autosave Disabled';
+    }
+}
+
+function clearAllData() {
+    if(confirm("WARNING: Are you sure you want to delete all data? This cannot be undone!")) {
+        localStorage.removeItem('financeDataV10');
+        location.reload();
+    }
+}
+
+function exportJSON() { const dl = document.createElement('a'); dl.setAttribute("href", "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2))); dl.setAttribute("download", `planner_backup_${currentYear}.json`); dl.click(); }
+
+// --- IMPORT & MERGE DIFF ENGINE ---
+
+function itemsEqual(a, b) {
+    return a.name === b.name && a.cost === b.cost && a.qty === b.qty && a.isIncome === b.isIncome && a.currency === b.currency && a.done === b.done && a.color === b.color && JSON.stringify(a.tags) === JSON.stringify(b.tags) && JSON.stringify(a.subItems) === JSON.stringify(b.subItems);
+}
+
+function getFlatItems(st) {
+    let map = {};
+    if (st.years) {
+        for(let y in st.years) {
+            months.forEach(m => {
+                if (st.years[y][m] && st.years[y][m].items) {
+                    st.years[y][m].items.forEach(i => map[i.id] = { item: i, locStr: `${m} ${y}`, y: y, m: m });
+                }
+            });
+        }
+    }
+    if (st.longTerm && st.longTerm.items) {
+        st.longTerm.items.forEach(i => map[i.id] = { item: i, locStr: `Long Term`, y: null, m: 'LongTerm' });
+    }
+    return map;
+}
+
+function importJSON(event) { 
+    const file = event.target.files[0]; if (!file) return; 
+    const reader = new FileReader(); 
+    reader.onload = function(e) { 
+        try { 
+            let parsed = JSON.parse(e.target.result); 
+            startMergeProcess(parsed);
+        } catch(err) { alert("Invalid JSON file"); } 
+    }; reader.readAsText(file); event.target.value = ''; 
+}
+
+function startMergeProcess(importedData) {
+    mergeConflicts = [];
+    mergeImportedData = importedData;
+    
+    let localMap = getFlatItems(state);
+    let impMap = getFlatItems(importedData);
+    
+    Object.keys(impMap).forEach(id => {
+        let imp = impMap[id];
+        let loc = localMap[id];
+        if (!loc) {
+            mergeConflicts.push({ id, type: 'item_new', imp, choice: 'import', title: `New Entry in ${imp.locStr}` });
+        } else if (!itemsEqual(loc.item, imp.item)) {
+            mergeConflicts.push({ id, type: 'item_mod', loc, imp, choice: 'import', title: `Modified Entry in ${imp.locStr}` });
+        }
+    });
+
+    Object.keys(localMap).forEach(id => {
+        if (!impMap[id]) {
+            let loc = localMap[id];
+            mergeConflicts.push({ id, type: 'item_del', loc, choice: 'local', title: `Missing in Import (from ${loc.locStr})` });
+        }
+    });
+
+    let localPig = {}; state.piggyBanks.forEach(p => localPig[p.id] = p);
+    let impPig = {}; (importedData.piggyBanks || []).forEach(p => impPig[p.id] = p);
+    
+    Object.keys(impPig).forEach(id => {
+        let imp = impPig[id];
+        let loc = localPig[id];
+        if(!loc) { mergeConflicts.push({ id, type: 'pig_new', imp, choice: 'import', title: `New Piggy Bank` }); }
+        else if (loc.name !== imp.name || loc.balance !== imp.balance || loc.monthlyPlan !== imp.monthlyPlan) {
+            mergeConflicts.push({ id, type: 'pig_mod', loc, imp, choice: 'import', title: `Modified Piggy Bank` });
+        }
+    });
+    Object.keys(localPig).forEach(id => {
+        if(!impPig[id]) mergeConflicts.push({ id, type: 'pig_del', loc: localPig[id], choice: 'local', title: `Piggy Bank Missing in Import` });
+    });
+
+    if (mergeConflicts.length === 0) {
+        finalizeMerge();
+        alert("Sync Complete! Everything is up to date. No conflicts found.");
+        return;
     }
 
-    function finalizeMerge() {
-        let newState = JSON.parse(JSON.stringify(state)); 
-        let imp = mergeImportedData;
+    renderMergeModal();
+    document.getElementById('mergeModal').style.display = 'flex';
+}
 
-        if (imp.settings) {
-            newState.settings = { ...newState.settings, ...imp.settings };
-        }
+function setMergeChoice(id, choice) {
+    let conf = mergeConflicts.find(c => c.id === id);
+    if(conf) conf.choice = choice;
+    renderMergeModal();
+}
+
+function setAllMergeChoices(choice) {
+    mergeConflicts.forEach(c => c.choice = choice);
+    renderMergeModal();
+}
+
+function renderMergeModal() {
+    let html = '';
+    mergeConflicts.forEach(conf => {
+        let badgeClass = conf.type.includes('new') ? 'new' : (conf.type.includes('mod') ? 'mod' : 'del');
+        let badgeText = conf.type.includes('new') ? 'NEW (IN IMPORT)' : (conf.type.includes('mod') ? 'MODIFIED' : 'NOT IN IMPORT');
         
-        if (imp.years) {
-            Object.keys(imp.years).forEach(y => {
-                if (newState.years[y] && imp.years[y].yearlySalary !== undefined) {
-                    newState.years[y].yearlySalary = imp.years[y].yearlySalary;
-                }
-            });
+        let details = '';
+        if(conf.type === 'item_new') {
+            details = `<div style="color:#aaa;">➕ ${conf.imp.item.name} | ${conf.imp.item.cost}₾ | Done: ${conf.imp.item.done ? 'Yes':'No'}</div>`;
+        } else if (conf.type === 'item_mod') {
+            details = `
+                <div style="color:#aaa; text-decoration: line-through;">Local: ${conf.loc.item.name} | ${conf.loc.item.cost}₾ | Done: ${conf.loc.item.done ? 'Yes':'No'}</div>
+                <div style="color:var(--text);">Import: ${conf.imp.item.name} | ${conf.imp.item.cost}₾ | Done: ${conf.imp.item.done ? 'Yes':'No'}</div>
+            `;
+        } else if (conf.type === 'item_del') {
+            details = `<div style="color:#aaa;">Existing Local: ${conf.loc.item.name} | ${conf.loc.item.cost}₾ | Done: ${conf.loc.item.done ? 'Yes':'No'}</div>`;
+        } else if (conf.type === 'pig_new') {
+            details = `<div style="color:#aaa;">➕ Vault: ${conf.imp.name} | Bal: ${conf.imp.balance}₾</div>`;
+        } else if (conf.type === 'pig_mod') {
+            details = `
+                <div style="color:#aaa; text-decoration: line-through;">Local Vault: ${conf.loc.name} | Bal: ${conf.loc.balance}₾</div>
+                <div style="color:var(--text);">Import Vault: ${conf.imp.name} | Bal: ${conf.imp.balance}₾</div>
+            `;
+        } else if (conf.type === 'pig_del') {
+            details = `<div style="color:#aaa;">Existing Local Vault: ${conf.loc.name} | Bal: ${conf.loc.balance}₾</div>`;
         }
 
-        if (imp.tags) { imp.tags.forEach(t => { if(!newState.tags.includes(t)) newState.tags.push(t); }); }
-        if (imp.notes && newState.notes !== imp.notes) { newState.notes = newState.notes ? newState.notes + "\n\n--- IMPORTED NOTE ---\n" + imp.notes : imp.notes; }
-        
-        if (imp.history) {
-            let existingIds = new Set(newState.history.map(h => h.id));
-            imp.history.forEach(h => {
-                if(!existingIds.has(h.id)) {
-                    newState.history.push(h);
-                    existingIds.add(h.id);
-                }
-            });
-            newState.history.sort((a,b) => b.time - a.time);
-            if(newState.history.length > 500) newState.history.length = 500;
-        }
+        html += `
+        <div class="merge-card ${badgeClass}">
+            <div style="font-weight:bold;"><span class="merge-badge" style="background: ${badgeClass==='new'?'#2196f3':(badgeClass==='mod'?'#ff9800':'#f44336')}">${badgeText}</span>${conf.title}</div>
+            ${details}
+            <div style="display:flex; gap: 10px; margin-top: 5px;">
+                <div class="btn-merge-choice ${conf.choice === 'local' ? 'active' : ''}" onclick="setMergeChoice('${conf.id}', 'local')">Keep Local Version</div>
+                <div class="btn-merge-choice ${conf.choice === 'import' ? 'active' : ''}" onclick="setMergeChoice('${conf.id}', 'import')">${badgeClass==='del' ? 'Accept Deletion' : 'Use Imported Version'}</div>
+            </div>
+        </div>`;
+    });
+    document.getElementById('mergeContent').innerHTML = html;
+}
 
-        mergeConflicts.forEach(conf => {
-            if (conf.choice === 'import') {
-                if (conf.type === 'item_new') {
-                    if(conf.imp.m === 'LongTerm') {
-                        if(!newState.longTerm) newState.longTerm = { items: [] };
-                        newState.longTerm.items.push(conf.imp.item);
-                    } else {
-                        if(!newState.years[conf.imp.y]) generateYear(conf.imp.y, newState);
-                        newState.years[conf.imp.y][conf.imp.m].items.push(conf.imp.item);
-                    }
-                } else if (conf.type === 'item_mod') {
-                    let arr = conf.imp.m === 'LongTerm' ? newState.longTerm.items : newState.years[conf.imp.y][conf.imp.m].items;
-                    let idx = arr.findIndex(i => i.id === conf.id);
-                    if(idx !== -1) arr[idx] = conf.imp.item;
-                } else if (conf.type === 'item_del') {
-                    let arr = conf.loc.m === 'LongTerm' ? newState.longTerm.items : newState.years[conf.loc.y][conf.loc.m].items;
-                    let idx = arr.findIndex(i => i.id === conf.id);
-                    if(idx !== -1) arr.splice(idx, 1);
-                } else if (conf.type === 'pig_new') {
-                    if(!newState.piggyBanks) newState.piggyBanks = [];
-                    newState.piggyBanks.push(conf.imp);
-                } else if (conf.type === 'pig_mod') {
-                    let idx = newState.piggyBanks.findIndex(p => p.id === conf.id);
-                    if(idx !== -1) newState.piggyBanks[idx] = conf.imp;
-                } else if (conf.type === 'pig_del') {
-                    let idx = newState.piggyBanks.findIndex(p => p.id === conf.id);
-                    if(idx !== -1) newState.piggyBanks.splice(idx, 1);
-                }
+function applyMerge() {
+    finalizeMerge();
+    document.getElementById('mergeModal').style.display = 'none';
+    
+    currentYear = getFinancialDate().year;
+    document.getElementById('yearDisplay').innerText = currentYear;
+    autoSave();
+    initUI();
+    if(activeMonth) { closeMonthPage(); openMonthPage(activeMonth); }
+    
+    let el = document.getElementById('save-status');
+    el.innerText = `Merge Completed!`;
+    el.style.color = "var(--accent)";
+    setTimeout(() => { autoSave(); el.style.color = "#aaa"; }, 3000);
+}
+
+function finalizeMerge() {
+    let newState = JSON.parse(JSON.stringify(state)); 
+    let imp = mergeImportedData;
+
+    if (imp.settings) {
+        newState.settings = { ...newState.settings, ...imp.settings };
+    }
+    
+    if (imp.years) {
+        Object.keys(imp.years).forEach(y => {
+            if (newState.years[y] && imp.years[y].yearlySalary !== undefined) {
+                newState.years[y].yearlySalary = imp.years[y].yearlySalary;
             }
         });
-
-        newState.tags.sort((a,b) => a.localeCompare(b));
-        state = newState;
     }
 
-    init();
+    if (imp.tags) { imp.tags.forEach(t => { if(!newState.tags.includes(t)) newState.tags.push(t); }); }
+    if (imp.notes && newState.notes !== imp.notes) { newState.notes = newState.notes ? newState.notes + "\n\n--- IMPORTED NOTE ---\n" + imp.notes : imp.notes; }
+    
+    if (imp.history) {
+        let existingIds = new Set(newState.history.map(h => h.id));
+        imp.history.forEach(h => {
+            if(!existingIds.has(h.id)) {
+                newState.history.push(h);
+                existingIds.add(h.id);
+            }
+        });
+        newState.history.sort((a,b) => b.time - a.time);
+        if(newState.history.length > 500) newState.history.length = 500;
+    }
+
+    mergeConflicts.forEach(conf => {
+        if (conf.choice === 'import') {
+            if (conf.type === 'item_new') {
+                if(conf.imp.m === 'LongTerm') {
+                    if(!newState.longTerm) newState.longTerm = { items: [] };
+                    newState.longTerm.items.push(conf.imp.item);
+                } else {
+                    if(!newState.years[conf.imp.y]) generateYear(conf.imp.y, newState);
+                    newState.years[conf.imp.y][conf.imp.m].items.push(conf.imp.item);
+                }
+            } else if (conf.type === 'item_mod') {
+                let arr = conf.imp.m === 'LongTerm' ? newState.longTerm.items : newState.years[conf.imp.y][conf.imp.m].items;
+                let idx = arr.findIndex(i => i.id === conf.id);
+                if(idx !== -1) arr[idx] = conf.imp.item;
+            } else if (conf.type === 'item_del') {
+                let arr = conf.loc.m === 'LongTerm' ? newState.longTerm.items : newState.years[conf.loc.y][conf.loc.m].items;
+                let idx = arr.findIndex(i => i.id === conf.id);
+                if(idx !== -1) arr.splice(idx, 1);
+            } else if (conf.type === 'pig_new') {
+                if(!newState.piggyBanks) newState.piggyBanks = [];
+                newState.piggyBanks.push(conf.imp);
+            } else if (conf.type === 'pig_mod') {
+                let idx = newState.piggyBanks.findIndex(p => p.id === conf.id);
+                if(idx !== -1) newState.piggyBanks[idx] = conf.imp;
+            } else if (conf.type === 'pig_del') {
+                let idx = newState.piggyBanks.findIndex(p => p.id === conf.id);
+                if(idx !== -1) newState.piggyBanks.splice(idx, 1);
+            }
+        }
+    });
+
+    newState.tags.sort((a,b) => a.localeCompare(b));
+    state = newState;
+}
+
+init();
 </script>
 </body>
 </html>
