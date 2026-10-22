@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Finance Planner Pro V23</title>
+    <title>Finance Planner Pro V24</title>
     <meta name="description" content="Personal finance planning and budgeting application">
 
     <!-- PWA Meta Tags -->
@@ -848,7 +848,7 @@
                 <h2 id="pageMonthTitle" style="margin: 0;">Month Name</h2>
             </div>
 
-            <div style="display:flex; gap: 15px; align-items: center;">
+            <div style="display:flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                 <div id="salaryOverrideContainer">
                     <label>Month Override (₾): </label>
                     <input type="text" class="num-input" id="pageSalary" placeholder="Uses year baseline if empty"
@@ -883,7 +883,7 @@
 
                 <div
                     style="display:flex; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:4px; overflow:hidden;">
-                    <input type="text" class="num-input" id="itemCost" placeholder="Cost"
+                    <input type="text" class="num-input math-input" id="itemCost" placeholder="Cost"
                         style="width:80px; border:none;" onkeydown="checkEnter(event)">
                     <select id="itemCurrency"
                         style="width:50px; border:none; background:transparent; font-weight:bold;">
@@ -1044,6 +1044,59 @@
                 <button onclick="confirmPiggySpend()"
                     style="padding: 12px; font-size: 1.1em; background:var(--accent); margin-top: 5px;">Confirm
                     Purchase</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="depositModal" onclick="if(event.target===this) closeDepositModal()"
+        style="z-index: 250; display:none;">
+        <div class="modal" style="min-width: 360px; max-width: 480px; width: 92%;">
+            <div
+                style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.2em; font-weight:bold; align-items:center;">
+                <span>🏦 Deposit to Piggy Bank</span>
+                <button class="btn-danger" onclick="closeDepositModal()">X</button>
+            </div>
+
+            <div id="depositModalNoPiggies" style="display:none; padding:15px; background:rgba(244,67,54,0.1); border:1px solid #f44336; border-radius:6px; margin-bottom:15px;">
+                <div style="font-weight:bold; margin-bottom:6px; color:#f44336;">No Piggy Banks Available</div>
+                <div style="font-size:0.9em; margin-bottom:10px; color:#aaa;">You need to create a Personal Piggy Bank before depositing money.</div>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="quickPiggyName" placeholder="New Piggy Bank Name" style="flex:1;">
+                    <button onclick="quickCreatePiggy()" style="background:var(--accent); font-weight:bold;">Create</button>
+                </div>
+            </div>
+
+            <div id="depositModalForm" style="display:flex; flex-direction:column; gap: 14px;">
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-weight:bold;">Deposit from Month:</label>
+                    <select id="depositModalMonth" style="width:100%; padding:10px; font-size:1em; font-weight:bold; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px;">
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-weight:bold;">In Which Personal Piggy Bank?</label>
+                    <select id="depositModalPiggySelect" style="width:100%; padding:10px; font-size:1em; font-weight:bold; background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px;" onchange="updateDepositPiggyPreview()">
+                    </select>
+                    <div id="depositPiggyInfo" style="margin-top:6px; font-size:0.85em; color:#aaa; display:flex; justify-content:space-between; flex-wrap:wrap; gap:5px;">
+                        <span>Available Balance: <strong id="depositPiggyCurBal" style="color:var(--accent);">0.00</strong>₾</span>
+                        <span id="depositPiggyGoalText"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-weight:bold;">Amount to Deposit (₾):</label>
+                    <input type="text" id="depositModalAmount" class="math-input" placeholder="e.g. 150 or 50+100" style="width:100%; font-size:1.1em; padding:10px;" oninput="updateDepositAmountPreview()">
+                    <div id="depositAmountPreview" style="font-size:0.85em; color:var(--accent); margin-top:4px; font-weight:bold; min-height:16px;"></div>
+                </div>
+
+                <div>
+                    <label style="display:block; margin-bottom:5px; font-weight:bold;">Note / Description (Optional):</label>
+                    <input type="text" id="depositModalNote" placeholder="e.g. Monthly Savings, Bonus, etc." style="width:100%; padding:10px;">
+                </div>
+
+                <button onclick="confirmPiggyDeposit()"
+                    style="padding: 12px; font-size: 1.1em; background:var(--accent); font-weight:bold; margin-top: 5px;">Confirm
+                    Deposit</button>
             </div>
         </div>
     </div>
@@ -1353,7 +1406,10 @@
         }
 
         document.addEventListener('input', e => {
-            if (e.target.classList.contains('num-input')) {
+            if (e.target.classList.contains('math-input')) {
+                let val = e.target.value.replace(/[^0-9.\-+*\/xX() ,\n\r]/g, '');
+                if (e.target.value !== val) e.target.value = val;
+            } else if (e.target.classList.contains('num-input')) {
                 let val = e.target.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, '');
                 let parts = val.split('.');
                 if (parts.length > 2) val = parts[0] + '.' + parts.slice(1).join('');
@@ -1368,8 +1424,11 @@
                 return;
             }
             if (event.key === "Escape") {
-                let modals = ['tagsModal', 'settingsModal', 'mergeModal', 'historyModal', 'spendModal'];
-                modals.forEach(m => { if (document.getElementById(m).style.display === 'flex') document.getElementById(m).style.display = 'none'; });
+                let modals = ['tagsModal', 'settingsModal', 'mergeModal', 'historyModal', 'spendModal', 'depositModal'];
+                modals.forEach(m => {
+                    let el = document.getElementById(m);
+                    if (el && el.style.display === 'flex') el.style.display = 'none';
+                });
                 if (document.getElementById('analyticsView').style.display === 'flex') closeAnalyticsPage();
                 else if (activeMonth !== null) closeMonthPage();
             }
@@ -1478,7 +1537,126 @@
             renderBoard(); renderExtras(); autoSave();
         }
 
-        function updateTypePlaceholder() { document.getElementById('itemCost').placeholder = document.getElementById('itemType').value === 'income' ? 'Amt' : 'Cost'; }
+        function parseCostExpression(raw) {
+            if (raw === null || raw === undefined) return 0;
+            if (typeof raw === 'number') return isNaN(raw) ? 0 : raw;
+            let s = String(raw).trim();
+            if (!s) return 0;
+            s = s.replace(/[₾$]/g, '').trim();
+            if (!s) return 0;
+
+            s = s.replace(/[\u2212\u2013\u2014]/g, '-').replace(/[xX\u00d7]/g, '*');
+
+            if (!/[+\-*\/()]/.test(s)) {
+                let parts = s.split(/[\s,\n\r]+/).filter(p => p.length > 0);
+                if (parts.length > 1) {
+                    let sum = 0;
+                    let foundAny = false;
+                    for (let p of parts) {
+                        let num = parseFloat(p);
+                        if (!isNaN(num)) {
+                            sum += num;
+                            foundAny = true;
+                        }
+                    }
+                    if (foundAny) return fmt(sum);
+                } else if (parts.length === 1) {
+                    let num = parseFloat(parts[0]);
+                    return isNaN(num) ? 0 : fmt(num);
+                }
+            }
+
+            let normalized = s.replace(/[\n\r,]+/g, ' + ');
+            normalized = normalized.replace(/(\d)\s+(\d)/g, '$1 + $2');
+            normalized = normalized.replace(/\s+/g, ' ');
+
+            if (/[^0-9.\-+*\/()\s]/.test(normalized)) {
+                return parseFloat(s) || 0;
+            }
+
+            try {
+                let evalStr = normalized.replace(/[+\-*\/]+\s*$/, '').trim();
+                if (!evalStr) return parseFloat(s) || 0;
+                let res = Function('"use strict"; return (' + evalStr + ')')();
+                if (typeof res === 'number' && !isNaN(res) && isFinite(res)) {
+                    return fmt(res);
+                }
+            } catch (err) {
+            }
+            return parseFloat(s) || 0;
+        }
+
+        function extractNumbersAndSum(text) {
+            if (!text) return { count: 0, sum: 0, numbers: [] };
+            let lines = text.split(/[\n\r]+/);
+            let allNums = [];
+            let total = 0;
+            lines.forEach(line => {
+                let trimmed = line.trim();
+                if (!trimmed) return;
+                let lineVal = parseCostExpression(trimmed);
+                if (lineVal !== 0 || trimmed === '0') {
+                    allNums.push(lineVal);
+                    total += lineVal;
+                }
+            });
+            return { count: allNums.length, sum: fmt(total), numbers: allNums };
+        }
+
+        function updateSubCostPreview(itemId) {
+            let input = document.getElementById(`subCost-${itemId}`);
+            let prev = document.getElementById(`subCostPreview-${itemId}`);
+            if (!input || !prev) return;
+            let val = input.value.trim();
+            if (/[+\-*\/xX()]/.test(val) || /[\s,]+/.test(val)) {
+                let computed = parseCostExpression(val);
+                prev.style.display = 'block';
+                prev.innerText = `= ${computed}₾`;
+            } else {
+                prev.style.display = 'none';
+                prev.innerText = '';
+            }
+        }
+
+        function toggleSumHelper(itemId) {
+            let el = document.getElementById(`sumHelperDrawer-${itemId}`);
+            if (!el) return;
+            let isHidden = el.style.display === 'none' || !el.style.display;
+            el.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                let txt = document.getElementById(`sumHelperText-${itemId}`);
+                if (txt) {
+                    let cur = document.getElementById(`subCost-${itemId}`).value.trim();
+                    if (cur && !txt.value) txt.value = cur;
+                    txt.focus();
+                    updateSumHelperPreview(itemId);
+                }
+            }
+        }
+
+        function updateSumHelperPreview(itemId) {
+            let txt = document.getElementById(`sumHelperText-${itemId}`);
+            let stats = document.getElementById(`sumHelperStats-${itemId}`);
+            if (!txt || !stats) return;
+            let res = extractNumbersAndSum(txt.value);
+            stats.innerText = `Total: ${res.sum}₾ (${res.count} ${res.count === 1 ? 'number' : 'numbers'})`;
+        }
+
+        function applySumHelperToSubCost(itemId) {
+            let txt = document.getElementById(`sumHelperText-${itemId}`);
+            let target = document.getElementById(`subCost-${itemId}`);
+            if (!txt || !target) return;
+            let res = extractNumbersAndSum(txt.value);
+            target.value = res.sum;
+            updateSubCostPreview(itemId);
+            toggleSumHelper(itemId);
+            target.focus();
+        }
+
+        function updateTypePlaceholder() {
+            let t = document.getElementById('itemType').value;
+            document.getElementById('itemCost').placeholder = t === 'income' ? 'Amt' : 'Cost';
+        }
 
         function renderBoard() {
             const board = document.getElementById('board');
@@ -1590,7 +1768,10 @@
             let monthlyPlanHtml = totalPlanMonthly > 0 ? `<span style="font-size:0.85em; color:#aaa; margin-left: 10px;">(Goal: ${totalPlanMonthly}₾/mo)</span>` : '';
 
             document.getElementById('piggyBox').innerHTML = `
-        <div class="month-header" style="border-bottom: 1px dashed var(--border);"><strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong></div>
+        <div class="month-header" style="border-bottom: 1px dashed var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <div><strong style="font-size: 1.2em;">Personal Piggy Banks ${monthlyPlanHtml}</strong></div>
+            <button class="btn-secondary" style="padding:4px 8px; font-size:0.85em; background:rgba(76,175,80,0.2); border:1px solid var(--accent); color:var(--text);" onclick="openDepositModal()">🏦 Deposit from Month</button>
+        </div>
         <div style="padding:15px; display:flex; flex-direction:column; gap:10px; flex-grow:1; overflow-y:auto;">
             ${state.piggyBanks.map(p => `
                 <div style="background:var(--card); padding:12px; border-radius:6px; border-left:6px solid ${p.color}; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:grab;"
@@ -1713,6 +1894,142 @@
             autoSave();
         }
 
+        function openDepositModal(sourceMonth, targetPiggyId) {
+            let fDate = getFinancialDate();
+            let defMonth = sourceMonth || (activeMonth && activeMonth !== 'LongTerm' ? activeMonth : months[fDate.monthIdx]);
+
+            let monthSel = document.getElementById('depositModalMonth');
+            monthSel.innerHTML = months.map(m => `<option value="${m}" ${m === defMonth ? 'selected' : ''}>${m} ${currentYear}</option>`).join('');
+
+            let piggySel = document.getElementById('depositModalPiggySelect');
+            let noBox = document.getElementById('depositModalNoPiggies');
+            let formBox = document.getElementById('depositModalForm');
+
+            if (!state.piggyBanks || state.piggyBanks.length === 0) {
+                noBox.style.display = 'block';
+                formBox.style.display = 'none';
+            } else {
+                noBox.style.display = 'none';
+                formBox.style.display = 'flex';
+                piggySel.innerHTML = state.piggyBanks.map(p => `
+                    <option value="${p.id}" ${p.id === targetPiggyId ? 'selected' : ''}>${p.name} (Balance: ${fmt(p.balance)}₾)</option>
+                `).join('');
+                updateDepositPiggyPreview();
+            }
+
+            document.getElementById('depositModalAmount').value = '';
+            document.getElementById('depositModalNote').value = '';
+            document.getElementById('depositAmountPreview').innerText = '';
+
+            let modal = document.getElementById('depositModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                let amtInput = document.getElementById('depositModalAmount');
+                if (amtInput && formBox.style.display !== 'none') amtInput.focus();
+            }, 100);
+        }
+
+        function closeDepositModal() {
+            let m = document.getElementById('depositModal');
+            if (m) m.style.display = 'none';
+        }
+
+        function updateDepositPiggyPreview() {
+            let selId = document.getElementById('depositModalPiggySelect').value;
+            let p = (state.piggyBanks || []).find(x => x.id === selId);
+            if (!p) return;
+            document.getElementById('depositPiggyCurBal').innerText = fmt(p.balance);
+            document.getElementById('depositPiggyGoalText').innerText = p.monthlyPlan ? `Monthly Goal: ${p.monthlyPlan}₾` : '';
+        }
+
+        function updateDepositAmountPreview() {
+            let input = document.getElementById('depositModalAmount');
+            let prev = document.getElementById('depositAmountPreview');
+            if (!input || !prev) return;
+            let val = input.value.trim();
+            if (/[+\-*\/xX()]/.test(val) || /[\s,]+/.test(val)) {
+                let computed = parseCostExpression(val);
+                prev.innerText = `= ${computed}₾`;
+            } else {
+                prev.innerText = '';
+            }
+        }
+
+        function quickCreatePiggy() {
+            let n = document.getElementById('quickPiggyName').value.trim();
+            if (!n) return;
+            let newId = Date.now().toString();
+            state.piggyBanks.push({ id: newId, name: n, balance: 0, monthlyPlan: null, color: selectedColor, isEditing: false });
+            logHistory(newId, n, 'ADD', `Created Piggy Bank`);
+            renderExtras(); autoSave();
+            document.getElementById('quickPiggyName').value = '';
+            openDepositModal(document.getElementById('depositModalMonth').value, newId);
+        }
+
+        function confirmPiggyDeposit() {
+            let piggyId = document.getElementById('depositModalPiggySelect').value;
+            let b = state.piggyBanks.find(p => p.id === piggyId);
+            if (!b) { alert("Please select a piggy bank."); return; }
+
+            let targetMonth = document.getElementById('depositModalMonth').value;
+            if (!targetMonth) { alert("Please select a source month."); return; }
+
+            let amtRaw = document.getElementById('depositModalAmount').value;
+            let amount = parseCostExpression(amtRaw);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid deposit amount.");
+                return;
+            }
+
+            let note = document.getElementById('depositModalNote').value.trim();
+
+            b.balance = fmt(b.balance + amount);
+            logHistory(b.id, b.name, 'ADJUST', `Deposited ${amount}₾ from ${targetMonth} ${currentYear}`);
+
+            if (!state.years[currentYear]) generateYear(currentYear);
+            let itemsArr = state.years[currentYear][targetMonth].items;
+
+            if (!state.tags.includes("Savings")) state.tags.push("Savings");
+            if (!state.tags.includes("Piggy Bank")) state.tags.push("Piggy Bank");
+            if (!state.tags.includes("Piggy Deposit")) state.tags.push("Piggy Deposit");
+
+            let expName = `Deposit to ${b.name}`;
+            let existingExp = itemsArr.find(i => !i.isIncome && i.name === expName && (i.tags.includes("Piggy Bank") || i.tags.includes("Piggy Deposit")));
+            let subNote = note || `Deposit (${new Date().toLocaleDateString([], { month: 'short', day: 'numeric' })})`;
+
+            if (existingExp) {
+                if (!existingExp.subItems) existingExp.subItems = [];
+                existingExp.subItems.push({ name: subNote, cost: amount });
+                existingExp.cost = fmt(existingExp.cost + amount);
+                logHistory(existingExp.id, existingExp.name, 'EDIT', `Added deposit sub-item: ${subNote} (${amount}₾)`);
+            } else {
+                let newExp = {
+                    id: Date.now().toString() + "D",
+                    name: expName,
+                    cost: amount,
+                    qty: 1,
+                    tags: ["Savings", "Piggy Bank", "Piggy Deposit"],
+                    color: b.color || selectedColor,
+                    done: true,
+                    isEditing: false,
+                    isIncome: false,
+                    currency: 'GEL',
+                    subItems: [{ name: subNote, cost: amount }]
+                };
+                itemsArr.push(newExp);
+                logHistory(newExp.id, newExp.name, 'ADD', `Created ${expName} with ${amount}₾`);
+            }
+
+            state.tags.sort((a, b) => a.localeCompare(b));
+            updateTagSelects();
+
+            closeDepositModal();
+            renderExtras();
+            renderBoard();
+            if (activeMonth === targetMonth) renderPageItems();
+            autoSave();
+        }
+
 
         function piggyDragStart(ev, id) { draggedPiggyId = id; }
         function piggyDrop(ev, targetId) { ev.preventDefault(); if (draggedPiggyId === targetId || !draggedPiggyId) return; let arr = state.piggyBanks; let dIdx = arr.findIndex(p => p.id === draggedPiggyId); let tIdx = arr.findIndex(p => p.id === targetId); arr.splice(tIdx, 0, arr.splice(dIdx, 1)[0]); draggedPiggyId = null; renderExtras(); autoSave(); }
@@ -1779,7 +2096,7 @@
         function addItem() {
             let nameInput = document.getElementById('itemName'); let costInput = document.getElementById('itemCost'); let qtyInput = document.getElementById('itemQty'); let typeInput = document.getElementById('itemType').value; let currInput = document.getElementById('itemCurrency').value;
             if (!nameInput.value) return;
-            let item = { id: Date.now().toString(), name: nameInput.value, cost: parseFloat(costInput.value) || 0, qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput, subItems: [] };
+            let item = { id: Date.now().toString(), name: nameInput.value, cost: parseCostExpression(costInput.value), qty: parseFloat(qtyInput.value) || 1, tags: [...newEntryTags], color: selectedColor, done: false, isEditing: false, isIncome: typeInput === 'income', currency: currInput, subItems: [] };
             getActiveItemsArray().push(item);
 
             logHistory(item.id, item.name, 'ADD', `Created at ${item.cost} ${item.currency}`);
@@ -1796,12 +2113,12 @@
                 let costEl = document.getElementById(`editSubCost-${id}-${sIdx}`);
                 if (nameEl && costEl) {
                     sub.name = nameEl.value.trim() || sub.name;
-                    let parsed = parseFloat(costEl.value);
-                    sub.cost = isNaN(parsed) ? 0 : parsed;
+                    let parsed = parseCostExpression(costEl.value);
+                    sub.cost = parsed;
                 }
                 total += sub.cost;
             });
-            item.cost = total;
+            item.cost = fmt(total);
             let mainCostEl = document.getElementById(`editCost-${id}`);
             if (mainCostEl) mainCostEl.value = total;
         }
@@ -1814,12 +2131,11 @@
 
             let n = document.getElementById(`subName-${itemId}`).value.trim();
             let cStr = document.getElementById(`subCost-${itemId}`).value;
-            let c = parseFloat(cStr);
-            if (isNaN(c)) c = 0;
+            let c = parseCostExpression(cStr);
 
             if (n) {
                 item.subItems.push({ name: n, cost: c });
-                item.cost = item.subItems.reduce((acc, s) => acc + s.cost, 0);
+                item.cost = fmt(item.subItems.reduce((acc, s) => acc + s.cost, 0));
 
                 logHistory(itemId, item.name, 'EDIT', `Added split sub-item: ${n} (${c})`);
                 renderPageItems();
@@ -1851,7 +2167,7 @@
                 return;
             }
 
-            let cost = parseFloat(costInput.value) || 0; let adj = parseFloat(adjInput.value) || 0;
+            let cost = parseCostExpression(costInput.value); let adj = parseCostExpression(adjInput.value);
             if (adj > 0) {
                 let newCost = fmt(cost + (adj * mult));
                 costInput.value = newCost;
@@ -1946,16 +2262,32 @@
                             <div style="display:flex; justify-content:space-between; background:var(--bg); padding:6px 8px; border-radius:4px; border:1px solid var(--border); gap:10px; align-items:center;">
                                 <input type="text" id="editSubName-${item.id}-${sIdx}" value="${sub.name}" oninput="syncSubItems('${item.id}')" style="flex:1; padding:6px; min-width:100px;">
                                 <div style="display:flex; gap:10px; align-items:center;">
-                                    <input type="text" class="num-input" id="editSubCost-${item.id}-${sIdx}" value="${sub.cost}" oninput="syncSubItems('${item.id}')" style="width:70px; padding:6px; text-align:right;">
+                                    <input type="text" class="math-input" id="editSubCost-${item.id}-${sIdx}" value="${sub.cost}" oninput="syncSubItems('${item.id}')" onblur="this.value=parseCostExpression(this.value); syncSubItems('${item.id}');" title="Cost or math formula" style="width:80px; padding:6px; text-align:right;">
                                     <button class="btn-danger" style="padding:6px 10px; font-size:0.9em; font-weight:bold;" onclick="deleteSubItem('${item.id}', ${sIdx})">X</button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
-                    <div style="display:flex; gap:5px; flex-wrap: wrap;">
-                        <input type="text" id="subName-${item.id}" placeholder="Sub-item name" style="flex:1; min-width: 120px;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
-                        <input type="text" class="num-input" id="subCost-${item.id}" placeholder="Cost" style="width:70px;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
-                        <button onclick="addSubItem('${item.id}')" style="padding: 8px 12px; background: #2196f3; flex-shrink: 0; white-space: nowrap;">Add</button>
+                    <div style="display:flex; gap:6px; flex-wrap: wrap; align-items: center;">
+                        <input type="text" id="subName-${item.id}" placeholder="Sub-item name" style="flex:1; min-width: 120px; padding: 8px;" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
+                        <div style="position:relative; display:inline-flex; align-items:center;">
+                            <input type="text" class="math-input" id="subCost-${item.id}" placeholder="Cost (e.g. 10+20)" title="Enter numbers or formula to sum (e.g. 15+20+35 or 15 20 35)" style="width:130px; padding:8px 30px 8px 8px;" oninput="updateSubCostPreview('${item.id}')" onkeydown="if(event.key==='Enter') { addSubItem('${item.id}'); event.stopPropagation(); event.preventDefault(); }">
+                            <button type="button" title="Multi-number Sum Calculator" onclick="toggleSumHelper('${item.id}')" style="position:absolute; right:2px; padding:3px 6px; font-size:0.9em; background:transparent; border:none; cursor:pointer; color:var(--accent); font-weight:bold;">∑</button>
+                        </div>
+                        <button onclick="addSubItem('${item.id}')" style="padding: 8px 14px; background: #2196f3; flex-shrink: 0; white-space: nowrap; font-weight:bold;">Add</button>
+                    </div>
+                    <div id="subCostPreview-${item.id}" style="font-size:0.85em; color:var(--accent); font-weight:bold; margin-top:4px; display:none;"></div>
+                    <div id="sumHelperDrawer-${item.id}" style="display:none; margin-top:8px; padding:10px; background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                            <span style="font-size:0.85em; font-weight:bold; color:var(--text);">🔢 Sum Multiple Numbers</span>
+                            <button type="button" class="btn-secondary" style="padding:2px 6px; font-size:0.75em;" onclick="toggleSumHelper('${item.id}')">Close</button>
+                        </div>
+                        <div style="font-size:0.75em; color:#aaa; margin-bottom:6px;">Type or paste lots of numbers below (separated by spaces, +, commas, or new lines):</div>
+                        <textarea id="sumHelperText-${item.id}" placeholder="12.50&#10;45&#10;19.99&#10;30" style="width:100%; height:60px; font-family:monospace; font-size:0.85em; padding:6px; background:var(--bg); border:1px solid var(--border); border-radius:4px; color:var(--text); resize:vertical;" oninput="updateSumHelperPreview('${item.id}')"></textarea>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                            <span id="sumHelperStats-${item.id}" style="font-weight:bold; color:var(--accent); font-size:0.9em;">Total: 0.00₾ (0 numbers)</span>
+                            <button type="button" style="padding:5px 12px; font-size:0.85em; background:var(--accent); font-weight:bold;" onclick="applySumHelperToSubCost('${item.id}')">Insert Sum</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -2038,7 +2370,7 @@
                 let newName = document.getElementById(`editName-${id}`).value;
 
                 let hasSubItems = item.subItems && item.subItems.length > 0;
-                let newCost = hasSubItems ? item.cost : (parseFloat(document.getElementById(`editCost-${id}`).value) || 0);
+                let newCost = hasSubItems ? item.cost : parseCostExpression(document.getElementById(`editCost-${id}`).value);
 
                 if (item.name !== newName || (!hasSubItems && item.cost !== newCost)) {
                     logHistory(id, newName, 'EDIT', `Changed properties (Name: ${item.name}->${newName}, Cost: ${item.cost}->${newCost})`);
